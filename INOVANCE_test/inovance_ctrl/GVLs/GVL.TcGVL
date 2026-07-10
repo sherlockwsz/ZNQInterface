@@ -1,18 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
-  <GVL Name="GVL" Id="{e0ee9dd5-29bb-43c1-ae29-2a3b6ac8719a}">
+  <GVL Name="GVL" Id="{3063c373-a5be-4cc4-8e9a-826008442a45}">
     <Declaration><![CDATA[VAR_GLOBAL
-    Axis_1 : AXIS_REF;
+	//伺服控制
+    bEnable    : BOOL := FALSE;
+    bReset     : BOOL := FALSE;
+    bStop      : BOOL := FALSE;
+	
+	// 运动命令
+    bMoveRel : BOOL := FALSE;
+    bMoveAbs : BOOL := FALSE;
+	
+	//运动参数
+	fTargetPosition : LREAL := 0.0;
+    fDistance  : LREAL := 60.0;
+    fVelocity  : LREAL := 60.0;
+    fAcc       : LREAL := 5.0;
+    fDec       : LREAL := 5.0;
+	
+	//Power状态
+	bPowerStatus  : BOOL;
+    bPowerError   : BOOL;
+    nPowerErrorID : UDINT;
 
-    bEnable     : BOOL := FALSE;
-    bReset      : BOOL := FALSE;
-    bMoveRel    : BOOL := FALSE;
-    bStop       : BOOL := FALSE;
+	//相对运动状态
+    bMoveRelDone     : BOOL;
+    bMoveRelBusy     : BOOL;
+    bMoveRelError    : BOOL;
+    nMoveRelErrorID  : UDINT;
+	
+	//绝对运动状态
+	bMoveAbsDone : BOOL;
+	bMoveAbsBusy : BOOL;
+	bMoveAbsError : BOOL;
+	nMoveAbsErrorID : UDINT;
+	
+	//停止状态
+	bStopDone     : BOOL;
+    bStopBusy     : BOOL;
+    bStopError    : BOOL;
+    nStopErrorID  : UDINT;
 
-    fDistance   : LREAL := 10.0;   // 相对运动距离，单位取决于你的轴单位，例如 mm
-    fVelocity   : LREAL := 1.0;    // 速度，例如 mm/s
-    fAcc        : LREAL := 5.0;    // 加速度
-    fDec        : LREAL := 5.0;    // 减速度
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
