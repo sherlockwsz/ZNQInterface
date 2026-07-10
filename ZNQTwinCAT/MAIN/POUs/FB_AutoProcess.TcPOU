@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <POU Name="FB_AutoProcess" Id="{6d9e40c7-b8e0-4d38-87dc-aef4a2edb953}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AutoProcess
+VAR
+    stepTimer : TON;
+    stepDelay : TIME := T#1S;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// 只有自动运行状态才推进流程
+IF GVL_HMI.gPlcState.MachineState <> 40 THEN // AutoRunning
+    stepTimer(IN := FALSE);
+    RETURN;
+END_IF
+
+// 每一步延时 1 秒，方便上位机观察工步变化
+stepTimer(IN := TRUE, PT := stepDelay);
+
+IF NOT stepTimer.Q THEN
+    RETURN;
+END_IF
+
+// 定时器到达后复位，准备下一步
+stepTimer(IN := FALSE);
+
+CASE GVL_HMI.gPlcState.CurrentStep OF
+
+    0: // Idle
+        GVL_HMI.gPlcState.CurrentStep := 10; // CheckReady
+
+    10: // CheckReady
+        IF GVL_HMI.gPlcState.AxisAllReady AND GVL_HMI.gPlcState.EtherCATReady THEN
+            GVL_HMI.gPlcState.CurrentStep := 20; // TrayFeed
+        ELSE
+            GVL_HMI.gPlcState.AlarmCode := 1001;
+            GVL_HMI.gPlcState.MachineState := 70; // Alarm
+        END_IF
+
+    20: // TrayFeed 料盘补给
+        GVL_HMI.gPlcState.CurrentStep := 30; // PickProduct
+
+    30: // PickProduct 三轴取料
+        GVL_HMI.gPlcState.CurrentStep := 40; // TopVisionAngle
+
+    40: // TopVisionAngle 角度相机识别
+        GVL_HMI.gPlcState.CurrentStep := 50; // RotateProduct
+
+    50: // RotateProduct 旋转夹爪校正角度
+        GVL_HMI.gPlcState.CurrentStep := 60; // PlaceToRing
+
+    60: // PlaceToRing 放入环形备料位
+        GVL_HMI.gPlcState.CurrentStep := 70; // RingToClamp
+
+    70: // RingToClamp 环形区旋转到夹紧位
+        GVL_HMI.gPlcState.CurrentStep := 80; // ClampProduct
+
+    80: // ClampProduct 夹紧产品
+        GVL_HMI.gPlcState.CurrentStep := 90; // CoaxVision
+
+    90: // CoaxVision 同轴度检测
+        GVL_HMI.gPlcState.CurrentStep := 100; // CoaxAdjust
+
+    100: // CoaxAdjust 同轴度调整
+        GVL_HMI.gPlcState.CurrentStep := 110; // ScrewMove
+
+    110: // ScrewMove 电批移动
+        GVL_HMI.gPlcState.CurrentStep := 120; // ScrewTighten
+
+    120: // ScrewTighten 拧紧螺钉
+        GVL_HMI.gPlcState.CurrentStep := 130; // RingReturn
+
+    130: // RingReturn 夹紧位旋回备料位
+        GVL_HMI.gPlcState.CurrentStep := 140; // PickBack
+
+    140: // PickBack 三轴取回产品
+        GVL_HMI.gPlcState.CurrentStep := 150; // PlaceToTray
+
+    150: // PlaceToTray 放回料盘
+        GVL_HMI.gPlcState.GoodCount := GVL_HMI.gPlcState.GoodCount + 1;
+        GVL_HMI.gPlcState.CurrentColumn := GVL_HMI.gPlcState.CurrentColumn + 1;
+        GVL_HMI.gPlcState.CurrentStep := 160; // NextProduct
+
+    160: // NextProduct 下一个产品
+        IF GVL_HMI.gPlcState.CurrentColumn >= 6 THEN
+            GVL_HMI.gPlcState.CurrentColumn := 0;
+            GVL_HMI.gPlcState.CurrentRow := GVL_HMI.gPlcState.CurrentRow + 1;
+        END_IF
+
+        IF GVL_HMI.gPlcState.CurrentRow >= 4 THEN
+            GVL_HMI.gPlcState.CurrentRow := 0;
+            GVL_HMI.gPlcState.CurrentTray := GVL_HMI.gPlcState.CurrentTray + 1;
+        END_IF
+
+        IF GVL_HMI.gPlcState.CurrentTray >= 5 THEN
+            GVL_HMI.gPlcState.CurrentStep := 170; // Finished
+        ELSE
+            GVL_HMI.gPlcState.CurrentStep := 20; // 回到料盘补给/下一件流程
+        END_IF
+
+    170: // Finished 全部完成
+        GVL_HMI.gPlcState.AutoRunning := FALSE;
+        GVL_HMI.gPlcState.MachineState := 30; // Standby
+        GVL_HMI.gPlcState.CurrentStep := 0;   // Idle
+
+ELSE
+    GVL_HMI.gPlcState.AlarmCode := 9999;
+    GVL_HMI.gPlcState.MachineState := 70; // Alarm
+
+END_CASE]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

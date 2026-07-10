@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+_Build/
+_CompileInfo/
+
+# TwinCAT generated / runtime files
+_Boot/
+*.boot
+*.compileinfo
+*.tpy
+
+# Logs / temporary
+*.log
+*.tmp
+*.bak
+*.cache
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# TwinCAT license / local target files
+*.license
+*.lic

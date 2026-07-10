@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <POU Name="MAIN" Id="{507a1a2e-b6ab-4e33-b970-86de01f3194d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+    fbHmiInterface : FB_HmiInterface;
+    fbAutoProcess  : FB_AutoProcess;
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// 处理上位机命令
+fbHmiInterface();
+
+// 自动流程状态机
+fbAutoProcess();]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

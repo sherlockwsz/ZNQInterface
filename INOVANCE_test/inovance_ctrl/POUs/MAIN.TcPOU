@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <POU Name="MAIN" Id="{370fcb14-3877-446b-bcdc-c519ad459ba0}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+    Axis_1     : AXIS_REF;
+
+    fbPower    : MC_Power;
+    fbReset    : MC_Reset;
+    fbMoveRel  : MC_MoveRelative;
+    fbStop     : MC_Stop;
+
+    trigReset  : R_TRIG;
+    trigMoveRel: R_TRIG;
+
+    bEnable    : BOOL := FALSE;
+    bReset     : BOOL := FALSE;
+    bMoveRel   : BOOL := FALSE;
+    bStop      : BOOL := FALSE;
+
+    fDistance  : LREAL := 1.0;
+    fVelocity  : LREAL := 1.0;
+    fAcc       : LREAL := 5.0;
+    fDec       : LREAL := 5.0;
+
+    bPowerStatus  : BOOL;
+    bPowerError   : BOOL;
+    nPowerErrorID : UDINT;
+
+    bMoveDone     : BOOL;
+    bMoveBusy     : BOOL;
+    bMoveError    : BOOL;
+    nMoveErrorID  : UDINT;
+
+    bStopDone     : BOOL;
+    bStopBusy     : BOOL;
+    bStopError    : BOOL;
+    nStopErrorID  : UDINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// 复位
+trigReset(CLK := bReset);
+
+fbReset(
+    Axis    := Axis_1,
+    Execute := trigReset.Q
+);
+
+
+// 伺服使能
+fbPower(
+    Axis            := Axis_1,
+    Enable          := bEnable,
+    Enable_Positive := TRUE,
+    Enable_Negative := TRUE,
+    Override        := 100.0,
+    Status          => bPowerStatus,
+    Error           => bPowerError,
+    ErrorID         => nPowerErrorID
+);
+
+
+// 相对运动触发
+trigMoveRel(CLK := bMoveRel);
+
+fbMoveRel(
+    Axis         := Axis_1,
+    Execute      := bMoveRel,
+    Distance     := fDistance,
+    Velocity     := fVelocity,
+    Acceleration := fAcc,
+    Deceleration := fDec,
+    Done         => bMoveDone,
+    Busy         => bMoveBusy,
+    Error        => bMoveError,
+    ErrorID      => nMoveErrorID
+);
+
+
+// 停止
+fbStop(
+    Axis         := Axis_1,
+    Execute      := bStop,
+    Deceleration := fDec,
+    Done         => bStopDone,
+    Busy         => bStopBusy,
+    Error        => bStopError,
+    ErrorID      => nStopErrorID
+);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

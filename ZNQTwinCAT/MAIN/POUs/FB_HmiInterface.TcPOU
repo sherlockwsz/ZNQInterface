@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <POU Name="FB_HmiInterface" Id="{628b9c08-ffc3-43d5-a04a-d71c1d41c9b7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HmiInterface
+VAR
+    lastCmdSeq : UDINT := 0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[GVL_HMI.gPlcState.Heartbeat := GVL_HMI.gPlcState.Heartbeat + 1;
+
+GVL_HMI.gPlcState.AxisAllReady := TRUE;
+GVL_HMI.gPlcState.EtherCATReady := TRUE;
+
+IF GVL_HMI.gPlcState.MachineState = 0 THEN
+    GVL_HMI.gPlcState.MachineState := 30;
+END_IF
+
+IF GVL_HMI.gHostCmd.CmdSeq <> lastCmdSeq THEN
+
+    lastCmdSeq := GVL_HMI.gHostCmd.CmdSeq;
+
+    CASE GVL_HMI.gHostCmd.CmdId OF
+
+        1:
+            IF GVL_HMI.gPlcState.MachineState = 30 THEN
+                GVL_HMI.gPlcState.MachineState := 40;
+                GVL_HMI.gPlcState.AutoRunning := TRUE;
+                GVL_HMI.gPlcState.Paused := FALSE;
+                GVL_HMI.gPlcState.CurrentStep := 0;
+            END_IF
+
+        2:
+            IF GVL_HMI.gPlcState.MachineState = 40 THEN
+                GVL_HMI.gPlcState.MachineState := 50;
+                GVL_HMI.gPlcState.AutoRunning := FALSE;
+                GVL_HMI.gPlcState.Paused := TRUE;
+            END_IF
+
+        3:
+            IF GVL_HMI.gPlcState.MachineState = 50 THEN
+                GVL_HMI.gPlcState.MachineState := 40;
+                GVL_HMI.gPlcState.AutoRunning := TRUE;
+                GVL_HMI.gPlcState.Paused := FALSE;
+            END_IF
+
+        4:
+            GVL_HMI.gPlcState.MachineState := 30;
+            GVL_HMI.gPlcState.AutoRunning := FALSE;
+            GVL_HMI.gPlcState.Paused := FALSE;
+            GVL_HMI.gPlcState.CurrentStep := 0;
+
+        5:
+            GVL_HMI.gPlcState.AlarmCode := 0;
+            GVL_HMI.gPlcState.MachineState := 30;
+            GVL_HMI.gPlcState.AutoRunning := FALSE;
+            GVL_HMI.gPlcState.Paused := FALSE;
+            GVL_HMI.gPlcState.CurrentStep := 0;
+
+        6:
+            GVL_HMI.gPlcState.AlarmCode := 0;
+            IF GVL_HMI.gPlcState.MachineState = 70 THEN
+                GVL_HMI.gPlcState.MachineState := 30;
+            END_IF
+
+    END_CASE
+
+    GVL_HMI.gPlcState.AckSeq := lastCmdSeq;
+
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <GVL Name="GVL" Id="{e0ee9dd5-29bb-43c1-ae29-2a3b6ac8719a}">
+    <Declaration><![CDATA[VAR_GLOBAL
+    Axis_1 : AXIS_REF;
+
+    bEnable     : BOOL := FALSE;
+    bReset      : BOOL := FALSE;
+    bMoveRel    : BOOL := FALSE;
+    bStop       : BOOL := FALSE;
+
+    fDistance   : LREAL := 10.0;   // 相对运动距离，单位取决于你的轴单位，例如 mm
+    fVelocity   : LREAL := 1.0;    // 速度，例如 mm/s
+    fAcc        : LREAL := 5.0;    // 加速度
+    fDec        : LREAL := 5.0;    // 减速度
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
