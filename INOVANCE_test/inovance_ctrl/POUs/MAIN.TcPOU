@@ -3,28 +3,51 @@
   <POU Name="MAIN" Id="{370fcb14-3877-446b-bcdc-c519ad459ba0}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-    Axis_1   	   : AXIS_REF;
+    Axis_1   	   : AXIS_REF;	//轴绑定
 
-    fbPower    	   : MC_Power;
-    fbReset   	   : MC_Reset;
+    fbPower    	   : MC_Power;	//Power绑定
+    fbReset   	   : MC_Reset;	//复位绑定
     fbMoveRel      : MC_MoveRelative;
 	fbMoveAbsolute : MC_MoveAbsolute;
     fbStop         : MC_Stop;
 
-    trigReset   : R_TRIG;
-	trigMoveRel : R_TRIG;
-	trigMoveAbs : R_TRIG;
+    trigReset   : R_TRIG;		//复位上升沿触发
+	trigMoveRel : R_TRIG;		//相对运动上升沿触发
+	trigMoveAbs : R_TRIG;		//绝对运动上升沿触发
+	trigJogRelease : F_TRIG;	//点动松开下降沿触发
+	
+	fbJogVel  : MC_MoveVelocity;//让轴按指定速度连续运动
+	fbJogHalt : MC_Halt;		//让轴按减速度正常停下来
+	
+	eJogDir     : MC_Direction := MC_Positive_Direction;
+	bJogExecute : BOOL := FALSE;
+	bJogHaltReq : BOOL := FALSE;
+	
+	bBusyForNewCmd : BOOL := FALSE;
+	bBusyForJog : BOOL := FALSE;
 	
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// 复位
 trigReset(CLK := GVL.bReset);
+// 相对运动触发
+trigMoveRel(CLK := GVL.bMoveRel);
+//绝对运动触发
+trigMoveAbs(CLK := GVL.bMoveAbs);
 
 fbReset(
     Axis    := Axis_1,
-    Execute := trigReset.Q
+    Execute := trigReset.Q,
+    Done    => GVL.bResetDone,
+    Busy    => GVL.bResetBusy,
+    Error   => GVL.bResetError,
+    ErrorID => GVL.nResetErrorID
 );
 
+//复位状态自动复位
+IF trigReset.Q THEN
+    GVL.bReset := FALSE;
+END_IF;
 
 // 伺服使能
 fbPower(
@@ -38,13 +61,39 @@ fbPower(
     ErrorID         => GVL.nPowerErrorID
 );
 
+// 忙碌状态预处理
+bBusyForNewCmd := GVL.bMoveRelBusy 
+               OR GVL.bMoveAbsBusy 
+               OR GVL.bStopBusy
+               OR GVL.bJogBusy
+               OR GVL.bJogHaltBusy;
+			   
+bBusyForJog := GVL.bMoveRelBusy 
+            OR GVL.bMoveAbsBusy 
+            OR GVL.bStopBusy
+            OR GVL.bJogHaltBusy;
+			
+//bStop优先级设置为最高
+IF GVL.bStop THEN
+    GVL.bJogPos := FALSE;
+    GVL.bJogNeg := FALSE;
+    bJogExecute := FALSE;
+    bJogHaltReq := FALSE;
+END_IF;			
+			   
 
-// 相对运动触发
-trigMoveRel(CLK := GVL.bMoveRel);
+bMoveRelExec := trigMoveRel.Q 
+                AND NOT trigMoveAbs.Q
+                AND GVL.bPowerStatus
+                AND NOT bBusyForNewCmd
+                AND NOT GVL.bStop
+                AND NOT GVL.bJogPos
+                AND NOT GVL.bJogNeg
+                AND NOT GVL.bAxisError;
 
 fbMoveRel(
     Axis         := Axis_1,
-    Execute      := trigMoveRel.Q,
+    Execute      := bMoveRelExec,
     Distance     := GVL.fDistance,
     Velocity     := GVL.fVelocity,
     Acceleration := GVL.fAcc,
@@ -54,12 +103,24 @@ fbMoveRel(
     Error        => GVL.bMoveRelError,
     ErrorID      => GVL.nMoveRelErrorID
 );
-//绝对运动触发
-trigMoveAbs(CLK := GVL.bMoveAbs);
+//相对运动自动复位
+IF trigMoveRel.Q THEN
+    GVL.bMoveRel := FALSE;
+END_IF;
+
+
+bMoveAbsExec := trigMoveAbs.Q 
+                AND NOT trigMoveRel.Q
+                AND GVL.bPowerStatus
+                AND NOT bBusyForNewCmd
+                AND NOT GVL.bStop
+                AND NOT GVL.bJogPos
+                AND NOT GVL.bJogNeg
+                AND NOT GVL.bAxisError;
 
 fbMoveAbsolute(
     Axis         := Axis_1,
-    Execute      := trigMoveAbs.Q,
+    Execute      := bMoveAbsExec,
     Position     := GVL.fTargetPosition,
     Velocity     := GVL.fVelocity,
     Acceleration := GVL.fAcc,
@@ -69,6 +130,70 @@ fbMoveAbsolute(
     Error        => GVL.bMoveAbsError,
     ErrorID      => GVL.nMoveAbsErrorID
 );
+//绝对运动自动复位
+IF trigMoveAbs.Q THEN
+    GVL.bMoveAbs := FALSE;
+END_IF;
+
+// 默认不执行点动
+bJogExecute := FALSE;
+
+// 正反点动互锁：不能同时按 JOG+ 和 JOG-
+IF GVL.bJogPos AND NOT GVL.bJogNeg AND GVL.bPowerStatus AND NOT bBusyForJog AND NOT GVL.bStop AND NOT GVL.bAxisError THEN
+
+    eJogDir := MC_Positive_Direction;
+    bJogExecute := TRUE;
+
+ELSIF GVL.bJogNeg AND NOT GVL.bJogPos AND GVL.bPowerStatus AND NOT bBusyForJog AND NOT GVL.bStop AND NOT GVL.bAxisError THEN
+
+    eJogDir := MC_Negative_Direction;
+    bJogExecute := TRUE;
+
+ELSE
+
+    bJogExecute := FALSE;
+
+END_IF;
+
+// 点动速度运动
+fbJogVel(
+    Axis           := Axis_1,
+    Execute        := bJogExecute,
+    Velocity       := GVL.fJogVelocity,
+    Acceleration   := GVL.fJogAcc,
+    Deceleration   := GVL.fJogDec,
+    Direction      := eJogDir,
+    InVelocity     => GVL.bJogInVelocity,
+    Busy           => GVL.bJogBusy,
+    Active         => GVL.bJogActive,
+    CommandAborted => GVL.bJogCommandAborted,
+    Error          => GVL.bJogError,
+    ErrorID        => GVL.nJogErrorID
+);
+
+//点动松手后的减速停止
+trigJogRelease(CLK := bJogExecute);
+
+IF trigJogRelease.Q AND NOT GVL.bStop THEN
+    bJogHaltReq := TRUE;
+END_IF;
+
+// 点动 Halt
+fbJogHalt(
+    Axis         := Axis_1,
+    Execute      := bJogHaltReq,
+    Deceleration := GVL.fJogDec,
+    Done         => GVL.bJogHaltDone,
+    Busy         => GVL.bJogHaltBusy,
+    Active       => GVL.bJogHaltActive,
+    Error        => GVL.bJogHaltError,
+    ErrorID      => GVL.nJogHaltErrorID
+);
+
+// Halt完成或报错后，释放Halt请求
+IF GVL.bJogHaltDone OR GVL.bJogHaltError THEN
+    bJogHaltReq := FALSE;
+END_IF;
 
 // 停止
 fbStop(
@@ -79,7 +204,60 @@ fbStop(
     Busy         => GVL.bStopBusy,
     Error        => GVL.bStopError,
     ErrorID      => GVL.nStopErrorID
-);]]></ST>
+);
+
+//停止完成后自动复位
+IF GVL.bStopDone OR GVL.bStopError THEN
+    GVL.bStop := FALSE;
+END_IF;
+
+GVL.fActPos  := Axis_1.NcToPlc.ActPos;
+GVL.fSetPos  := Axis_1.NcToPlc.SetPos;
+GVL.fActVelo := Axis_1.NcToPlc.ActVelo;
+
+IF GVL.fMmPerRev > 0.0 THEN
+    GVL.fActRpm := GVL.fActVelo * 60.0 / GVL.fMmPerRev;
+ELSE
+    GVL.fActRpm := 0.0;
+END_IF;
+
+GVL.fPosDiff := GVL.fSetPos - GVL.fActPos;
+
+//轴忙状态
+GVL.bAxisBusy := GVL.bResetBusy
+              OR GVL.bMoveRelBusy 
+              OR GVL.bMoveAbsBusy 
+              OR GVL.bStopBusy
+              OR GVL.bJogBusy
+              OR GVL.bJogHaltBusy;
+			  
+//轴错误处理
+GVL.bAxisError := GVL.bPowerError 
+               OR GVL.bResetError
+               OR GVL.bMoveRelError 
+               OR GVL.bMoveAbsError 
+               OR GVL.bStopError
+               OR GVL.bJogError
+               OR GVL.bJogHaltError;
+			   
+//轴错误码
+IF GVL.bPowerError THEN
+    GVL.nAxisErrorID := GVL.nPowerErrorID;
+ELSIF GVL.bResetError THEN
+    GVL.nAxisErrorID := GVL.nResetErrorID;
+ELSIF GVL.bMoveRelError THEN
+    GVL.nAxisErrorID := GVL.nMoveRelErrorID;
+ELSIF GVL.bMoveAbsError THEN
+    GVL.nAxisErrorID := GVL.nMoveAbsErrorID;
+ELSIF GVL.bStopError THEN
+    GVL.nAxisErrorID := GVL.nStopErrorID;
+ELSIF GVL.bJogError THEN
+    GVL.nAxisErrorID := GVL.nJogErrorID;
+ELSIF GVL.bJogHaltError THEN
+    GVL.nAxisErrorID := GVL.nJogHaltErrorID;
+ELSE
+    GVL.nAxisErrorID := 0;
+END_IF;]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>
