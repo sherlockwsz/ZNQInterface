@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <DUT Name="ST_HmiAxisCmd" Id="{36b0b02b-41bd-4e21-9d2c-dc1431db9d1a}">
+    <Declaration><![CDATA[TYPE ST_HmiAxisCmd :
+STRUCT
+    bEnable  : BOOL;   // 伺服使能，保持型
+    bReset   : BOOL;   // 轴复位，脉冲型，PLC 自动复位
+    bStop    : BOOL;   // 软件停止，完成或报错后 PLC 自动复位
+
+    bMoveRel : BOOL;   // 相对运动，脉冲型，PLC 自动复位
+    bMoveAbs : BOOL;   // 绝对运动，脉冲型，PLC 自动复位
+
+    bJogPos  : BOOL;   // 正向点动，HMI 按下 TRUE，松开 FALSE
+    bJogNeg  : BOOL;   // 反向点动，HMI 按下 TRUE，松开 FALSE
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

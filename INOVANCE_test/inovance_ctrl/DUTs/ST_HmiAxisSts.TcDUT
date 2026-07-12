@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <DUT Name="ST_HmiAxisSts" Id="{070b9b5c-add5-48f0-b8af-1e2c8f95335c}">
+    <Declaration><![CDATA[TYPE ST_HmiAxisSts :
+STRUCT
+    // 基本状态
+    bPowerStatus : BOOL;     // 伺服是否使能
+    bBusy        : BOOL;     // 轴总忙碌
+    bError       : BOOL;     // 轴总报警
+    nErrorID     : UDINT;    // 当前优先级最高的错误码
+
+    // 运动状态编号
+    // 0: Disabled/NotReady
+    // 1: Standstill
+    // 2: Moving
+    // 3: Jogging
+    // 4: Stopping
+    // 5: Error
+    // 6: Resetting
+    nMotionState : INT;
+
+    // 位置和速度
+    fActPos      : LREAL;    // 实际位置
+    fSetPos      : LREAL;    // 设定位置
+    fActVelo     : LREAL;    // 实际速度，工程单位/s
+    fActRpm      : LREAL;    // 实际转速，rpm
+    fPosDiff     : LREAL;    // 设定位置 - 实际位置
+
+    // 命令反馈，供 HMI 提示使用
+    bCmdRejected : BOOL;     // 命令被拒绝，保持到下一次有效命令或复位
+    nRejectReason: UDINT;    // 0 无；1 相对运动拒绝；2 绝对运动拒绝；3 正反点动冲突；4 点动条件不满足
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

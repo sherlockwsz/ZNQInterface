@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <GVL Name="GVL_HMI" Id="{ee76473c-c416-4bac-be19-b7e0f6cac706}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+    AxisCmd : ST_HmiAxisCmd;   // HMI/ADS 写入：命令
+    AxisSet : ST_HmiAxisSet;   // HMI/ADS 写入：距离、位置
+    AxisSts : ST_HmiAxisSts;   // HMI/ADS 读取：轴状态
+	Comm : ST_HmiComm;		   //监控HMI通信状态
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

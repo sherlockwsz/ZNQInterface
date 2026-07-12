@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
+  <DUT Name="ST_AxisInternalSts" Id="{39798418-4ed5-45f5-bd4f-2ba57eb5f18e}">
+    <Declaration><![CDATA[TYPE ST_AxisInternalSts :
+STRUCT
+    // Power 状态
+    bPowerStatus       : BOOL;
+    bPowerError        : BOOL;
+    nPowerErrorID      : UDINT;
+
+    // Reset 状态
+    bResetBusy         : BOOL;
+    bResetDone         : BOOL;
+    bResetError        : BOOL;
+    nResetErrorID      : UDINT;
+
+    // 相对运动状态
+    bMoveRelBusy       : BOOL;
+    bMoveRelDone       : BOOL;
+    bMoveRelError      : BOOL;
+    nMoveRelErrorID    : UDINT;
+
+    // 绝对运动状态
+    bMoveAbsBusy       : BOOL;
+    bMoveAbsDone       : BOOL;
+    bMoveAbsError      : BOOL;
+    nMoveAbsErrorID    : UDINT;
+
+    // 点动速度运动状态
+    bJogInVelocity     : BOOL;
+    bJogBusy           : BOOL;
+    bJogActive         : BOOL;
+    bJogCommandAborted : BOOL;
+    bJogError          : BOOL;
+    nJogErrorID        : UDINT;
+
+    // 点动 Halt 状态
+    bJogHaltDone       : BOOL;
+    bJogHaltBusy       : BOOL;
+    bJogHaltActive     : BOOL;
+    bJogHaltError      : BOOL;
+    nJogHaltErrorID    : UDINT;
+
+    // Stop 状态
+    bStopDone          : BOOL;
+    bStopBusy          : BOOL;
+    bStopError         : BOOL;
+    nStopErrorID       : UDINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
