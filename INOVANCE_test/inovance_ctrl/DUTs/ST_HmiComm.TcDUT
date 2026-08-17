@@ -3,9 +3,9 @@
   <DUT Name="ST_HmiComm" Id="{7cbae786-3eef-4a6a-889b-2a0e2ec633b0}">
     <Declaration><![CDATA[TYPE ST_HmiComm :
 STRUCT
-	udiHeartbeat : UDINT;   // HMI周期递增
-    bOnline      : BOOL;    // PLC判断HMI是否在线
-    bTimeout     : BOOL;    // PLC判断通信是否超时
+	udiHeartbeat : UDINT;   // HMI 写入：周期递增，建议周期不大于 1 s
+    bOnline      : BOOL;    // PLC 写入：已收到有效心跳且当前未超时
+    bTimeout     : BOOL;    // PLC 写入：心跳停止达到配置的超时时间
 END_STRUCT
 END_TYPE
 ]]></Declaration>

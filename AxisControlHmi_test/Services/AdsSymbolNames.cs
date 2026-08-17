@@ -25,5 +25,7 @@ namespace AxisControlHmi_test.Services
         internal const string RejectReason = "GVL_HMI.AxisSts.nRejectReason";
 
         internal const string Heartbeat = "GVL_HMI.Comm.udiHeartbeat";
+        internal const string HmiOnline = "GVL_HMI.Comm.bOnline";
+        internal const string HmiTimeout = "GVL_HMI.Comm.bTimeout";
     }
 }

@@ -18,7 +18,8 @@ namespace AxisControlHmi_test
             {
                 AmsNetId = string.Empty,
                 Port = 851,
-                TimeoutMilliseconds = 1000
+                TimeoutMilliseconds = 1000,
+                HeartbeatTimeoutMilliseconds = 3000
             });
             containerRegistry.RegisterSingleton<IAxisService, AdsAxisService>();
         }

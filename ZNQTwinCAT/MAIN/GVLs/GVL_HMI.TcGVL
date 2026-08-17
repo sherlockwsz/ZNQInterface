@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.18">
-  <GVL Name="GVL_HMI" Id="{12e7fd2d-dec6-4e6e-9cb0-a5b4830f8abe}">
-    <Declaration><![CDATA[VAR_GLOBAL
-    gHostCmd  : ST_HostCmd;   // 上位机写入
-    gPlcState : ST_PlcState;  // PLC 返回上位机
-END_VAR]]></Declaration>
-  </GVL>
-</TcPlcObject>

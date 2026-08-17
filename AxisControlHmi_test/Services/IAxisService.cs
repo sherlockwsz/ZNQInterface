@@ -6,8 +6,10 @@ namespace AxisControlHmi_test.Services
     {
         bool IsConnected { get; }
         void Connect();
+        void Disconnect();
         AxisStatus GetStatus();
         void Enable();
+        void Disable();
         void Reset();
         void Stop();
         void MoveRelative(double distance);

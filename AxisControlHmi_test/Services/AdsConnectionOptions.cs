@@ -10,5 +10,8 @@ namespace AxisControlHmi_test.Services
 
         public int TimeoutMilliseconds { get; init; } = 1000;
 
+        // 与 PLC 的 GVL_AxisCfg.tHmiHeartbeatTimeout = T#3S 保持一致。
+        public int HeartbeatTimeoutMilliseconds { get; init; } = 3000;
+
     }
 }

@@ -17,6 +17,17 @@ VAR
     trigMoveRel    : R_TRIG;
     trigMoveAbs    : R_TRIG;
     trigJogRelease : F_TRIG;
+    trigHmiTimeout : R_TRIG;
+
+    fbHmiTimeout : TON;
+
+    udiLastHeartbeat       : UDINT;
+    bHmiHeartbeatChanged   : BOOL;
+    bHmiHeartbeatSeen      : BOOL;
+    bHmiStopPending        : BOOL;
+    bHmiRequireEnableReset : BOOL;
+    bHmiControlAllowed     : BOOL;
+    bPowerEnableRequest    : BOOL;
 
     bBusyForNewCmd : BOOL;
     bBusyForJog    : BOOL;
@@ -35,14 +46,72 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// =====================================================
-// 1. 命令触发器
+// 1. HMI 心跳监测与通信失效处理
+// =====================================================
+bHmiHeartbeatChanged := GVL_HMI.Comm.udiHeartbeat <> udiLastHeartbeat;
+
+IF bHmiHeartbeatChanged THEN
+    udiLastHeartbeat := GVL_HMI.Comm.udiHeartbeat;
+    bHmiHeartbeatSeen := TRUE;
+END_IF;
+
+// 心跳发生变化时让 TON 复位；停止变化达到设定时间后 Q 置位
+fbHmiTimeout(
+    IN := NOT bHmiHeartbeatChanged,
+    PT := GVL_AxisCfg.tHmiHeartbeatTimeout
+);
+
+GVL_HMI.Comm.bTimeout := fbHmiTimeout.Q;
+GVL_HMI.Comm.bOnline := bHmiHeartbeatSeen AND NOT GVL_HMI.Comm.bTimeout;
+
+trigHmiTimeout(CLK := GVL_HMI.Comm.bTimeout);
+
+IF trigHmiTimeout.Q THEN
+    // 记录超时时轴是否已使能；已使能时先保持 Power，完成受控停止
+    bHmiStopPending := GVL_AxisInternal.Axis1.bPowerStatus;
+    bHmiRequireEnableReset := TRUE;
+    GVL_HMI.AxisCmd.bEnable := FALSE;
+END_IF;
+
+// 超时、尚未收到首个有效心跳或正在处理超时停止时，禁止新的运动命令
+bHmiControlAllowed := GVL_HMI.Comm.bOnline
+                      AND NOT bHmiStopPending
+                      AND NOT bHmiRequireEnableReset;
+
+IF NOT bHmiControlAllowed THEN
+    GVL_HMI.AxisCmd.bReset := FALSE;
+    GVL_HMI.AxisCmd.bMoveRel := FALSE;
+    GVL_HMI.AxisCmd.bMoveAbs := FALSE;
+    GVL_HMI.AxisCmd.bJogPos := FALSE;
+    GVL_HMI.AxisCmd.bJogNeg := FALSE;
+END_IF;
+
+// 超时持续期间强制清除 HMI 使能，防止通信恢复后自动重新使能
+IF GVL_HMI.Comm.bTimeout THEN
+    GVL_HMI.AxisCmd.bEnable := FALSE;
+END_IF;
+
+// 通信恢复后，必须观察到 HMI 的使能命令为 FALSE，才重新开放控制
+IF bHmiRequireEnableReset
+   AND GVL_HMI.Comm.bOnline
+   AND NOT bHmiStopPending
+   AND NOT GVL_HMI.AxisCmd.bEnable THEN
+    bHmiRequireEnableReset := FALSE;
+END_IF;
+
+// 超时停止期间保持伺服使能，停止完成后再撤销 Power
+bPowerEnableRequest := (GVL_HMI.AxisCmd.bEnable AND bHmiControlAllowed)
+                       OR bHmiStopPending;
+
+// =====================================================
+// 2. 命令触发器
 // =====================================================
 trigReset(CLK := GVL_HMI.AxisCmd.bReset);
 trigMoveRel(CLK := GVL_HMI.AxisCmd.bMoveRel);
 trigMoveAbs(CLK := GVL_HMI.AxisCmd.bMoveAbs);
 
 // =====================================================
-// 2. HMI 目标参数限幅
+// 3. HMI 目标参数限幅
 // =====================================================
 fRelDistanceChecked := GVL_HMI.AxisSet.fRelDistance;
 IF fRelDistanceChecked > GVL_AxisCfg.fMaxRelDistance THEN
@@ -59,7 +128,7 @@ ELSIF fAbsPositionChecked < GVL_AxisCfg.fMinAbsPosition THEN
 END_IF;
 
 // =====================================================
-// 3. Reset 与 Power
+// 4. Reset 与 Power
 // =====================================================
 fbReset(
     Axis    := Axis_1,
@@ -76,7 +145,7 @@ END_IF;
 
 fbPower(
     Axis            := Axis_1,
-    Enable          := GVL_HMI.AxisCmd.bEnable,
+    Enable          := bPowerEnableRequest,
     Enable_Positive := TRUE,
     Enable_Negative := TRUE,
     Override        := 100.0,
@@ -86,7 +155,7 @@ fbPower(
 );
 
 // =====================================================
-// 4. 状态预处理：供本周期命令互锁使用
+// 5. 状态预处理：供本周期命令互锁使用
 // =====================================================
 bErrorForCmd := GVL_AxisInternal.Axis1.bPowerError
              OR GVL_AxisInternal.Axis1.bResetError
@@ -111,7 +180,7 @@ bBusyForJog := GVL_AxisInternal.Axis1.bResetBusy
             OR GVL_AxisInternal.Axis1.bJogHaltBusy;
 
 // =====================================================
-// 5. Stop 最高优先级：停止时取消点动命令和 Halt 请求
+// 6. Stop 最高优先级：停止时取消点动命令和 Halt 请求
 // =====================================================
 IF GVL_HMI.AxisCmd.bStop THEN
     GVL_HMI.AxisCmd.bJogPos := FALSE;
@@ -120,8 +189,13 @@ IF GVL_HMI.AxisCmd.bStop THEN
     bJogHaltReq := FALSE;
 END_IF;
 
+// 通信超时触发的停止请求不允许被 HMI 覆盖
+IF bHmiStopPending THEN
+    GVL_HMI.AxisCmd.bStop := TRUE;
+END_IF;
+
 // =====================================================
-// 6. 相对运动
+// 7. 相对运动
 // =====================================================
 bMoveRelExec := trigMoveRel.Q
                 AND NOT trigMoveAbs.Q
@@ -150,7 +224,7 @@ IF trigMoveRel.Q THEN
 END_IF;
 
 // =====================================================
-// 7. 绝对运动
+// 8. 绝对运动
 // =====================================================
 bMoveAbsExec := trigMoveAbs.Q
                 AND NOT trigMoveRel.Q
@@ -179,7 +253,7 @@ IF trigMoveAbs.Q THEN
 END_IF;
 
 // =====================================================
-// 8. 点动 MoveVelocity
+// 9. 点动 MoveVelocity
 // =====================================================
 bJogExecute := FALSE;
 
@@ -222,7 +296,7 @@ fbJogVel(
 );
 
 // =====================================================
-// 9. 点动松手后 Halt
+// 10. 点动松手后 Halt
 // =====================================================
 trigJogRelease(CLK := bJogExecute);
 
@@ -246,7 +320,7 @@ IF GVL_AxisInternal.Axis1.bJogHaltDone OR GVL_AxisInternal.Axis1.bJogHaltError T
 END_IF;
 
 // =====================================================
-// 10. Stop
+// 11. Stop
 // =====================================================
 fbStop(
     Axis         := Axis_1,
@@ -260,10 +334,11 @@ fbStop(
 
 IF GVL_AxisInternal.Axis1.bStopDone OR GVL_AxisInternal.Axis1.bStopError THEN
     GVL_HMI.AxisCmd.bStop := FALSE;
+    bHmiStopPending := FALSE;
 END_IF;
 
 // =====================================================
-// 11. 命令拒绝提示
+// 12. 命令拒绝提示
 // =====================================================
 IF trigReset.Q OR bMoveRelExec OR bMoveAbsExec OR GVL_HMI.AxisCmd.bStop OR bJogExecute THEN
     GVL_HMI.AxisSts.bCmdRejected := FALSE;
@@ -287,7 +362,7 @@ ELSIF (GVL_HMI.AxisCmd.bJogPos XOR GVL_HMI.AxisCmd.bJogNeg) AND NOT bJogExecute 
 END_IF;
 
 // =====================================================
-// 12. HMI 状态汇总
+// 13. HMI 状态汇总
 // =====================================================
 GVL_HMI.AxisSts.bPowerStatus := GVL_AxisInternal.Axis1.bPowerStatus;
 

@@ -21,6 +21,10 @@ namespace AxisControlHmi_test.ViewModels
         private bool _hasFault;
         private bool _isMoving;
         private bool _isAdsConnected;
+        private bool _isPlcOnline;
+        private bool _isHeartbeatFault;
+        private bool _heartbeatLampOn;
+        private DateTime _lastHeartbeatLampToggleUtc;
         private bool _jogPositiveActive;
         private bool _jogNegativeActive;
         private short _motionState;
@@ -32,8 +36,8 @@ namespace AxisControlHmi_test.ViewModels
         public MainWindowViewModel(IAxisService axisService)
         {
             _axisService = axisService;
-            ConnectCommand = new DelegateCommand(ConnectToPlc);
-            EnableCommand = new DelegateCommand(EnableAxis);
+            ConnectionToggleCommand = new DelegateCommand(TogglePlcConnection);
+            EnableToggleCommand = new DelegateCommand(ToggleAxisEnable);
             ResetCommand = new DelegateCommand(ResetAxis);
             StopCommand = new DelegateCommand(StopAxis);
             MoveRelativeCommand = new DelegateCommand(MoveRelative);
@@ -120,7 +124,28 @@ namespace AxisControlHmi_test.ViewModels
             }
         }
 
-        public string AxisStateText => !IsAdsConnected ? "ADS 未连接" : _motionState switch
+        public bool IsPlcOnline
+        {
+            get => _isPlcOnline;
+            private set
+            {
+                if (SetProperty(ref _isPlcOnline, value)) RaiseAxisStateChanged();
+            }
+        }
+
+        public bool IsHeartbeatFault
+        {
+            get => _isHeartbeatFault;
+            private set
+            {
+                if (SetProperty(ref _isHeartbeatFault, value)) RaiseAxisStateChanged();
+            }
+        }
+
+        public string AxisStateText => !IsAdsConnected ? "ADS 未连接"
+            : IsHeartbeatFault ? "PLC 心跳超时"
+            : !IsPlcOnline ? "等待 PLC 心跳"
+            : _motionState switch
         {
             0 => "未使能",
             1 => "已使能 / 就绪",
@@ -132,10 +157,28 @@ namespace AxisControlHmi_test.ViewModels
             _ => "状态未知"
         };
 
-        public string AxisStateColor => !IsAdsConnected ? "#F59E0B" : HasFault ? "#EF4444" : !IsEnabled ? "#94A3B8" : IsMoving ? "#38BDF8" : "#22C55E";
+        public string AxisStateColor => !IsAdsConnected ? "#F59E0B"
+            : IsHeartbeatFault ? "#EF4444"
+            : !IsPlcOnline ? "#F59E0B"
+            : HasFault ? "#EF4444"
+            : !IsEnabled ? "#94A3B8"
+            : IsMoving ? "#38BDF8"
+            : "#22C55E";
 
-        public DelegateCommand ConnectCommand { get; }
-        public DelegateCommand EnableCommand { get; }
+        public string ConnectionButtonText => IsAdsConnected ? "断开PLC" : "连接PLC";
+        public string ConnectionButtonIcon => IsAdsConnected ? "×" : "⇄";
+        public string ConnectionButtonColor => IsAdsConnected ? "#475569" : "#2563EB";
+        public string EnableButtonText => IsEnabled ? "掉使能" : "使能";
+        public string EnableButtonIcon => IsEnabled ? "○" : "⏻";
+        public string EnableButtonColor => IsEnabled ? "#64748B" : "#16A34A";
+        public string HeartbeatLampColor => _heartbeatLampOn && IsPlcOnline && !IsHeartbeatFault ? "#22C55E" : "#1E293B";
+        public string HeartbeatStatusText => !IsAdsConnected ? "未连接"
+            : IsHeartbeatFault ? "心跳停止"
+            : !IsPlcOnline ? "等待心跳"
+            : "心跳正常";
+
+        public DelegateCommand ConnectionToggleCommand { get; }
+        public DelegateCommand EnableToggleCommand { get; }
         public DelegateCommand ResetCommand { get; }
         public DelegateCommand StopCommand { get; }
         public DelegateCommand MoveRelativeCommand { get; }
@@ -146,6 +189,18 @@ namespace AxisControlHmi_test.ViewModels
         public DelegateCommand JogNegativeReleasedCommand { get; }
         public DelegateCommand ClearLogCommand { get; }
 
+        private void TogglePlcConnection()
+        {
+            if (_axisService.IsConnected)
+            {
+                DisconnectFromPlc();
+            }
+            else
+            {
+                ConnectToPlc();
+            }
+        }
+
         private void ConnectToPlc()
         {
             if (ExecuteAxisAction("已连接 TwinCAT ADS（PLC Runtime 1 / 端口 851）。", _axisService.Connect))
@@ -155,7 +210,36 @@ namespace AxisControlHmi_test.ViewModels
             }
         }
 
-        private void EnableAxis() => ExecuteAxisAction("轴使能命令已置位。", _axisService.Enable);
+        private void DisconnectFromPlc()
+        {
+            try
+            {
+                _jogPositiveActive = false;
+                _jogNegativeActive = false;
+                _axisService.Disconnect();
+                IsAdsConnected = false;
+                IsPlcOnline = false;
+                IsHeartbeatFault = false;
+                UpdateHeartbeatLamp(false);
+                AddLog("操作", "已主动断开 TwinCAT ADS 连接。");
+            }
+            catch (Exception exception)
+            {
+                AddLog("错误", $"断开 PLC 失败：{exception.Message}");
+            }
+        }
+
+        private void ToggleAxisEnable()
+        {
+            if (IsEnabled)
+            {
+                ExecuteAxisAction("轴使能命令已撤销：bEnable = FALSE。", _axisService.Disable);
+            }
+            else
+            {
+                ExecuteAxisAction("轴使能命令已置位：bEnable = TRUE。", _axisService.Enable);
+            }
+        }
         private void ResetAxis() => ExecuteAxisAction("复位命令已发送，PLC 将自动复位命令位。", _axisService.Reset);
         private void StopAxis() => ExecuteAxisAction("已撤销点动并发送停止命令。", _axisService.Stop);
 
@@ -218,7 +302,7 @@ namespace AxisControlHmi_test.ViewModels
             }
             catch (Exception exception)
             {
-                IsAdsConnected = false;
+                IsAdsConnected = _axisService.IsConnected;
                 AddLog("错误", $"ADS 操作失败：{exception.Message}");
                 return false;
             }
@@ -242,6 +326,9 @@ namespace AxisControlHmi_test.ViewModels
                 if (IsAdsConnected)
                 {
                     IsAdsConnected = false;
+                    IsPlcOnline = false;
+                    IsHeartbeatFault = true;
+                    UpdateHeartbeatLamp(false);
                     AddLog("错误", "TwinCAT ADS 连接已断开，请重新点击“连接至PLC”。");
                 }
                 return;
@@ -256,6 +343,22 @@ namespace AxisControlHmi_test.ViewModels
                 IsEnabled = status.IsEnabled;
                 HasFault = status.HasFault;
                 IsMoving = status.IsMoving;
+                IsPlcOnline = status.IsPlcOnline && !status.IsHeartbeatTimeout && !status.WasHeartbeatInterrupted;
+                var heartbeatFault = status.IsHeartbeatTimeout || status.WasHeartbeatInterrupted;
+                if (heartbeatFault && !IsHeartbeatFault)
+                {
+                    _jogPositiveActive = false;
+                    _jogNegativeActive = false;
+                    AddLog("错误", status.IsHeartbeatTimeout
+                        ? "PLC 已判定 HMI 心跳超时：运动命令已锁定，PLC 将受控停止并掉使能。"
+                        : "检测到 HMI 心跳发送中断超过 3 秒：已清除使能、定位及点动命令。" );
+                }
+                else if (!heartbeatFault && IsHeartbeatFault && status.IsPlcOnline)
+                {
+                    AddLog("信息", "PLC 心跳已恢复，安全命令复位完成，可重新使能。" );
+                }
+                IsHeartbeatFault = heartbeatFault;
+                UpdateHeartbeatLamp(IsPlcOnline && !heartbeatFault);
                 if (_motionState != status.MotionState)
                 {
                     _motionState = status.MotionState;
@@ -284,7 +387,10 @@ namespace AxisControlHmi_test.ViewModels
             }
             catch (Exception exception)
             {
-                IsAdsConnected = false;
+                IsAdsConnected = _axisService.IsConnected;
+                IsPlcOnline = false;
+                IsHeartbeatFault = true;
+                UpdateHeartbeatLamp(false);
                 var error = exception.GetBaseException().Message;
                 if (!string.Equals(_lastConnectionError, error, StringComparison.Ordinal))
                 {
@@ -298,6 +404,34 @@ namespace AxisControlHmi_test.ViewModels
         {
             RaisePropertyChanged(nameof(AxisStateText));
             RaisePropertyChanged(nameof(AxisStateColor));
+            RaisePropertyChanged(nameof(ConnectionButtonText));
+            RaisePropertyChanged(nameof(ConnectionButtonIcon));
+            RaisePropertyChanged(nameof(ConnectionButtonColor));
+            RaisePropertyChanged(nameof(EnableButtonText));
+            RaisePropertyChanged(nameof(EnableButtonIcon));
+            RaisePropertyChanged(nameof(EnableButtonColor));
+            RaisePropertyChanged(nameof(HeartbeatLampColor));
+            RaisePropertyChanged(nameof(HeartbeatStatusText));
+        }
+
+        private void UpdateHeartbeatLamp(bool isHeartbeatHealthy)
+        {
+            if (!isHeartbeatHealthy)
+            {
+                _lastHeartbeatLampToggleUtc = default;
+                if (!_heartbeatLampOn) return;
+                _heartbeatLampOn = false;
+                RaisePropertyChanged(nameof(HeartbeatLampColor));
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+            if (_lastHeartbeatLampToggleUtc != default
+                && now - _lastHeartbeatLampToggleUtc < TimeSpan.FromMilliseconds(500)) return;
+
+            _lastHeartbeatLampToggleUtc = now;
+            _heartbeatLampOn = !_heartbeatLampOn;
+            RaisePropertyChanged(nameof(HeartbeatLampColor));
         }
 
         private static string GetRejectMessage(uint reason)

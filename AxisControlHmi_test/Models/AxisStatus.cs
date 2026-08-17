@@ -12,5 +12,8 @@ namespace AxisControlHmi_test.Models
         public short MotionState { get; init; }
         public bool CommandRejected { get; init; }
         public uint RejectReason { get; init; }
+        public bool IsPlcOnline { get; init; }
+        public bool IsHeartbeatTimeout { get; init; }
+        public bool WasHeartbeatInterrupted { get; init; }
     }
 }

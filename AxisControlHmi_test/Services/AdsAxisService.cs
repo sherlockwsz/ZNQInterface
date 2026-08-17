@@ -13,6 +13,9 @@ namespace AxisControlHmi_test.Services
         private AdsClient? _client;
         private uint _heartbeat;
         private bool _connectionRequested;
+        private DateTime _lastHeartbeatUtc;
+        private bool _controlAllowed;
+        private bool _safeStateApplied;
         private bool _disposed;
 
         public AdsAxisService(AdsConnectionOptions options)
@@ -36,22 +39,62 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
-                WriteCore(AdsSymbolNames.Heartbeat, ++_heartbeat);
-
-                var motionState = Read<short>(AdsSymbolNames.MotionState);
-                return new AxisStatus
+                try
                 {
-                    Position = Read<double>(AdsSymbolNames.ActualPosition),
-                    Velocity = Read<double>(AdsSymbolNames.ActualVelocity),
-                    Rpm = Read<double>(AdsSymbolNames.ActualRpm),
-                    IsEnabled = Read<bool>(AdsSymbolNames.PowerStatus),
-                    HasFault = Read<bool>(AdsSymbolNames.Error),
-                    IsMoving = motionState is 2 or 3,
-                    ErrorId = Read<uint>(AdsSymbolNames.ErrorId),
-                    MotionState = motionState,
-                    CommandRejected = Read<bool>(AdsSymbolNames.CommandRejected),
-                    RejectReason = Read<uint>(AdsSymbolNames.RejectReason)
-                };
+                    var now = DateTime.UtcNow;
+                    var heartbeatInterrupted = _lastHeartbeatUtc != default
+                        && now - _lastHeartbeatUtc > TimeSpan.FromMilliseconds(_options.HeartbeatTimeoutMilliseconds);
+                    WriteCore(AdsSymbolNames.Heartbeat, ++_heartbeat);
+                    _lastHeartbeatUtc = now;
+
+                    var plcOnline = Read<bool>(AdsSymbolNames.HmiOnline);
+                    var plcTimeout = Read<bool>(AdsSymbolNames.HmiTimeout);
+                    _controlAllowed = plcOnline && !plcTimeout && !heartbeatInterrupted;
+                    if (!_controlAllowed && !_safeStateApplied)
+                    {
+                        ApplyHeartbeatSafeStateCore();
+                        _safeStateApplied = true;
+                    }
+                    else if (_controlAllowed)
+                    {
+                        _safeStateApplied = false;
+                    }
+
+                    var motionState = Read<short>(AdsSymbolNames.MotionState);
+                    return new AxisStatus
+                    {
+                        Position = Read<double>(AdsSymbolNames.ActualPosition),
+                        Velocity = Read<double>(AdsSymbolNames.ActualVelocity),
+                        Rpm = Read<double>(AdsSymbolNames.ActualRpm),
+                        IsEnabled = Read<bool>(AdsSymbolNames.PowerStatus),
+                        HasFault = Read<bool>(AdsSymbolNames.Error),
+                        IsMoving = motionState is 2 or 3,
+                        ErrorId = Read<uint>(AdsSymbolNames.ErrorId),
+                        MotionState = motionState,
+                        CommandRejected = Read<bool>(AdsSymbolNames.CommandRejected),
+                        RejectReason = Read<uint>(AdsSymbolNames.RejectReason),
+                        IsPlcOnline = plcOnline,
+                        IsHeartbeatTimeout = plcTimeout,
+                        WasHeartbeatInterrupted = heartbeatInterrupted
+                    };
+                }
+                catch
+                {
+                    _controlAllowed = false;
+                    if (!_safeStateApplied)
+                    {
+                        try
+                        {
+                            ApplyHeartbeatSafeStateCore();
+                            _safeStateApplied = true;
+                        }
+                        catch
+                        {
+                            // ADS 已经失效时由 PLC 的 3 秒心跳超时执行受控停止。
+                        }
+                    }
+                    throw;
+                }
             }
         }
 
@@ -60,15 +103,33 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 _connectionRequested = true;
+                _controlAllowed = false;
+                _lastHeartbeatUtc = default;
                 EnsureConnected();
             }
         }
 
+        public void Disconnect()
+        {
+            lock (_syncRoot)
+            {
+                if (_disposed) throw new ObjectDisposedException(nameof(AdsAxisService));
+                TryWriteJogOff();
+                _connectionRequested = false;
+                _controlAllowed = false;
+                _safeStateApplied = false;
+                _lastHeartbeatUtc = default;
+                DisconnectClient();
+            }
+        }
+
         // bEnable 为保持型命令。
-        public void Enable() => Write(AdsSymbolNames.Enable, true);
+        public void Enable() => WriteControlCommand(AdsSymbolNames.Enable, true);
+
+        public void Disable() => Write(AdsSymbolNames.Enable, false);
 
         // 以下命令均由 PLC 在捕获后自动复位，HMI 只负责写入 TRUE。
-        public void Reset() => Write(AdsSymbolNames.Reset, true);
+        public void Reset() => WriteControlCommand(AdsSymbolNames.Reset, true);
 
         public void Stop()
         {
@@ -86,6 +147,7 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
+                EnsureControlAllowed();
                 WriteCore(AdsSymbolNames.RelativeDistance, distance);
                 WriteCore(AdsSymbolNames.MoveRelative, true);
             }
@@ -96,6 +158,7 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
+                EnsureControlAllowed();
                 WriteCore(AdsSymbolNames.AbsolutePosition, position);
                 WriteCore(AdsSymbolNames.MoveAbsolute, true);
             }
@@ -106,7 +169,11 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
-                if (isActive) WriteCore(AdsSymbolNames.JogNegative, false);
+                if (isActive)
+                {
+                    EnsureControlAllowed();
+                    WriteCore(AdsSymbolNames.JogNegative, false);
+                }
                 WriteCore(AdsSymbolNames.JogPositive, isActive);
             }
         }
@@ -116,7 +183,11 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
-                if (isActive) WriteCore(AdsSymbolNames.JogPositive, false);
+                if (isActive)
+                {
+                    EnsureControlAllowed();
+                    WriteCore(AdsSymbolNames.JogPositive, false);
+                }
                 WriteCore(AdsSymbolNames.JogNegative, isActive);
             }
         }
@@ -142,6 +213,16 @@ namespace AxisControlHmi_test.Services
             lock (_syncRoot)
             {
                 EnsureConnected();
+                WriteCore(symbolName, value);
+            }
+        }
+
+        private void WriteControlCommand(string symbolName, object value)
+        {
+            lock (_syncRoot)
+            {
+                EnsureConnected();
+                EnsureControlAllowed();
                 WriteCore(symbolName, value);
             }
         }
@@ -180,6 +261,26 @@ namespace AxisControlHmi_test.Services
             }
 
             // 每次重连都先清除保持型点动位，防止 HMI 断线时 PLC 遗留点动命令。
+            ApplyHeartbeatSafeStateCore();
+            _controlAllowed = false;
+            _safeStateApplied = true;
+            _lastHeartbeatUtc = default;
+        }
+
+        private void EnsureControlAllowed()
+        {
+            if (!_controlAllowed)
+            {
+                throw new InvalidOperationException("PLC 心跳尚未确认在线或已经超时，当前禁止使能及运动命令。");
+            }
+        }
+
+        private void ApplyHeartbeatSafeStateCore()
+        {
+            WriteCore(AdsSymbolNames.Enable, false);
+            WriteCore(AdsSymbolNames.Reset, false);
+            WriteCore(AdsSymbolNames.MoveRelative, false);
+            WriteCore(AdsSymbolNames.MoveAbsolute, false);
             WriteCore(AdsSymbolNames.JogPositive, false);
             WriteCore(AdsSymbolNames.JogNegative, false);
         }

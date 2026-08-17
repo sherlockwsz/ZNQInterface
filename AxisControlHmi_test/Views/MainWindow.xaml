@@ -113,7 +113,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <TextBlock Text="实时参数" Style="{StaticResource SectionTitleStyle}" />
-                <UniformGrid Grid.Row="1" Columns="3" VerticalAlignment="Center">
+                <UniformGrid Grid.Row="1" Columns="4" VerticalAlignment="Center">
                     <Border Background="#0F172A" CornerRadius="8" Padding="18" Margin="0,0,8,0">
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="实时位置" Style="{StaticResource CaptionStyle}" HorizontalAlignment="Center" />
@@ -133,6 +133,14 @@
                             <TextBlock Text="实时转速" Style="{StaticResource CaptionStyle}" HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding ActualRpm, StringFormat={}{0:F1}}" FontSize="34" FontWeight="SemiBold" Foreground="#FBBF24" HorizontalAlignment="Center" Margin="0,16,0,8" />
                             <TextBlock Text="rpm" Foreground="#64748B" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#0F172A" CornerRadius="8" Padding="18" Margin="8,0,0,0">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="PLC 心跳" Style="{StaticResource CaptionStyle}" HorizontalAlignment="Center" />
+                            <Ellipse Width="42" Height="42" Fill="{Binding HeartbeatLampColor}"
+                                     Stroke="#334155" StrokeThickness="2" HorizontalAlignment="Center" Margin="0,13,0,10" />
+                            <TextBlock Text="{Binding HeartbeatStatusText}" Foreground="#94A3B8" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </UniformGrid>
@@ -247,38 +255,32 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <TextBlock Text="轴操作" Style="{StaticResource SectionTitleStyle}" />
-                <Grid Grid.Row="1" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Command="{Binding ConnectCommand}" Height="110" Margin="0,0,6,0" Background="#2563EB" Style="{StaticResource PrimaryButtonStyle}">
+                <UniformGrid Grid.Row="1" Columns="2" Rows="2" VerticalAlignment="Center">
+                    <Button Command="{Binding ConnectionToggleCommand}" Height="86" Margin="0,0,6,6" Background="{Binding ConnectionButtonColor}" Style="{StaticResource PrimaryButtonStyle}">
                         <StackPanel>
-                            <TextBlock Text="⇄" FontSize="28" HorizontalAlignment="Center" />
-                            <TextBlock Text="连接至PLC" FontSize="16" Margin="0,9,0,0" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionButtonIcon}" FontSize="23" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectionButtonText}" FontSize="15" Margin="0,5,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="1" Command="{Binding EnableCommand}" Height="110" Margin="3,0" Background="#16A34A" Style="{StaticResource PrimaryButtonStyle}">
+                    <Button Command="{Binding EnableToggleCommand}" Height="86" Margin="6,0,0,6" Background="{Binding EnableButtonColor}" Style="{StaticResource PrimaryButtonStyle}">
                         <StackPanel>
-                            <TextBlock Text="⏻" FontSize="28" HorizontalAlignment="Center" />
-                            <TextBlock Text="使能" FontSize="17" Margin="0,9,0,0" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding EnableButtonIcon}" FontSize="23" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding EnableButtonText}" FontSize="15" Margin="0,5,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="2" Command="{Binding ResetCommand}" Height="110" Margin="3,0" Background="#D97706" Style="{StaticResource PrimaryButtonStyle}">
+                    <Button Command="{Binding ResetCommand}" Height="86" Margin="0,6,6,0" Background="#D97706" Style="{StaticResource PrimaryButtonStyle}">
                         <StackPanel>
-                            <TextBlock Text="↻" FontSize="30" HorizontalAlignment="Center" />
-                            <TextBlock Text="复位" FontSize="17" Margin="0,7,0,0" HorizontalAlignment="Center" />
+                            <TextBlock Text="↻" FontSize="25" HorizontalAlignment="Center" />
+                            <TextBlock Text="复位" FontSize="15" Margin="0,3,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="3" Command="{Binding StopCommand}" Height="110" Margin="6,0,0,0" Style="{StaticResource DangerButtonStyle}">
+                    <Button Command="{Binding StopCommand}" Height="86" Margin="6,6,0,0" Style="{StaticResource DangerButtonStyle}">
                         <StackPanel>
-                            <TextBlock Text="■" FontSize="25" HorizontalAlignment="Center" />
-                            <TextBlock Text="停止" FontSize="17" Margin="0,12,0,0" HorizontalAlignment="Center" />
+                            <TextBlock Text="■" FontSize="21" HorizontalAlignment="Center" />
+                            <TextBlock Text="停止" FontSize="15" Margin="0,7,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                </Grid>
+                </UniformGrid>
             </Grid>
         </Border>
     </Grid>
