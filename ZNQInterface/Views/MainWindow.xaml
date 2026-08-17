@@ -25,7 +25,8 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="9*" />
+                    <ColumnDefinition Width="8*" />
+                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
                 <ComboBox Grid.Column="0"
@@ -52,12 +53,34 @@
                         </Style>
                     </ComboBox.ItemContainerStyle>
                 </ComboBox>
+
+                <TextBlock Grid.Column="1"
+                           Margin="12,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="35"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           Text="{Binding Title}" />
+
+                <Button Grid.Column="2"
+                        Width="130"
+                        Height="44"
+                        Margin="6,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="White"
+                        Foreground="Black"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Content="退出软件"/>
+
             </Grid>
         </Border>
 
         <Border Grid.Row="1"
-                Margin="16"
-                Padding="24"
+                Padding="5"
                 Background="White"
                 BorderBrush="#FFE5E7EB"
                 BorderThickness="1"
@@ -71,18 +94,51 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="4*" />
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="4.1*" />
+                    <ColumnDefinition Width="1.3*" />
+                    <ColumnDefinition Width="1.3*" />
+                    <ColumnDefinition Width="1.3*" />
                 </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Margin="12,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           Foreground="White"
+                           Text="设备运行状态：运行中" />
+
+                <TextBlock Grid.Column="1"
+                           Margin="12,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           Foreground="White"
+                           Text="当前报警：0x0010，上下料机构X轴超出限位" />
+
+
+                <TextBlock Grid.Column="2"
+                           Margin="12,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           Foreground="White"
+                           Text="ADS通信：未连接" />
+
+                <TextBlock Grid.Column="3"
+                           Margin="12,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           Foreground="White"
+                           Text="运行模式：自动" />
 
                 <TextBlock Grid.Column="4"
                            Margin="12,0"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            FontSize="16"
-                           Foreground="#FFD1D5DB"
+                           Foreground="White"
                            Text="{Binding CurrentSystemTime}" />
             </Grid>
         </Border>

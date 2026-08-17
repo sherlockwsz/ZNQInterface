@@ -15,7 +15,7 @@ namespace ZNQInterface.ViewModels
         private readonly IRegionManager _regionManager;//区域管理器
         private readonly DispatcherTimer _systemTimeTimer;//系统时间计时器
 
-        private string _title = "自动同轴度调整设备";
+        private string _title = "自  动  同  轴  度  调  整  设  备";
         private string _currentSystemTime;
 
 
@@ -27,11 +27,8 @@ namespace ZNQInterface.ViewModels
             NavigationItems = new List<NavigationItem>
             {
                 new("设备总览", NavigationKeys.Overview),
-                new("多轴监控", NavigationKeys.AxisMonitor),
                 new("手动调试", NavigationKeys.ManualControl),
-                new("参数设置", NavigationKeys.ParameterSettings),
                 new("产品数据", NavigationKeys.ProductData),
-                new("报警信息", NavigationKeys.Alarm),
                 new("操作日志", NavigationKeys.OperationLog)
             };
 

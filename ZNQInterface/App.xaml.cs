@@ -23,11 +23,8 @@ namespace ZNQInterface
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation <OverviewView, OverviewViewModel>(NavigationKeys.Overview);//注册OverviewView页面
-            containerRegistry.RegisterForNavigation<AxisMonitorView, AxisMonitorViewModel>(NavigationKeys.AxisMonitor);//注册AxisMonitorView页面
             containerRegistry.RegisterForNavigation<ManualControlView, ManualControlViewModel>(NavigationKeys.ManualControl);//注册ManualControlView页面
-            containerRegistry.RegisterForNavigation<ParameterSettingsView, ParameterSettingsViewModel>(NavigationKeys.ParameterSettings);//注册ParameterSettingsView页面
             containerRegistry.RegisterForNavigation<ProductDataView, ProductDataViewModel>(NavigationKeys.ProductData);//注册ProductDataView页面
-            containerRegistry.RegisterForNavigation<AlarmView, AlarmViewModel>(NavigationKeys.Alarm);//注册AlarmView页面
             containerRegistry.RegisterForNavigation<OperationLogView, OperationLogViewModel>(NavigationKeys.OperationLog);//注册OperationLogView页面
         }
 
