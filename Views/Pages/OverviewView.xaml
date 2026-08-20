@@ -27,6 +27,7 @@
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
+
                 <!--料位状态-->
                 <HeaderedContentControl Grid.Row="0"
                                         Header="料位状态"
@@ -39,18 +40,39 @@
                                VerticalAlignment="Center"/>
 
                 </HeaderedContentControl>
-                <!--不合格料位-->
-                <HeaderedContentControl Grid.Row="1"
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--不合格料位-->
+                    <HeaderedContentControl Grid.Column="0"
                                         Header="不合格料位"
                                         Style="{StaticResource TitledPanelStyle}"
                                         Margin="1,0,0,0">
 
-                    <TextBlock Text="主要内容"
+                        <TextBlock Text="主要内容"
                                FontSize="16"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
 
-                </HeaderedContentControl>
+                    </HeaderedContentControl>
+
+                    <!--缓冲料位-->
+                    <HeaderedContentControl Grid.Column="1"
+                                        Header="缓冲料位"
+                                        Style="{StaticResource TitledPanelStyle}"
+                                        Margin="1,0,0,0">
+
+                        <TextBlock Text="主要内容"
+                               FontSize="16"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    </HeaderedContentControl>
+
+                </Grid>
+
             </Grid>
             <!-- 第二行第一列分为左右两部分 -->
             <Grid Grid.Row="1"
@@ -279,7 +301,7 @@
                 <RowDefinition Height="3*" />
                 <RowDefinition Height="2*" />
             </Grid.RowDefinitions>
-            <!--右边上侧实时图像显示-->
+            <!--第三列上侧实时图像显示-->
             <Grid Grid.Row="0"
                   Margin="0,0,0,1">
                 <HeaderedContentControl Header="同轴度实时检测"
@@ -429,28 +451,67 @@
                     </Grid>
                 </HeaderedContentControl>
             </Grid>
-            <!--右边下侧内容-->
+            <!--第三列下侧内容-->
             <Grid Grid.Row="1"
                   Margin="0,1,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="3*"/>
-                </Grid.RowDefinitions>
-                <!--右下角第一行-->
-                <Grid Grid.Row="0"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <!--右下角第一列-->
+                <Grid Grid.Column="0"
                       Margin="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <!--夹紧轴数据-->
+                    <HeaderedContentControl Grid.Row="0"
+                                            Header="夹紧轴"
+                                            Style="{StaticResource TitledPanelStyle}"
+                                            Margin="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+                            <!--夹紧轴位置-->
+                            <controls:DataDisplayControl
+                                      Grid.Row="0"
+                                      Margin="0,1,0,0"
+                                      Description="夹紧轴位置："
+                                      DisplayValue="-456.45"
+                                      Unit="mm"
+                                      AxisStatus="夹紧"/>
+                            <!--夹紧轴力矩-->
+                            <controls:DataDisplayControl
+                                      Grid.Row="1"
+                                      Margin="0,1,0,0"
+                                      Description="夹紧轴力矩："
+                                      DisplayValue="1.00"
+                                      Unit="N·m"
+                                      AxisStatus="夹紧"/>
+                            <!--补偿位移-->
+                            <controls:DataDisplayControl
+                                      Grid.Row="2"
+                                      Margin="0,1,0,0"
+                                      Description="补偿位移："
+                                      DisplayValue="1.00"
+                                      Unit="μm"/>
+
+                        </Grid>
+                        
+                    </HeaderedContentControl>
                     <!--转台轴数据-->
-                    <HeaderedContentControl Grid.Column="0"
+                    <HeaderedContentControl Grid.Row="1"
                                             Header="转台轴"
                                             Style="{StaticResource TitledPanelStyle}"
                                             Margin="1">
 
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
                                 <RowDefinition Height="1*"/>
                                 <RowDefinition Height="1*"/>
                             </Grid.RowDefinitions>
@@ -461,18 +522,56 @@
                                 DisplayValue="-180.00"
                                 Unit="°"
                                 AxisStatus="反转"/>
-                            <controls:DataDisplayControl
-                                Grid.Row="1"
-                                Margin="0,1,0,0"
-                                Description="夹紧轴位置："
-                                DisplayValue="-456.45"
-                                Unit="mm"
-                                AxisStatus="夹紧"/>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                       Text="备料位："
+                                       FontSize="15"
+                                       Foreground="Black"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="1"
+                                       Text="ZNQ_2026_08_20"
+                                       FontSize="15"
+                                       Foreground="Black"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"/>
+                            </Grid>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                       Text="调整位："
+                                       FontSize="15"
+                                       Foreground="Black"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="1"
+                                       Text="ZNQ_2026_08_19"
+                                       FontSize="15"
+                                       Foreground="Black"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"/>
+                            </Grid>
                         </Grid>
                     </HeaderedContentControl>
 
+                </Grid>
+
+                <!--右下角第二列-->
+                <Grid Grid.Column="1"
+                      Margin="0,0,0,1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="3*"/>
+                    </Grid.RowDefinitions>
                     <!--螺丝刀轴数据-->
-                    <HeaderedContentControl Grid.Column="1"
+                    <HeaderedContentControl Grid.Row="0"
                                             Header="螺丝刀轴"
                                             Style="{StaticResource TitledPanelStyle}"
                                             Margin="1">
@@ -497,40 +596,9 @@
                                 AxisStatus="下移"/>
                         </Grid>
                     </HeaderedContentControl>
-                </Grid>
 
-                <!--右下角第二行-->
-                <Grid Grid.Row="1"
-                      Margin="0,0,0,1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <HeaderedContentControl Grid.Column="0"
-                                            Header="产品编号"
-                                            Style="{StaticResource TitledPanelStyle}"
-                                            Margin="1">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="1*"/>
-                                <RowDefinition Height="1*"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0"
-                                       Text="备料位："
-                                       FontSize="15"
-                                       Foreground="Black"
-                                       VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1"
-                                       Text="调整位："
-                                       FontSize="15"
-                                       Foreground="Black"
-                                       VerticalAlignment="Center"/>
-                        </Grid>
-                    </HeaderedContentControl>
-                    
                     <!--调整轴数据-->
-                    <HeaderedContentControl Grid.Column="1"
+                    <HeaderedContentControl Grid.Row="1"
                                             Header="调整轴"
                                             Style="{StaticResource TitledPanelStyle}"
                                             Margin="1">
@@ -545,7 +613,7 @@
                             <controls:DataDisplayControl
                                 Grid.Row="0"
                                 Margin="0,1,0,0"
-                                Description="X(左右)轴："
+                                Description="X(前后)轴："
                                 DisplayValue="+675.78"
                                 Unit="mm"
                                 AxisStatus="到位"/>
@@ -553,10 +621,10 @@
                             <controls:DataDisplayControl
                                 Grid.Row="1"
                                 Margin="0,1,0,0"
-                                Description="Y(前后)轴："
+                                Description="Y(左右)轴："
                                 DisplayValue="+715.98"
                                 Unit="mm"
-                                AxisStatus="后移"/>
+                                AxisStatus="右移"/>
                             <!--调整轴Z-->
                             <controls:DataDisplayControl
                                 Grid.Row="2"

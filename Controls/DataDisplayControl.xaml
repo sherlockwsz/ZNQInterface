@@ -31,7 +31,7 @@
                    Text="{Binding Description,
                                   RelativeSource={RelativeSource
                                   AncestorType={x:Type local:DataDisplayControl}}}"
-                   FontSize="16"
+                   FontSize="15"
                    Foreground="Black"
                    TextTrimming="CharacterEllipsis"
                    HorizontalAlignment="Center"
@@ -51,7 +51,7 @@
                                       AncestorType={x:Type local:DataDisplayControl}},
                                       TargetNullValue=--,
                                       FallbackValue=--}"
-                       FontSize="16"
+                       FontSize="15"
                        Foreground="Black"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
@@ -63,7 +63,7 @@
                    Text="{Binding Unit,
                                   RelativeSource={RelativeSource
                                   AncestorType={x:Type local:DataDisplayControl}}}"
-                   FontSize="16"
+                   FontSize="15"
                    Foreground="Black"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"/>
@@ -75,7 +75,7 @@
                                   AncestorType={x:Type local:DataDisplayControl}},
                                   TargetNullValue=--,
                                   FallbackValue=--}"
-                   FontSize="16"
+                   FontSize="15"
                    Foreground="Black"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>

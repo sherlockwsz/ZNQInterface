@@ -9,8 +9,8 @@ namespace ZNQInterface.ViewModels.Pages.Axis
 {
     public class AxisItemViewModel : BindableBase
     {
-        private double _targetPosition;
-        private double _followingError;
+        private double _setPosition;
+        private double _setVelocity;
         private string _groupName;
         private string _displayName;
         public double ActualPosition { get; set; }
@@ -30,15 +30,15 @@ namespace ZNQInterface.ViewModels.Pages.Axis
 
         public bool HasFault { get; set; }
 
-        public double TargetPosition
+        public double SetPosition
         {
-            get => _targetPosition;
-            set => SetProperty(ref _targetPosition, value);
+            get => _setPosition;
+            set => SetProperty(ref _setPosition, value);
         }
-        public double FollowingError
+        public double SetVelocity
         {
-            get => _followingError;
-            set => SetProperty(ref _followingError, value);
+            get => _setVelocity;
+            set => SetProperty(ref _setVelocity, value);
         }
         public string GroupName
         {

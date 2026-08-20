@@ -195,7 +195,7 @@
                FontSize="13"
                FontWeight="SemiBold"
                VerticalAlignment="Center">
-        <Run Text="{Binding TargetPosition,
+        <Run Text="{Binding SetPosition,
                             StringFormat={}{0:F3}}"/>
         <Run Text=" "/>
         <Run Text="{Binding PositionUnit,
@@ -206,7 +206,7 @@
                         <TextBlock Grid.Row="1"
                Grid.Column="2"
                Margin="12,0,0,0"
-               Text="跟随误差："
+               Text="设定速度："
                FontSize="13"
                Foreground="#FF6B7280"
                VerticalAlignment="Center"/>
@@ -216,11 +216,11 @@
                FontSize="13"
                FontWeight="SemiBold"
                VerticalAlignment="Center">
-        <Run Text="{Binding FollowingError,
-                            StringFormat={}{0:F3}}"/>
+        <Run Text="{Binding SetVelocity,
+                            StringFormat={}{0:F2}}"/>
         <Run Text=" "/>
-        <Run Text="{Binding PositionUnit,
-                            FallbackValue=mm}"/>
+        <Run Text="{Binding VelocityUnit,
+                            FallbackValue=mm/s}"/>
                         </TextBlock>
 
                     </Grid>

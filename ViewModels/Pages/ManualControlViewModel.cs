@@ -13,8 +13,8 @@ namespace ZNQInterface.ViewModels.Pages
         private AxisItemViewModel _selectedTurntableAxis;
         private AxisItemViewModel _selectedAdjustmentAxis;
         private AxisItemViewModel _selectedScrewdriverAxis;
-        private double _targetPosition;
-        private double _followingError;
+        private double _setPosition;
+        private double _setVelocity;
 
         public ManualControlViewModel()
         {
@@ -28,8 +28,8 @@ namespace ZNQInterface.ViewModels.Pages
                     ActualPosition = 125.360,
                     ActualVelocity = 20.00,
 
-                    TargetPosition = 130.00,
-                    FollowingError = 0.042,
+                    SetPosition = 130.00,
+                    SetVelocity = 0.042,
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
                     MotionStatus = "回零中",
@@ -47,8 +47,8 @@ namespace ZNQInterface.ViewModels.Pages
                     DisplayName = "Y(前后)轴",
                     ActualPosition = 48.200,
                     ActualVelocity = 0,
-                    TargetPosition = 150.00,
-                    FollowingError = 0.061,
+                    SetPosition = 150.00,
+                    SetVelocity = 50,
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -64,8 +64,8 @@ namespace ZNQInterface.ViewModels.Pages
                     DisplayName = "Z(上下)轴",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
-                    TargetPosition = 110.00,
-                    FollowingError = 0.011,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -89,8 +89,8 @@ namespace ZNQInterface.ViewModels.Pages
                     DisplayName = "X(左右)轴",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
-                    TargetPosition = 110.00,
-                    FollowingError = 0.011,
+                    SetPosition = 110.00,
+                    SetVelocity = 40,
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -106,8 +106,8 @@ namespace ZNQInterface.ViewModels.Pages
                     DisplayName = "Y(前后)轴",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
-                    TargetPosition = 110.00,
-                    FollowingError = 0.011,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -122,8 +122,8 @@ namespace ZNQInterface.ViewModels.Pages
                     DisplayName = "Z(上下)轴",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
-                    TargetPosition = 110.00,
-                    FollowingError = 0.011,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
