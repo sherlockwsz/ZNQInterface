@@ -16,9 +16,9 @@
     <!-- 页面纵向比例：顶部 8%、中部 84%、底部 8%；顶部横向比例：左侧 10%、右侧 90%。 -->
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
+            <RowDefinition Height="70" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="60" />
+            <RowDefinition Height="50" />
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"

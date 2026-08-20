@@ -4,9 +4,501 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ZNQInterface.Views.Pages"
+             xmlns:controls="clr-namespace:ZNQInterface.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="AxisListBoxStyle"
+       TargetType="{x:Type ListBox}">
+
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+            Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+            Value="Auto"/>
+
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type ListBoxItem}">
+
+                        <Setter Property="Margin" Value="2"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment"
+                        Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment"
+                        Value="Stretch"/>
+
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+
+                                    <Border x:Name="SelectedBorder"
+                                            Background="White"
+                                            BorderBrush="#FFD1D5DB"
+                                            BorderThickness="3"
+                                            CornerRadius="5">
+
+                                        <ContentPresenter/>
+                                    </Border>
+
+                                    <ControlTemplate.Triggers>
+
+                                        <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                            <Setter TargetName="SelectedBorder"
+                                            Property="Background"
+                                            Value="#FFEFF6FF"/>
+                                        </Trigger>
+
+                                        <Trigger Property="IsSelected"
+                                         Value="True">
+                                            <Setter TargetName="SelectedBorder"
+                                            Property="Background"
+                                            Value="#FFDBEAFE"/>
+                                            <Setter TargetName="SelectedBorder"
+                                            Property="BorderBrush"
+                                            Value="#FF2563EB"/>
+                                        </Trigger>
+
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 单根轴数据显示模板 -->
+        <DataTemplate x:Key="AxisItemTemplate">
+
+            <Border Padding="8,4"
+                Background="White"
+                BorderBrush="#FFD1D5DB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- 轴名称和运动状态 -->
+                        <RowDefinition Height="22"/>
+
+                        <!-- 位置和速度 -->
+                        <RowDefinition Height="22"/>
+
+                        <!-- 跟随误差和目标位置 -->
+                        <RowDefinition Height="22"/>
+                        
+                        <!-- 状态指示 -->
+                        <RowDefinition Height="22"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 第一行：轴名称、运动状态 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                               Text="{Binding DisplayName}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="#FF1F2937"
+                               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="1"
+                               Text="{Binding MotionStatus,
+                                              FallbackValue=静止}"
+                               FontSize="14"
+                               Foreground="#FF2563EB"
+                               VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- 实际数据、目标位置和跟随误差 -->
+                    <Grid Grid.Row="1"
+      Grid.RowSpan="2">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="24"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <!-- 左侧名称 -->
+                            <ColumnDefinition Width="Auto"/>
+
+                            <!-- 左侧数值 -->
+                            <ColumnDefinition Width="*"/>
+
+                            <!-- 右侧名称 -->
+                            <ColumnDefinition Width="Auto"/>
+
+                            <!-- 右侧数值 -->
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 第一行：实际位置 -->
+                        <TextBlock Grid.Row="0"
+               Grid.Column="0"
+               Text="实际位置："
+               FontSize="13"
+               Foreground="#FF6B7280"
+               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="0"
+               Grid.Column="1"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center">
+        <Run Text="{Binding ActualPosition,
+                            StringFormat={}{0:F3}}"/>
+        <Run Text=" "/>
+        <Run Text="{Binding PositionUnit,
+                            FallbackValue=mm}"/>
+                        </TextBlock>
+
+                        <!-- 第一行：实际速度 -->
+                        <TextBlock Grid.Row="0"
+               Grid.Column="2"
+               Margin="12,0,0,0"
+               Text="实际速度："
+               FontSize="13"
+               Foreground="#FF6B7280"
+               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="0"
+               Grid.Column="3"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center">
+        <Run Text="{Binding ActualVelocity,
+                            StringFormat={}{0:F2}}"/>
+        <Run Text=" "/>
+        <Run Text="{Binding VelocityUnit,
+                            FallbackValue=mm/s}"/>
+                        </TextBlock>
+
+                        <!-- 第二行：设定位置 -->
+                        <TextBlock Grid.Row="1"
+               Grid.Column="0"
+               Text="设定位置："
+               FontSize="13"
+               Foreground="#FF6B7280"
+               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="1"
+               Grid.Column="1"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center">
+        <Run Text="{Binding TargetPosition,
+                            StringFormat={}{0:F3}}"/>
+        <Run Text=" "/>
+        <Run Text="{Binding PositionUnit,
+                            FallbackValue=mm}"/>
+                        </TextBlock>
+
+                        <!-- 第二行：跟随误差 -->
+                        <TextBlock Grid.Row="1"
+               Grid.Column="2"
+               Margin="12,0,0,0"
+               Text="跟随误差："
+               FontSize="13"
+               Foreground="#FF6B7280"
+               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="1"
+               Grid.Column="3"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center">
+        <Run Text="{Binding FollowingError,
+                            StringFormat={}{0:F3}}"/>
+        <Run Text=" "/>
+        <Run Text="{Binding PositionUnit,
+                            FallbackValue=mm}"/>
+                        </TextBlock>
+
+                    </Grid>
+                    <!-- 第四行：状态指示 -->
+                    <UniformGrid Grid.Row="3"
+                             Rows="1"
+                             Columns="5">
+
+                        <!-- 使能 -->
+                        <TextBlock FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="未使能"/>
+                                    <Setter Property="Foreground" Value="#FF9CA3AF"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEnabled}"
+                             Value="True">
+                                            <Setter Property="Text" Value="● 使能"/>
+                                            <Setter Property="Foreground" Value="#FF16A34A"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- 回零 -->
+                        <TextBlock FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="未回零"/>
+                                    <Setter Property="Foreground"
+                                        Value="#FF9CA3AF"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsHomed}"
+                                                 Value="True">
+                                            <Setter Property="Text"
+                                                Value="● 已回零"/>
+                                            <Setter Property="Foreground"
+                                                Value="#FF16A34A"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- 通信 -->
+                        <TextBlock FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="● 通信异常"/>
+                                    <Setter Property="Foreground"
+                                        Value="#FFDC2626"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCommunicationOk}"
+                                                 Value="True">
+                                            <Setter Property="Text"
+                                                Value="● 通信正常"/>
+                                            <Setter Property="Foreground"
+                                                Value="#FF16A34A"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- 限位 -->
+                        <TextBlock FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="无限位"/>
+                                    <Setter Property="Foreground"
+                                        Value="#FF6B7280"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PositiveLimit}"
+                                                 Value="True">
+                                            <Setter Property="Text"
+                                                Value="● 正限位"/>
+                                            <Setter Property="Foreground"
+                                                Value="#FFF59E0B"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding NegativeLimit}"
+                                                 Value="True">
+                                            <Setter Property="Text"
+                                                Value="● 负限位"/>
+                                            <Setter Property="Foreground"
+                                                Value="#FFF59E0B"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- 故障 -->
+                        <TextBlock FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="● 正常"/>
+                                    <Setter Property="Foreground"
+                                        Value="#FF16A34A"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasFault}"
+                                                 Value="True">
+                                            <Setter Property="Text"
+                                                Value="● 故障"/>
+                                            <Setter Property="Foreground"
+                                                Value="#FFDC2626"/>
+                                            <Setter Property="FontWeight"
+                                                Value="SemiBold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                    </UniformGrid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
     <Grid>
-        <TextBlock Text="{Binding PageTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24"/>
+        <Grid.RowDefinitions>
+            <!-- 14轴实时数据 -->
+            <RowDefinition Height="65*"/>
+
+            <!-- 当前轴调试 -->
+            <RowDefinition Height="35*"/>
+        </Grid.RowDefinitions>
+        <!-- 14轴实时数据 -->
+        <Grid Grid.Row="0"
+              Margin="0,0,1,0">
+                <Grid.ColumnDefinitions>
+                    <!-- 第一列：阻尼器上下料 -->
+                    <ColumnDefinition Width="1*"/>
+
+                    <!-- 第二列：料盘上下料、转台 -->
+                    <ColumnDefinition Width="1*"/>
+
+                    <!-- 第三列：同轴度调整、螺丝刀 -->
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 第一列：阻尼器上下料 -->
+            <HeaderedContentControl Grid.Column="0"
+                            Header="阻尼器上下料"
+                            Style="{StaticResource TitledPanelStyle}"
+                            Margin="0,0,1,0">
+
+                <!-- 5根轴 -->
+                <ListBox ItemsSource="{Binding DamperLoadingAxes}"
+                         SelectedItem="{Binding SelectedDamperAxis, Mode=TwoWay}"
+                         SelectionMode="Single"
+                         ItemTemplate="{StaticResource AxisItemTemplate}"
+                         Style="{StaticResource AxisListBoxStyle}">
+                    
+                </ListBox>
+            </HeaderedContentControl>
+
+                <!-- 第二列 -->
+                <Grid Grid.Column="1"
+                      Margin="0,0,1,0">
+
+                    <Grid.RowDefinitions>
+                        <!-- 料盘上下料 -->
+                        <RowDefinition Height="1*"/>
+
+                        <!-- 转台 -->
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 料盘上下料 -->
+                    <HeaderedContentControl Grid.Row="0"
+                                            Header="料盘上下料"
+                                            Style="{StaticResource TitledPanelStyle}"
+                                            Margin="0,0,0,1">
+
+                        <ListBox ItemsSource="{Binding TrayLoadingAxes}"
+                                 SelectionMode="Single"
+                                 SelectedItem="{Binding SelectedTrayAxis, Mode=TwoWay}"
+                                 Style="{StaticResource AxisListBoxStyle}"
+                                 ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                    </HeaderedContentControl>
+
+                    <!-- 转台及夹紧轴 -->
+                    <HeaderedContentControl Grid.Row="1"
+                                            Header="转台及夹紧"
+                                            Style="{StaticResource TitledPanelStyle}">
+
+                        <ListBox ItemsSource="{Binding TurntableAxes}"
+                                 SelectionMode="Single"
+                                 SelectedItem="{Binding SelectedTurntableAxis, Mode=TwoWay}"
+                                 Style="{StaticResource AxisListBoxStyle}"
+                                 ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                    </HeaderedContentControl>
+
+                </Grid>
+
+                <!-- 第三列 -->
+                <Grid Grid.Column="2">
+
+                    <Grid.RowDefinitions>
+                        <!-- 同轴度调整：3根轴 -->
+                        <RowDefinition Height="3*"/>
+
+                        <!-- 螺丝刀：2根轴 -->
+                        <RowDefinition Height="2*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 同轴度调整 -->
+                    <HeaderedContentControl Grid.Row="0"
+                                            Header="同轴度调整"
+                                            Style="{StaticResource TitledPanelStyle}"
+                                            Margin="0,0,0,2">
+
+                        <ListBox ItemsSource="{Binding AdjustmentAxes}"
+                                 SelectionMode="Single"
+                                 SelectedItem="{Binding SelectedAdjustmentAxis, Mode=TwoWay}"
+                                 Style="{StaticResource AxisListBoxStyle}"
+                                 ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                    </HeaderedContentControl>
+
+                    <!-- 螺丝刀轴 -->
+                    <HeaderedContentControl Grid.Row="1"
+                                            Header="螺丝刀轴"
+                                            Style="{StaticResource TitledPanelStyle}">
+
+                        <ListBox ItemsSource="{Binding ScrewdriverAxes}"
+                                 SelectionMode="Single"
+                                 SelectedItem="{Binding SelectedScrewdriverAxis, Mode=TwoWay}"
+                                 Style="{StaticResource AxisListBoxStyle}"
+                                 ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                    </HeaderedContentControl>
+
+                </Grid>
+            </Grid>
+
+        <!-- 单轴调试 -->
+        <Grid Grid.Row="1"
+              Margin="0,1,0,0">
+            <Grid.ColumnDefinitions>
+                <!-- 详细状态 -->
+                <ColumnDefinition Width="2*"/>
+
+                <!-- 调试操作 -->
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <HeaderedContentControl Grid.Column="0"
+                                Header="{Binding SelectedAxisTitle}"
+                                Style="{StaticResource TitledPanelStyle}"
+                                Margin="0,0,1,0">
+
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Grid.Column="1"
+                                Header="调试操作"
+                                Style="{StaticResource TitledPanelStyle}"
+                                Margin="1,0,0,0">
+
+            </HeaderedContentControl>
+
+        </Grid>
     </Grid>
 </UserControl>
