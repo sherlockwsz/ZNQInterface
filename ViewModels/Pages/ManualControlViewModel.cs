@@ -2,11 +2,15 @@
 using System.Linq;
 using System.Collections.ObjectModel;
 using ZNQInterface.ViewModels.Pages.Axis;
+using ZNQInterface.ViewModels.Components;
 
 namespace ZNQInterface.ViewModels.Pages
 {
     public class ManualControlViewModel : BindableBase
     {
+        // 当前调试输入区域。
+        public AxisDebugInputViewModel DebugInput { get; }
+        // 当前选中轴及各功能组的同步引用。
         private AxisItemViewModel _selectedAxis;
         private AxisItemViewModel _selectedDamperAxis;
         private AxisItemViewModel _selectedTrayAxis;
@@ -18,20 +22,26 @@ namespace ZNQInterface.ViewModels.Pages
 
         public ManualControlViewModel()
         {
+            DebugInput = new AxisDebugInputViewModel();
+
+            // 阻尼器上下料轴。
             DamperLoadingAxes = new ObservableCollection<AxisItemViewModel>
             {
-                //X轴模拟
+                // X轴模拟
                 new AxisItemViewModel
                 {
                     GroupName = "阻尼器上下料",
-                    DisplayName = "X(左右)轴",
+                    DisplayName = "X(前后)轴",
                     ActualPosition = 125.360,
                     ActualVelocity = 20.00,
-
                     SetPosition = 130.00,
                     SetVelocity = 0.042,
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
                     MotionStatus = "回零中",
                     IsEnabled = true,
                     IsHomed = true,
@@ -40,15 +50,19 @@ namespace ZNQInterface.ViewModels.Pages
                     NegativeLimit = false,
                     HasFault = true
                 },
-                //Y轴模拟
+                // Y轴模拟
                 new AxisItemViewModel
                 {
                     GroupName = "阻尼器上下料",
-                    DisplayName = "Y(前后)轴",
+                    DisplayName = "Y(左右)轴",
                     ActualPosition = 48.200,
                     ActualVelocity = 0,
                     SetPosition = 150.00,
                     SetVelocity = 50,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -57,7 +71,7 @@ namespace ZNQInterface.ViewModels.Pages
                     IsHomed = false,
                     IsCommunicationOk = true
                 },
-                //Z轴模拟
+                // Z轴模拟
                 new AxisItemViewModel
                 {
                     GroupName = "阻尼器上下料",
@@ -66,6 +80,10 @@ namespace ZNQInterface.ViewModels.Pages
                     ActualVelocity = 0,
                     SetPosition = 110.00,
                     SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -74,40 +92,66 @@ namespace ZNQInterface.ViewModels.Pages
                     IsHomed = false,
                     IsCommunicationOk = true
                 },
-
-            };
-
-            TrayLoadingAxes = new ObservableCollection<AxisItemViewModel>();
-            TurntableAxes = new ObservableCollection<AxisItemViewModel>();
-            //调整轴模拟
-            AdjustmentAxes = new ObservableCollection<AxisItemViewModel>()
-            {
-                //X轴
+                // 转轴
                 new AxisItemViewModel
                 {
-                    GroupName = "同轴度调整",
-                    DisplayName = "X(左右)轴",
-                    ActualPosition = 76.200,
-                    ActualVelocity = 0,
-                    SetPosition = 110.00,
-                    SetVelocity = 40,
-
-                    PositionUnit = "mm",
-                    VelocityUnit = "mm/s",
-                    MotionStatus = "已到位",
-                    IsEnabled = false,
-                    IsHomed = false,
-                    IsCommunicationOk = true
-                },
-                //Y
-                new AxisItemViewModel
-                {
-                    GroupName = "同轴度调整",
-                    DisplayName = "Y(前后)轴",
+                    GroupName = "阻尼器上下料",
+                    DisplayName = "转轴",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
                     SetPosition = 110.00,
                     SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                },
+
+                // 夹爪
+                new AxisItemViewModel
+                {
+                    GroupName = "阻尼器上下料",
+                    DisplayName = "夹爪轴",
+                    ActualPosition = 0,
+                    ActualVelocity = 0,
+                    SetPosition = 0,
+                    SetVelocity = 0,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                }
+
+            };
+            // 托盘上下料轴。
+            TrayLoadingAxes = new ObservableCollection<AxisItemViewModel>()
+            {
+                // X轴
+                new AxisItemViewModel
+                {
+                    GroupName = "托盘上下料",
+                    DisplayName = "X(前后)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 40,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -116,7 +160,123 @@ namespace ZNQInterface.ViewModels.Pages
                     IsHomed = false,
                     IsCommunicationOk = true
                 },
-                                new AxisItemViewModel
+                // Y轴
+                new AxisItemViewModel
+                {
+                    GroupName = "托盘上下料",
+                    DisplayName = "Y(左右)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                }
+
+            };
+            // 转台轴。
+            TurntableAxes = new ObservableCollection<AxisItemViewModel>()
+            {
+                // 转轴
+                new AxisItemViewModel
+                {
+                    GroupName = "转台轴",
+                    DisplayName = "转轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                },
+
+                // 夹爪
+                new AxisItemViewModel
+                {
+                    GroupName = "转台轴",
+                    DisplayName = "夹紧轴",
+                    ActualPosition = 0,
+                    ActualVelocity = 0,
+                    SetPosition = 0,
+                    SetVelocity = 0,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                }
+
+            };
+            // 同轴度调整轴。
+            AdjustmentAxes = new ObservableCollection<AxisItemViewModel>()
+            {
+                // X轴
+                new AxisItemViewModel
+                {
+                    GroupName = "同轴度调整",
+                    DisplayName = "X(前后)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 40,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                },
+                // Y
+                new AxisItemViewModel
+                {
+                    GroupName = "同轴度调整",
+                    DisplayName = "Y(左右)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                },
+                // Z
+                new AxisItemViewModel
                 {
                     GroupName = "同轴度调整",
                     DisplayName = "Z(上下)轴",
@@ -124,6 +284,10 @@ namespace ZNQInterface.ViewModels.Pages
                     ActualVelocity = 0,
                     SetPosition = 110.00,
                     SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
 
                     PositionUnit = "mm",
                     VelocityUnit = "mm/s",
@@ -134,17 +298,70 @@ namespace ZNQInterface.ViewModels.Pages
                 },
 
             };
-            ScrewdriverAxes = new ObservableCollection<AxisItemViewModel>();
+            // 螺丝刀轴。
+            ScrewdriverAxes = new ObservableCollection<AxisItemViewModel>()
+            {
+                // Y轴模拟
+                new AxisItemViewModel
+                {
+                    GroupName = "螺丝刀轴",
+                    DisplayName = "Y(左右)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                },
+                // Z轴模拟
+                new AxisItemViewModel
+                {
+                    GroupName = "螺丝刀轴",
+                    DisplayName = "Z(上下)轴",
+                    ActualPosition = 76.200,
+                    ActualVelocity = 0,
+                    SetPosition = 110.00,
+                    SetVelocity = 60,
+                    AccelerationUnit = "mm/s²",
+                    DecelerationUnit = "mm/s²",
+                    RelativeDistanceUnit = "mm",
+                    TorqueUnit = "N·m",
+                    PositionUnit = "mm",
+                    VelocityUnit = "mm/s",
+                    MotionStatus = "已到位",
+                    IsEnabled = false,
+                    IsHomed = false,
+                    IsCommunicationOk = true
+                }
 
+            };
+
+            // 默认选中第一根轴。
             SelectedAxis = DamperLoadingAxes.FirstOrDefault();
         }
 
+        // 各功能组轴集合。
         public ObservableCollection<AxisItemViewModel> DamperLoadingAxes { get; }
         public ObservableCollection<AxisItemViewModel> TrayLoadingAxes { get; }
         public ObservableCollection<AxisItemViewModel> TurntableAxes { get; }
         public ObservableCollection<AxisItemViewModel> AdjustmentAxes { get; }
         public ObservableCollection<AxisItemViewModel> ScrewdriverAxes { get; }
 
+        public string SelectedAxisDetailHeader =>
+            $"当前选中轴：{SelectedAxisTitle}";
+
+        public string SelectedAxisDebugHeader =>
+            $"当前调试轴：{SelectedAxisTitle}";
+
+        // 当前选中轴及各组联动属性。
         public AxisItemViewModel SelectedAxis
         {
             get => _selectedAxis;
@@ -189,8 +406,10 @@ namespace ZNQInterface.ViewModels.Pages
                         ? value
                         : null,
                     nameof(SelectedScrewdriverAxis));
-
+                DebugInput.InitializeForAxis(value);
                 RaisePropertyChanged(nameof(SelectedAxisTitle));
+                RaisePropertyChanged(nameof(SelectedAxisDetailHeader));
+                RaisePropertyChanged(nameof(SelectedAxisDebugHeader));
             }
         }
         public AxisItemViewModel SelectedDamperAxis
@@ -257,6 +476,7 @@ namespace ZNQInterface.ViewModels.Pages
                 }
             }
         }
+        // 当前选中轴标题。
         public string SelectedAxisTitle
         {
             get
@@ -267,8 +487,9 @@ namespace ZNQInterface.ViewModels.Pages
                 }
 
                 return $"{SelectedAxis.GroupName} —— " +
-                       $"{SelectedAxis.DisplayName} 详细信息";
+                       $"{SelectedAxis.DisplayName}";
             }
         }
+
     }
 }

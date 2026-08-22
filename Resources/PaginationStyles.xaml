@@ -1,0 +1,42 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 分页按钮基础样式及交互状态 -->
+    <Style x:Key="PaginationButtonStyle"
+        TargetType="{x:Type Button}">
+
+        <Setter Property="MinWidth" Value="42"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Margin" Value="3,0"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="#FF374151"/>
+        <Setter Property="BorderBrush" Value="#FFD1D5DB"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Style.Triggers>
+
+            <!-- 鼠标悬停状态 -->
+            <Trigger Property="IsMouseOver"
+                Value="True">
+                <Setter Property="Background" Value="#FFEFF6FF"/>
+                <Setter Property="BorderBrush" Value="#FF2563EB"/>
+                <Setter Property="Foreground" Value="#FF1D4ED8"/>
+            </Trigger>
+
+            <!-- 按钮不可用状态 -->
+            <Trigger Property="IsEnabled"
+                Value="False">
+                <Setter Property="Background" Value="#FFF3F4F6"/>
+                <Setter Property="Foreground" Value="#FF9CA3AF"/>
+                <Setter Property="BorderBrush" Value="#FFE5E7EB"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </Trigger>
+
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

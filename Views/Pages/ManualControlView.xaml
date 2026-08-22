@@ -9,7 +9,7 @@
     d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="AxisDetailCellStyle"
-       TargetType="{x:Type Border}">
+            TargetType="{x:Type Border}">
 
             <Setter Property="Margin" Value="3"/>
             <Setter Property="Padding" Value="8,4"/>
@@ -166,563 +166,737 @@
                             VerticalAlignment="Center">
                             <Run Text="{Binding ActualPosition,
                                 StringFormat={}{0:F3}}"/>
-                            <Run Text=" "/>
+                                <Run Text=" "/>
                             <Run Text="{Binding PositionUnit,
                                 FallbackValue=mm}"/>
                         </TextBlock>
 
-                        <!-- 第一行：实际速度 -->
-                        <TextBlock Grid.Row="0"
-                            Grid.Column="2"
-                            Margin="12,0,0,0"
-                            Text="实际速度："
-                            FontSize="13"
-                            Foreground="#FF6B7280"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="0"
-                            Grid.Column="3"
-                            FontSize="13"
-                            FontWeight="SemiBold"
-                            VerticalAlignment="Center">
-                            <Run Text="{Binding ActualVelocity,
-                                StringFormat={}{0:F2}}"/>
-                            <Run Text=" "/>
-                            <Run Text="{Binding VelocityUnit,
-                                FallbackValue=mm/s}"/>
-                        </TextBlock>
-
-                        <!-- 第二行：设定位置 -->
-                        <TextBlock Grid.Row="1"
-                            Grid.Column="0"
-                            Text="设定位置："
-                            FontSize="13"
-                            Foreground="#FF6B7280"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="1"
-                            Grid.Column="1"
-                            FontSize="13"
-                            FontWeight="SemiBold"
-                            VerticalAlignment="Center">
-                            <Run Text="{Binding SetPosition,
-                                StringFormat={}{0:F3}}"/>
-                            <Run Text=" "/>
-                            <Run Text="{Binding PositionUnit,
-                                FallbackValue=mm}"/>
-                        </TextBlock>
-
-                        <!-- 第二行：跟随误差 -->
-                        <TextBlock Grid.Row="1"
-                            Grid.Column="2"
-                            Margin="12,0,0,0"
-                            Text="设定速度："
-                            FontSize="13"
-                            Foreground="#FF6B7280"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="1"
-                            Grid.Column="3"
-                            FontSize="13"
-                            FontWeight="SemiBold"
-                            VerticalAlignment="Center">
-                            <Run Text="{Binding SetVelocity,
-                                StringFormat={}{0:F2}}"/>
-                            <Run Text=" "/>
-                            <Run Text="{Binding VelocityUnit,
-                                FallbackValue=mm/s}"/>
-                        </TextBlock>
-
-                    </Grid>
-                    <!-- 第四行：状态指示 -->
-                    <UniformGrid Grid.Row="3"
-                        Rows="1"
-                        Columns="5">
-
-                        <!-- 使能 -->
-                        <TextBlock FontSize="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="未使能"/>
-                                    <Setter Property="Foreground" Value="#FF9CA3AF"/>
-
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsEnabled}"
-                                            Value="True">
-                                            <Setter Property="Text" Value="● 使能"/>
-                                            <Setter Property="Foreground" Value="#FF16A34A"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                        <!-- 回零 -->
-                        <TextBlock FontSize="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="未回零"/>
-                                    <Setter Property="Foreground"
-                                        Value="#FF9CA3AF"/>
-
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsHomed}"
-                                            Value="True">
-                                            <Setter Property="Text"
-                                                Value="● 已回零"/>
-                                            <Setter Property="Foreground"
-                                                Value="#FF16A34A"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                        <!-- 通信 -->
-                        <TextBlock FontSize="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="● 通信异常"/>
-                                    <Setter Property="Foreground"
-                                        Value="#FFDC2626"/>
-
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCommunicationOk}"
-                                            Value="True">
-                                            <Setter Property="Text"
-                                                Value="● 通信正常"/>
-                                            <Setter Property="Foreground"
-                                                Value="#FF16A34A"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                        <!-- 限位 -->
-                        <TextBlock FontSize="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="无限位"/>
-                                    <Setter Property="Foreground"
-                                        Value="#FF6B7280"/>
-
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PositiveLimit}"
-                                            Value="True">
-                                            <Setter Property="Text"
-                                                Value="● 正限位"/>
-                                            <Setter Property="Foreground"
-                                                Value="#FFF59E0B"/>
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding NegativeLimit}"
-                                            Value="True">
-                                            <Setter Property="Text"
-                                                Value="● 负限位"/>
-                                            <Setter Property="Foreground"
-                                                Value="#FFF59E0B"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                        <!-- 故障 -->
-                        <TextBlock FontSize="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="● 正常"/>
-                                    <Setter Property="Foreground"
-                                        Value="#FF16A34A"/>
-
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding HasFault}"
-                                            Value="True">
-                                            <Setter Property="Text"
-                                                Value="● 故障"/>
-                                            <Setter Property="Foreground"
-                                                Value="#FFDC2626"/>
-                                            <Setter Property="FontWeight"
-                                                Value="SemiBold"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-
-                    </UniformGrid>
-                </Grid>
-            </Border>
-        </DataTemplate>
-
-    </UserControl.Resources>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <!-- 14轴实时数据 -->
-            <RowDefinition Height="65*"/>
-
-            <!-- 当前轴调试 -->
-            <RowDefinition Height="35*"/>
-        </Grid.RowDefinitions>
-        <!-- 14轴实时数据 -->
-        <Grid Grid.Row="0"
-            Margin="0,0,1,0">
-            <Grid.ColumnDefinitions>
-                <!-- 第一列：阻尼器上下料 -->
-                <ColumnDefinition Width="1*"/>
-
-                <!-- 第二列：料盘上下料、转台 -->
-                <ColumnDefinition Width="1*"/>
-
-                <!-- 第三列：同轴度调整、螺丝刀 -->
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- 第一列：阻尼器上下料 -->
-            <HeaderedContentControl Grid.Column="0"
-                Header="阻尼器上下料"
-                Style="{StaticResource TitledPanelStyle}"
-                Margin="0,0,1,0">
-
-                <!-- 5根轴 -->
-                <ListBox ItemsSource="{Binding DamperLoadingAxes}"
-                    SelectedItem="{Binding SelectedDamperAxis, Mode=TwoWay}"
-                    SelectionMode="Single"
-                    ItemTemplate="{StaticResource AxisItemTemplate}"
-                    Style="{StaticResource AxisListBoxStyle}">
-
-                </ListBox>
-            </HeaderedContentControl>
-
-            <!-- 第二列 -->
-            <Grid Grid.Column="1"
-                Margin="0,0,1,0">
-
-                <Grid.RowDefinitions>
-                    <!-- 料盘上下料 -->
-                    <RowDefinition Height="1*"/>
-
-                    <!-- 转台 -->
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-
-                <!-- 料盘上下料 -->
-                <HeaderedContentControl Grid.Row="0"
-                    Header="料盘上下料"
-                    Style="{StaticResource TitledPanelStyle}"
-                    Margin="0,0,0,1">
-
-                    <ListBox ItemsSource="{Binding TrayLoadingAxes}"
-                        SelectionMode="Single"
-                        SelectedItem="{Binding SelectedTrayAxis, Mode=TwoWay}"
-                        Style="{StaticResource AxisListBoxStyle}"
-                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
-                </HeaderedContentControl>
-
-                <!-- 转台及夹紧轴 -->
-                <HeaderedContentControl Grid.Row="1"
-                    Header="转台及夹紧"
-                    Style="{StaticResource TitledPanelStyle}">
-
-                    <ListBox ItemsSource="{Binding TurntableAxes}"
-                        SelectionMode="Single"
-                        SelectedItem="{Binding SelectedTurntableAxis, Mode=TwoWay}"
-                        Style="{StaticResource AxisListBoxStyle}"
-                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
-                </HeaderedContentControl>
-
-            </Grid>
-
-            <!-- 第三列 -->
-            <Grid Grid.Column="2">
-
-                <Grid.RowDefinitions>
-                    <!-- 同轴度调整：3根轴 -->
-                    <RowDefinition Height="3*"/>
-
-                    <!-- 螺丝刀：2根轴 -->
-                    <RowDefinition Height="2*"/>
-                </Grid.RowDefinitions>
-
-                <!-- 同轴度调整 -->
-                <HeaderedContentControl Grid.Row="0"
-                    Header="同轴度调整"
-                    Style="{StaticResource TitledPanelStyle}"
-                    Margin="0,0,0,2">
-
-                    <ListBox ItemsSource="{Binding AdjustmentAxes}"
-                        SelectionMode="Single"
-                        SelectedItem="{Binding SelectedAdjustmentAxis, Mode=TwoWay}"
-                        Style="{StaticResource AxisListBoxStyle}"
-                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
-                </HeaderedContentControl>
-
-                <!-- 螺丝刀轴 -->
-                <HeaderedContentControl Grid.Row="1"
-                    Header="螺丝刀轴"
-                    Style="{StaticResource TitledPanelStyle}">
-
-                    <ListBox ItemsSource="{Binding ScrewdriverAxes}"
-                        SelectionMode="Single"
-                        SelectedItem="{Binding SelectedScrewdriverAxis, Mode=TwoWay}"
-                        Style="{StaticResource AxisListBoxStyle}"
-                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
-                </HeaderedContentControl>
-
-            </Grid>
-        </Grid>
-
-        <!-- 单轴调试 -->
-        <Grid Grid.Row="1"
-            Margin="0,1,0,0">
-            <Grid.ColumnDefinitions>
-                <!-- 详细状态 -->
-                <ColumnDefinition Width="2*"/>
-
-                <!-- 调试操作 -->
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-
-            <HeaderedContentControl Grid.Column="0"
-                Header="{Binding SelectedAxisTitle}"
-                Style="{StaticResource TitledPanelStyle}"
-                Margin="0,0,1,0">
-                
-                <Grid Margin="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="0.9*"/>
-                        <RowDefinition Height="1.1*"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- 第一行：实际数据 -->
-                    <UniformGrid Grid.Row="0"
-                 Rows="1"
-                 Columns="3">
-
-                        <!-- 实际位置 -->
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="实际位置："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.ActualPosition,
-                                    StringFormat={}{0:F3}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.PositionUnit,
-                                    FallbackValue=mm}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <!-- 实际速度 -->
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="实际速度："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.ActualVelocity,
-                                    StringFormat={}{0:F2}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.VelocityUnit,
-                                    FallbackValue=mm/s}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <!-- 实际负载 -->
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="实际负载："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.ActualLoad,
-                                    StringFormat={}{0:F1}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.LoadUnit,
-                                    FallbackValue=%}"/>
-                            </TextBlock>
-                        </Border>
-                    </UniformGrid>
-
-                    <!-- 第二行：设定数据 -->
-                    <UniformGrid Grid.Row="1"
-                 Rows="1"
-                 Columns="3">
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="设定位置："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.SetPosition,
-                                    StringFormat={}{0:F2}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="设定速度："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.SetVelocity,
-                                    StringFormat={}{0:F2}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.VelocityUnit}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="设定负载："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.SetLoad,
-                                    StringFormat={}{0:F1}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.LoadUnit,
-                                    FallbackValue=%}"/>
-                            </TextBlock>
-                        </Border>
-                    </UniformGrid>
-
-                    <!-- 第三行：运动偏差 -->
-                    <UniformGrid Grid.Row="2"
-                 Rows="1"
-                 Columns="3">
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="剩余距离："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.RemainingDistance,
-                                    StringFormat={}{0:F3}}"
-                     FontWeight="SemiBold"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="跟随误差："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.FollowingError,
-                                    StringFormat={}{0:F3}}"
-                     FontWeight="SemiBold"
-                     Foreground="#FFF59E0B"/>
-                <Run Text=" "/>
-                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
-                            </TextBlock>
-                        </Border>
-
-                        <Border Style="{StaticResource AxisDetailCellStyle}">
-                            <TextBlock VerticalAlignment="Center">
-                <Run Text="运动状态："
-                     Foreground="#FF6B7280"/>
-                <Run Text="{Binding SelectedAxis.MotionStatus,
-                                    FallbackValue=--}"
-                     FontWeight="SemiBold"
-                     Foreground="#FF2563EB"/>
-                            </TextBlock>
-                        </Border>
-                    </UniformGrid>
-
-                    <!-- 第四行：轴状态 -->
-                    <UniformGrid Grid.Row="3"
-                 Rows="1"
-                 Columns="5"
-                 Margin="3">
-
-                        <TextBlock Text="{Binding SelectedAxis.EnableStatusText,
-                                  FallbackValue=未使能}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-
-                        <TextBlock Text="{Binding SelectedAxis.HomeStatusText,
-                                  FallbackValue=未回零}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-
-                        <TextBlock Text="{Binding SelectedAxis.CommunicationStatusText,
-                                  FallbackValue=通信异常}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-
-                        <TextBlock Text="{Binding SelectedAxis.FaultStatusText,
-                                  FallbackValue=无故障}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-
-                        <TextBlock Text="{Binding SelectedAxis.LimitStatusText,
-                                  FallbackValue=无限位}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
-                    </UniformGrid>
-
-                    <!-- 第五行：故障信息 -->
-                    <Border Grid.Row="4"
-            Style="{StaticResource AxisDetailCellStyle}"
-            Margin="3">
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="0"
-                       Text="故障代码："
-                       Foreground="#FF6B7280"
-                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="1"
-                       Text="{Binding SelectedAxis.FaultCode,
-                                      FallbackValue=0x0000}"
-                       FontWeight="SemiBold"
-                       Foreground="#FFDC2626"
-                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="2"
-                       Text="故障信息："
-                       Foreground="#FF6B7280"
-                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="3"
-                       Text="{Binding SelectedAxis.FaultMessage,
-                                      FallbackValue=无故障}"
-                       FontWeight="SemiBold"
-                       TextTrimming="CharacterEllipsis"
-                       VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-                
-            </HeaderedContentControl>
-
-            <HeaderedContentControl Grid.Column="1"
-                Header="调试操作"
-                Style="{StaticResource TitledPanelStyle}"
-                Margin="1,0,0,0">
-
-            </HeaderedContentControl>
-
-        </Grid>
-    </Grid>
-</UserControl>
+                                <!-- 第一行：实际速度 -->
+                                <TextBlock Grid.Row="0"
+                                    Grid.Column="2"
+                                    Margin="12,0,0,0"
+                                    Text="实际速度："
+                                    FontSize="13"
+                                    Foreground="#FF6B7280"
+                                    VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Row="0"
+                                    Grid.Column="3"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center">
+                                    <Run Text="{Binding ActualVelocity,
+                                        StringFormat={}{0:F2}}"/>
+                                        <Run Text=" "/>
+                                    <Run Text="{Binding VelocityUnit,
+                                        FallbackValue=mm/s}"/>
+                                </TextBlock>
+
+                                        <!-- 第二行：设定位置 -->
+                                        <TextBlock Grid.Row="1"
+                                            Grid.Column="0"
+                                            Text="设定位置："
+                                            FontSize="13"
+                                            Foreground="#FF6B7280"
+                                            VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Row="1"
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center">
+                                            <Run Text="{Binding SetPosition,
+                                                StringFormat={}{0:F3}}"/>
+                                                <Run Text=" "/>
+                                            <Run Text="{Binding PositionUnit,
+                                                FallbackValue=mm}"/>
+                                        </TextBlock>
+
+                                                <!-- 第二行：跟随误差 -->
+                                                <TextBlock Grid.Row="1"
+                                                    Grid.Column="2"
+                                                    Margin="12,0,0,0"
+                                                    Text="设定速度："
+                                                    FontSize="13"
+                                                    Foreground="#FF6B7280"
+                                                    VerticalAlignment="Center"/>
+
+                                                <TextBlock Grid.Row="1"
+                                                    Grid.Column="3"
+                                                    FontSize="13"
+                                                    FontWeight="SemiBold"
+                                                    VerticalAlignment="Center">
+                                                    <Run Text="{Binding SetVelocity,
+                                                        StringFormat={}{0:F2}}"/>
+                                                        <Run Text=" "/>
+                                                    <Run Text="{Binding VelocityUnit,
+                                                        FallbackValue=mm/s}"/>
+                                                </TextBlock>
+
+                                                    </Grid>
+                                                    <!-- 第四行：状态指示 -->
+                                                    <UniformGrid Grid.Row="3"
+                                                        Rows="1"
+                                                        Columns="5">
+
+                                                        <!-- 使能 -->
+                                                        <TextBlock FontSize="12"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="未使能"/>
+                                                                    <Setter Property="Foreground" Value="#FF9CA3AF"/>
+
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsEnabled}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text" Value="● 使能"/>
+                                                                            <Setter Property="Foreground" Value="#FF16A34A"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                        <!-- 回零 -->
+                                                        <TextBlock FontSize="12"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="未回零"/>
+                                                                    <Setter Property="Foreground"
+                                                                        Value="#FF9CA3AF"/>
+
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsHomed}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text"
+                                                                                Value="● 已回零"/>
+                                                                            <Setter Property="Foreground"
+                                                                                Value="#FF16A34A"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                        <!-- 通信 -->
+                                                        <TextBlock FontSize="12"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="● 通信异常"/>
+                                                                    <Setter Property="Foreground"
+                                                                        Value="#FFDC2626"/>
+
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsCommunicationOk}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text"
+                                                                                Value="● 通信正常"/>
+                                                                            <Setter Property="Foreground"
+                                                                                Value="#FF16A34A"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                        <!-- 限位 -->
+                                                        <TextBlock FontSize="12"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="无限位"/>
+                                                                    <Setter Property="Foreground"
+                                                                        Value="#FF6B7280"/>
+
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding PositiveLimit}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text"
+                                                                                Value="● 正限位"/>
+                                                                            <Setter Property="Foreground"
+                                                                                Value="#FFF59E0B"/>
+                                                                        </DataTrigger>
+
+                                                                        <DataTrigger Binding="{Binding NegativeLimit}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text"
+                                                                                Value="● 负限位"/>
+                                                                            <Setter Property="Foreground"
+                                                                                Value="#FFF59E0B"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                        <!-- 故障 -->
+                                                        <TextBlock FontSize="12"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="● 正常"/>
+                                                                    <Setter Property="Foreground"
+                                                                        Value="#FF16A34A"/>
+
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasFault}"
+                                                                            Value="True">
+                                                                            <Setter Property="Text"
+                                                                                Value="● 故障"/>
+                                                                            <Setter Property="Foreground"
+                                                                                Value="#FFDC2626"/>
+                                                                            <Setter Property="FontWeight"
+                                                                                Value="SemiBold"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                    </UniformGrid>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+
+                                    </UserControl.Resources>
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <!-- 14轴实时数据 -->
+                                            <RowDefinition Height="68*"/>
+
+                                            <!-- 当前轴调试 -->
+                                            <RowDefinition Height="32*"/>
+                                        </Grid.RowDefinitions>
+                                        <!-- 14轴实时数据 -->
+                                        <Grid Grid.Row="0"
+                                            Margin="0,0,1,0">
+                                            <Grid.ColumnDefinitions>
+                                                <!-- 第一列：阻尼器上下料 -->
+                                                <ColumnDefinition Width="1*"/>
+
+                                                <!-- 第二列：料盘上下料、转台 -->
+                                                <ColumnDefinition Width="1*"/>
+
+                                                <!-- 第三列：同轴度调整、螺丝刀 -->
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- 第一列：阻尼器上下料 -->
+                                            <HeaderedContentControl Grid.Column="0"
+                                                Header="阻尼器上下料"
+                                                Style="{StaticResource TitledPanelStyle}"
+                                                Margin="0,0,1,0">
+
+                                                <!-- 5根轴 -->
+                                                <ListBox ItemsSource="{Binding DamperLoadingAxes}"
+                                                    SelectedItem="{Binding SelectedDamperAxis, Mode=TwoWay}"
+                                                    SelectionMode="Single"
+                                                    ItemTemplate="{StaticResource AxisItemTemplate}"
+                                                    Style="{StaticResource AxisListBoxStyle}">
+
+                                                </ListBox>
+                                            </HeaderedContentControl>
+
+                                            <!-- 第二列 -->
+                                            <Grid Grid.Column="1"
+                                                Margin="0,0,1,0">
+
+                                                <Grid.RowDefinitions>
+                                                    <!-- 料盘上下料 -->
+                                                    <RowDefinition Height="1*"/>
+
+                                                    <!-- 转台 -->
+                                                    <RowDefinition Height="1*"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- 料盘上下料 -->
+                                                <HeaderedContentControl Grid.Row="0"
+                                                    Header="料盘上下料"
+                                                    Style="{StaticResource TitledPanelStyle}"
+                                                    Margin="0,0,0,1">
+
+                                                    <ListBox ItemsSource="{Binding TrayLoadingAxes}"
+                                                        SelectionMode="Single"
+                                                        SelectedItem="{Binding SelectedTrayAxis, Mode=TwoWay}"
+                                                        Style="{StaticResource AxisListBoxStyle}"
+                                                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                                                </HeaderedContentControl>
+
+                                                <!-- 转台及夹紧轴 -->
+                                                <HeaderedContentControl Grid.Row="1"
+                                                    Header="转台及夹紧"
+                                                    Style="{StaticResource TitledPanelStyle}">
+
+                                                    <ListBox ItemsSource="{Binding TurntableAxes}"
+                                                        SelectionMode="Single"
+                                                        SelectedItem="{Binding SelectedTurntableAxis, Mode=TwoWay}"
+                                                        Style="{StaticResource AxisListBoxStyle}"
+                                                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                                                </HeaderedContentControl>
+
+                                            </Grid>
+
+                                            <!-- 第三列 -->
+                                            <Grid Grid.Column="2">
+
+                                                <Grid.RowDefinitions>
+                                                    <!-- 同轴度调整：3根轴 -->
+                                                    <RowDefinition Height="3*"/>
+
+                                                    <!-- 螺丝刀：2根轴 -->
+                                                    <RowDefinition Height="2*"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- 同轴度调整 -->
+                                                <HeaderedContentControl Grid.Row="0"
+                                                    Header="同轴度调整"
+                                                    Style="{StaticResource TitledPanelStyle}"
+                                                    Margin="0,0,0,2">
+
+                                                    <ListBox ItemsSource="{Binding AdjustmentAxes}"
+                                                        SelectionMode="Single"
+                                                        SelectedItem="{Binding SelectedAdjustmentAxis, Mode=TwoWay}"
+                                                        Style="{StaticResource AxisListBoxStyle}"
+                                                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                                                </HeaderedContentControl>
+
+                                                <!-- 螺丝刀轴 -->
+                                                <HeaderedContentControl Grid.Row="1"
+                                                    Header="螺丝刀轴"
+                                                    Style="{StaticResource TitledPanelStyle}">
+
+                                                    <ListBox ItemsSource="{Binding ScrewdriverAxes}"
+                                                        SelectionMode="Single"
+                                                        SelectedItem="{Binding SelectedScrewdriverAxis, Mode=TwoWay}"
+                                                        Style="{StaticResource AxisListBoxStyle}"
+                                                        ItemTemplate="{StaticResource AxisItemTemplate}"/>
+                                                </HeaderedContentControl>
+
+                                            </Grid>
+                                        </Grid>
+
+                                        <!-- 单轴调试 -->
+                                        <Grid Grid.Row="1"
+                                            Margin="0,1,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <!-- 详细状态 -->
+                                                <ColumnDefinition Width="2*"/>
+
+                                                <!-- 调试操作 -->
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- 选中轴的详细信息 -->
+                                            <HeaderedContentControl Grid.Column="0"
+                                                Header="{Binding SelectedAxisDetailHeader}"
+                                                Style="{StaticResource TitledPanelStyle}"
+                                                Margin="0,0,1,0">
+
+                                                <Grid Margin="2">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="1*"/>
+                                                        <RowDefinition Height="1*"/>
+                                                        <RowDefinition Height="1*"/>
+                                                        <RowDefinition Height="0.9*"/>
+                                                        <RowDefinition Height="1.1*"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <!-- 第一行：实际数据 -->
+                                                    <UniformGrid Grid.Row="0"
+                                                        Rows="1"
+                                                        Columns="3">
+
+                                                        <!-- 实际位置 -->
+                                                        <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                            <TextBlock VerticalAlignment="Center">
+                                                                <Run Text="实际位置："
+                                                                    Foreground="#FF6B7280"/>
+                                                                <Run Text="{Binding SelectedAxis.ActualPosition,
+                                                                    StringFormat={}{0:F3}}"
+                                                                    FontWeight="SemiBold"/>
+                                                                <Run Text=" "/>
+                                                                <Run Text="{Binding SelectedAxis.PositionUnit,
+                                                                    FallbackValue=mm}"/>
+                                                            </TextBlock>
+                                                                </Border>
+
+                                                                <!-- 实际速度 -->
+                                                                <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                    <TextBlock VerticalAlignment="Center">
+                                                                        <Run Text="实际速度："
+                                                                            Foreground="#FF6B7280"/>
+                                                                        <Run Text="{Binding SelectedAxis.ActualVelocity,
+                                                                            StringFormat={}{0:F2}}"
+                                                                            FontWeight="SemiBold"/>
+                                                                        <Run Text=" "/>
+                                                                        <Run Text="{Binding SelectedAxis.VelocityUnit,
+                                                                            FallbackValue=mm/s}"/>
+                                                                    </TextBlock>
+                                                                        </Border>
+
+                                                                        <!-- 实际转矩 -->
+                                                                        <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                            <TextBlock VerticalAlignment="Center">
+                                                                                <Run Text="实际转矩："
+                                                                                    Foreground="#FF6B7280"/>
+                                                                                <Run Text="{Binding SelectedAxis.ActualLoad,
+                                                                                    StringFormat={}{0:F1}}"
+                                                                                    FontWeight="SemiBold"/>
+                                                                                <Run Text=" "/>
+                                                                                <Run Text="{Binding SelectedAxis.LoadUnit,
+                                                                                    FallbackValue=N·m}"/>
+                                                                            </TextBlock>
+                                                                                </Border>
+                                                                            </UniformGrid>
+
+                                                                            <!-- 第二行：设定数据 -->
+                                                                            <UniformGrid Grid.Row="1"
+                                                                                Rows="1"
+                                                                                Columns="3">
+                                                                                <!-- 设定位置 -->
+                                                                                <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                    <TextBlock VerticalAlignment="Center">
+                                                                                        <Run Text="设定位置："
+                                                                                            Foreground="#FF6B7280"/>
+                                                                                        <Run Text="{Binding SelectedAxis.SetPosition,
+                                                                                            StringFormat={}{0:F2}}"
+                                                                                            FontWeight="SemiBold"/>
+                                                                                        <Run Text=" "/>
+                                                                                        <Run Text="{Binding SelectedAxis.PositionUnit}"/>
+                                                                                    </TextBlock>
+                                                                                </Border>
+                                                                                <!-- 设定速度 -->
+                                                                                <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                    <TextBlock VerticalAlignment="Center">
+                                                                                        <Run Text="设定速度："
+                                                                                            Foreground="#FF6B7280"/>
+                                                                                        <Run Text="{Binding SelectedAxis.SetVelocity,
+                                                                                            StringFormat={}{0:F2}}"
+                                                                                            FontWeight="SemiBold"/>
+                                                                                        <Run Text=" "/>
+                                                                                        <Run Text="{Binding SelectedAxis.VelocityUnit}"
+                                                                                            />
+                                                                                    </TextBlock>
+                                                                                </Border>
+                                                                                <!-- 设定转矩 -->
+                                                                                <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                    <TextBlock VerticalAlignment="Center">
+                                                                                        <Run Text="设定转矩："
+                                                                                            Foreground="#FF6B7280"/>
+                                                                                        <Run Text="{Binding SelectedAxis.SetLoad,
+                                                                                            StringFormat={}{0:F1}}"
+                                                                                            FontWeight="SemiBold"/>
+                                                                                        <Run Text=" "/>
+                                                                                        <Run Text="{Binding SelectedAxis.LoadUnit,
+                                                                                            FallbackValue=N·m}"/>
+                                                                                    </TextBlock>
+                                                                                        </Border>
+                                                                                    </UniformGrid>
+
+                                                                                    <!-- 第三行：运动偏差 -->
+                                                                                    <UniformGrid Grid.Row="2"
+                                                                                        Rows="1"
+                                                                                        Columns="3">
+
+                                                                                        <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                            <TextBlock VerticalAlignment="Center">
+                                                                                                <Run Text="剩余距离："
+                                                                                                    Foreground="#FF6B7280"/>
+                                                                                                <Run Text="{Binding SelectedAxis.RemainingDistance,
+                                                                                                    StringFormat={}{0:F3}}"
+                                                                                                    FontWeight="SemiBold"/>
+                                                                                                <Run Text=" "/>
+                                                                                                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+
+                                                                                        <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                            <TextBlock VerticalAlignment="Center">
+                                                                                                <Run Text="跟随误差："
+                                                                                                    Foreground="#FF6B7280"/>
+                                                                                                <Run Text="{Binding SelectedAxis.FollowingError,
+                                                                                                    StringFormat={}{0:F3}}"
+                                                                                                    FontWeight="SemiBold"
+                                                                                                    Foreground="#FFF59E0B"/>
+                                                                                                <Run Text=" "/>
+                                                                                                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+
+                                                                                        <Border Style="{StaticResource AxisDetailCellStyle}">
+                                                                                            <TextBlock VerticalAlignment="Center">
+                                                                                                <Run Text="运动状态："
+                                                                                                    Foreground="#FF6B7280"/>
+                                                                                                <Run Text="{Binding SelectedAxis.MotionStatus,
+                                                                                                    FallbackValue=--}"
+                                                                                                    FontWeight="SemiBold"
+                                                                                                    Foreground="#FF2563EB"/>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                    </UniformGrid>
+
+                                                                                    <!-- 第四行：轴状态 -->
+                                                                                    <UniformGrid Grid.Row="3"
+                                                                                        Rows="1"
+                                                                                        Columns="5"
+                                                                                        Margin="3">
+
+                                                                                        <TextBlock Text="{Binding SelectedAxis.EnableStatusText,
+                                                                                            FallbackValue=未使能}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center"/>
+
+                                                                                        <TextBlock Text="{Binding SelectedAxis.HomeStatusText,
+                                                                                            FallbackValue=未回零}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center"/>
+
+                                                                                        <TextBlock Text="{Binding SelectedAxis.CommunicationStatusText,
+                                                                                            FallbackValue=通信异常}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center"/>
+
+                                                                                        <TextBlock Text="{Binding SelectedAxis.LimitStatusText,
+                                                                                            FallbackValue=无限位}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center"/>
+
+                                                                                        <TextBlock Text="{Binding SelectedAxis.FaultStatusText,
+                                                                                            FallbackValue=无故障}"
+                                                                                            HorizontalAlignment="Center"
+                                                                                            VerticalAlignment="Center"/>
+
+                                                                                    </UniformGrid>
+
+                                                                                    <!-- 第五行：故障信息 -->
+                                                                                    <Border Grid.Row="4"
+                                                                                        Style="{StaticResource AxisDetailCellStyle}"
+                                                                                        Margin="3">
+
+                                                                                        <Grid>
+                                                                                            <Grid.ColumnDefinitions>
+                                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                                <ColumnDefinition Width="120"/>
+                                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                                <ColumnDefinition Width="*"/>
+                                                                                            </Grid.ColumnDefinitions>
+
+                                                                                            <TextBlock Grid.Column="0"
+                                                                                                Text="故障代码："
+                                                                                                Foreground="#FF6B7280"
+                                                                                                VerticalAlignment="Center"/>
+
+                                                                                            <TextBlock Grid.Column="1"
+                                                                                                Text="{Binding SelectedAxis.FaultCode,
+                                                                                                FallbackValue=0x0000}"
+                                                                                                FontWeight="SemiBold"
+                                                                                                Foreground="#FFDC2626"
+                                                                                                VerticalAlignment="Center"/>
+
+                                                                                            <TextBlock Grid.Column="2"
+                                                                                                Text="故障信息："
+                                                                                                Foreground="#FF6B7280"
+                                                                                                VerticalAlignment="Center"/>
+
+                                                                                            <TextBlock Grid.Column="3"
+                                                                                                Text="{Binding SelectedAxis.FaultMessage,
+                                                                                                FallbackValue=无故障}"
+                                                                                                FontWeight="SemiBold"
+                                                                                                TextTrimming="CharacterEllipsis"
+                                                                                                VerticalAlignment="Center"/>
+                                                                                        </Grid>
+                                                                                    </Border>
+                                                                                </Grid>
+
+                                                                            </HeaderedContentControl>
+                                                                            <!-- 选中轴的调试操作 -->
+                                                                            <HeaderedContentControl Grid.Column="1"
+                                                                                Header="{Binding SelectedAxisDebugHeader}"
+                                                                                Style="{StaticResource TitledPanelStyle}"
+                                                                                Margin="1,0,0,0">
+                                                                                <Grid Margin="6">
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <!-- 基础操作 -->
+                                                                                        <RowDefinition Height="1*"/>
+
+                                                                                        <!-- 位置和速度 -->
+                                                                                        <RowDefinition Height="1*"/>
+
+                                                                                        <!-- 距离和加速度 -->
+                                                                                        <RowDefinition Height="1*"/>
+
+                                                                                        <!-- 力矩和减速度 -->
+                                                                                        <RowDefinition Height="1*"/>
+
+                                                                                        <!-- 点动控制 -->
+                                                                                        <RowDefinition Height="1*"/>
+                                                                                    </Grid.RowDefinitions>
+                                                                                    <!-- 第一行：基础操作 -->
+                                                                                    <Grid Grid.Row="0">
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="2*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="2*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="2*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="2*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                        </Grid.ColumnDefinitions>
+                                                                                        <!-- 使能按钮 -->
+                                                                                        <Grid Grid.Column="1"
+                                                                                            Margin="20,0,10,0">
+                                                                                            <ToggleButton>
+                                                                                                <ToggleButton.Style>
+                                                                                                    <Style TargetType="{x:Type ToggleButton}"
+                                                                                                        BasedOn="{StaticResource ToggleStateButtonStyle}">
+
+                                                                                                        <!-- 初始状态 -->
+                                                                                                        <Setter Property="Content"
+                                                                                                            Value="轴使能"/>
+
+                                                                                                        <Setter Property="Background"
+                                                                                                            Value="#FF16A34A"/>
+
+                                                                                                        <Setter Property="BorderBrush"
+                                                                                                            Value="#FF15803D"/>
+
+                                                                                                        <!-- 切换状态 -->
+                                                                                                        <Style.Triggers>
+
+                                                                                                            <Trigger Property="IsChecked"
+                                                                                                                Value="True">
+
+                                                                                                                <Setter Property="Content"
+                                                                                                                    Value="掉使能"/>
+
+                                                                                                                <Setter Property="Background"
+                                                                                                                    Value="Red"/>
+
+                                                                                                                <Setter Property="BorderBrush"
+                                                                                                                    Value="Red"/>
+
+                                                                                                            </Trigger>
+
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </ToggleButton.Style>
+
+                                                                                            </ToggleButton>
+                                                                                        </Grid>
+                                                                                        <!-- 回零按钮 -->
+                                                                                        <Grid Grid.Column="3"
+                                                                                            Margin="10,0,10,0">
+                                                                                            <Button Content="回零"
+                                                                                                Style="{StaticResource NormalButtonStyle}"
+                                                                                                Background="#FF2563EB"
+                                                                                                BorderBrush="#FF1D4ED8"/>
+                                                                                        </Grid>
+                                                                                        <!-- 故障复位按钮 -->
+                                                                                        <Grid Grid.Column="5"
+                                                                                            Margin="10,0,10,0">
+                                                                                            <Button Content="故障复位"
+                                                                                                Style="{StaticResource NormalButtonStyle}"
+                                                                                                Background="#FFF59E0B"
+                                                                                                BorderBrush="#FFD97706"/>
+                                                                                        </Grid>
+                                                                                        <!-- 停止轴按钮 -->
+                                                                                        <Grid Grid.Column="7"
+                                                                                            Margin="10,0,20,0">
+                                                                                            <Button Content="停止"
+                                                                                                Style="{StaticResource NormalButtonStyle}"
+                                                                                                Background="#FFDC2626"
+                                                                                                BorderBrush="#FFB91C1C"/>
+                                                                                        </Grid>
+                                                                                    </Grid>
+                                                                                    <!-- 第二行：位置和速度设置 -->
+                                                                                    <Grid Grid.Row="1"
+                                                                                        Margin="3">
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                        </Grid.ColumnDefinitions>
+
+                                                                                        <!-- 位置 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="0"
+                                                                                            Description="位置："
+                                                                                            RangeText="(-100.00 ～ 500.00)"
+                                                                                            InputText="{Binding DebugInput.AbsolutePositionText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.PositionUnit}"
+                                                                                            ButtonText="绝对运动"/>
+                                                                                        <!-- 速度 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="1"
+                                                                                            Description="速度："
+                                                                                            RangeText="(0.00 ～ 100.00)"
+                                                                                            InputText="{Binding DebugInput.VelocityText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.VelocityUnit}"
+                                                                                            ButtonText="设定速度"/>
+                                                                                    </Grid>
+                                                                                    <!-- 第三行：距离和加速度 -->
+                                                                                    <Grid Grid.Row="2"
+                                                                                        Margin="3">
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                        </Grid.ColumnDefinitions>
+
+                                                                                        <!-- 距离 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="0"
+                                                                                            Description="距离："
+                                                                                            RangeText="(-100.00 ～ 500.00)"
+                                                                                            InputText="{Binding DebugInput.RelativeDistanceText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.RelativeDistanceUnit}"
+                                                                                            ButtonText="相对运动"/>
+                                                                                        <!-- 加速度 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="1"
+                                                                                            Description="加速度："
+                                                                                            RangeText="(0.00 ～ 100.00)"
+                                                                                            InputText="{Binding DebugInput.AccelerationText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.AccelerationUnit}"
+                                                                                            ButtonText="设定加速度"/>
+                                                                                    </Grid>
+                                                                                    <!-- 第四行：力矩和减速度 -->
+                                                                                    <Grid Grid.Row="3"
+                                                                                        Margin="3">
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                            <ColumnDefinition Width="1*"/>
+                                                                                        </Grid.ColumnDefinitions>
+
+                                                                                        <!-- 力矩 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="0"
+                                                                                            Description="力矩："
+                                                                                            RangeText="(0.00 ～ 100.00)"
+                                                                                            InputText="{Binding DebugInput.TorqueText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.TorqueUnit}"
+                                                                                            ButtonText="设定力矩"/>
+                                                                                        <!-- 减速度 -->
+                                                                                        <controls:ParameterInputControl Grid.Column="1"
+                                                                                            Description="减速度："
+                                                                                            RangeText="(0.00 ～ 100.00)"
+                                                                                            InputText="{Binding DebugInput.DecelerationText,
+                                                                                            Mode=TwoWay}"
+                                                                                            Unit="{Binding SelectedAxis.DecelerationUnit}"
+                                                                                            ButtonText="设定减速度"/>
+                                                                                    </Grid>
+                                                                                </Grid>
+
+                                                                            </HeaderedContentControl>
+
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </UserControl>

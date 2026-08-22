@@ -11,25 +11,33 @@ using ZNQInterface.Models;
 
 namespace ZNQInterface.ViewModels
 {
+    /// <summary>
+    /// 主窗口状态、导航和系统时间管理。
+    /// </summary>
     public class MainWindowViewModel : BindableBase
     {
 
-        private readonly IRegionManager _regionManager;//区域管理器
-        private readonly DispatcherTimer _systemTimeTimer;//系统时间计时器
+        // Prism 内容区域管理器。
+        private readonly IRegionManager _regionManager;
+        // 系统时间刷新计时器。
+        private readonly DispatcherTimer _systemTimeTimer;
 
         private string _title = "自  动  同  轴  度  调  整  设  备";
         private string _currentSystemTime;
 
 
-        private NavigationItem _selectedNavigationItem;//选中的导航项
+        // 当前选中的页面导航项。
+        private NavigationItem _selectedNavigationItem;
         public MainWindowViewModel(IRegionManager regionManager)
         {
-            _regionManager = regionManager;//区域管理器
+            _regionManager = regionManager;
 
+            // 初始化退出命令。
             ExitApplicationCommand =
-                new DelegateCommand(ExecuteExitApplication);//退出应用程序命令
+                new DelegateCommand(ExecuteExitApplication);
 
-            NavigationItems = new List<NavigationItem>//导航项列表
+            // 初始化页面导航项。
+            NavigationItems = new List<NavigationItem>
             {
                 new("设备总览", NavigationKeys.Overview),
                 new("手动调试", NavigationKeys.ManualControl),
@@ -52,9 +60,7 @@ namespace ZNQInterface.ViewModels
                 CurrentSystemTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _systemTimeTimer.Start();
         }
-        /***
-         * 退出应用程序
-         */
+        // 执行应用程序退出流程。
         private void ExecuteExitApplication()
         {
             MessageBoxResult result = MessageBox.Show(
@@ -76,7 +82,10 @@ namespace ZNQInterface.ViewModels
             Application.Current.Shutdown();
         }
 
-        public IReadOnlyList<NavigationItem> NavigationItems { get; }//导航项列表
+        /// <summary>
+        /// 页面导航项集合。
+        /// </summary>
+        public IReadOnlyList<NavigationItem> NavigationItems { get; }
 
         public string Title
         {
@@ -84,7 +93,10 @@ namespace ZNQInterface.ViewModels
             set => SetProperty(ref _title, value);
         }
 
-        public NavigationItem SelectedNavigationItem//选中的导航项
+        /// <summary>
+        /// 当前选中的导航项。
+        /// </summary>
+        public NavigationItem SelectedNavigationItem
         {
             get => _selectedNavigationItem;
             set
@@ -101,12 +113,18 @@ namespace ZNQInterface.ViewModels
             }
         }
 
-        public string CurrentSystemTime//当前系统时间
+        /// <summary>
+        /// 当前系统时间。
+        /// </summary>
+        public string CurrentSystemTime
         {
             get => _currentSystemTime;
             private set => SetProperty(ref _currentSystemTime, value);
         }
 
-        public DelegateCommand ExitApplicationCommand { get; }//退出应用程序命令
+        /// <summary>
+        /// 退出应用程序命令。
+        /// </summary>
+        public DelegateCommand ExitApplicationCommand { get; }
     }
 }

@@ -4,7 +4,7 @@
 
     <!-- 通用标题面板 -->
     <Style x:Key="TitledPanelStyle"
-           TargetType="{x:Type HeaderedContentControl}">
+        TargetType="{x:Type HeaderedContentControl}">
 
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#FFE5E7EB"/>
@@ -18,10 +18,10 @@
                 <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
 
                     <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
-                            Padding="{TemplateBinding Padding}">
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4"
+                        Padding="{TemplateBinding Padding}">
 
                         <Grid>
                             <Grid.RowDefinitions>
@@ -29,22 +29,22 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <!-- 左上角标题 -->
-                            <TextBlock Grid.Row="0"
-                                       Text="{TemplateBinding Header}"
-                                       Margin="0,0,0,5"
-                                       FontSize="15"
-                                       FontWeight="Bold"
-                                       Foreground="Black"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Top"/>
-
-                            <!-- 面板主要内容 -->
+                            <!-- 标题区域：支持文字或自定义布局 -->
+                            <!-- 标题区域：支持文字或自定义布局 -->
+                            <ContentPresenter Grid.Row="0"
+                                ContentSource="Header"
+                                Margin="0,0,0,5"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                TextElement.FontSize="15"
+                                TextElement.FontWeight="Bold"
+                                TextElement.Foreground="Black"/>
+                            <!-- 面板主要内容区域 -->
                             <ContentPresenter Grid.Row="1"
-                                              Content="{TemplateBinding Content}"
-                                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
                         </Grid>
                     </Border>

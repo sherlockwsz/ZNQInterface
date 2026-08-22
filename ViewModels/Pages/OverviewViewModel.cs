@@ -4,6 +4,9 @@ using ZNQInterface.ViewModels.Components;
 
 namespace ZNQInterface.ViewModels.Pages
 {
+    /// <summary>
+    /// 设备总览页面的实时检测模块。
+    /// </summary>
     public class OverviewViewModel : BindableBase
     {
         /// <summary>
@@ -11,6 +14,7 @@ namespace ZNQInterface.ViewModels.Pages
         /// </summary>
         public ScrewAngleMonitorViewModel ScrewAngleMonitor { get; } =
             ScrewAngleMonitorViewModel.CreatePreview();
+
         /// <summary>
         /// 同轴度实时检测模块。
         /// </summary>

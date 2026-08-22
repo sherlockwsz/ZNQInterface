@@ -13,6 +13,8 @@ namespace ZNQInterface.ViewModels.Components
         private double? _yDeviation;
         private double? _coaxiality;
         private bool? _isQualified;
+
+        // 同轴度检测结果属性
         /// <summary>
         /// 同轴度实时检测图像。
         /// </summary>

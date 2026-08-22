@@ -1,0 +1,77 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- DataGrid统一表头样式 -->
+    <Style x:Key="CommonDataGridHeaderStyle"
+        TargetType="{x:Type DataGridColumnHeader}">
+
+        <Setter Property="Height"
+            Value="46"/>
+
+        <Setter Property="FontSize"
+            Value="18"/>
+
+        <Setter Property="FontWeight"
+            Value="SemiBold"/>
+
+        <Setter Property="Foreground"
+            Value="#FF111827"/>
+
+        <Setter Property="Background"
+            Value="#FFF3F4F6"/>
+
+        <Setter Property="HorizontalContentAlignment"
+            Value="Center"/>
+
+        <Setter Property="VerticalContentAlignment"
+            Value="Center"/>
+
+        <Setter Property="BorderBrush"
+            Value="#FFE5E7EB"/>
+
+        <Setter Property="BorderThickness"
+            Value="0,0,1,1"/>
+    </Style>
+
+    <!-- 日期时间、编号、数值等居中显示 -->
+    <Style x:Key="CommonDataGridCenterTextStyle"
+        TargetType="{x:Type TextBlock}">
+
+        <Setter Property="FontSize"
+            Value="16"/>
+
+        <Setter Property="HorizontalAlignment"
+            Value="Stretch"/>
+
+        <Setter Property="VerticalAlignment"
+            Value="Center"/>
+
+        <Setter Property="TextAlignment"
+            Value="Center"/>
+    </Style>
+
+    <!-- 报警信息、日志信息等左对齐显示 -->
+    <Style x:Key="CommonDataGridMessageTextStyle"
+        TargetType="{x:Type TextBlock}">
+
+        <Setter Property="Margin"
+            Value="16,0"/>
+
+        <Setter Property="FontSize"
+            Value="16"/>
+
+        <Setter Property="HorizontalAlignment"
+            Value="Stretch"/>
+
+        <Setter Property="VerticalAlignment"
+            Value="Center"/>
+
+        <Setter Property="TextAlignment"
+            Value="Left"/>
+
+        <Setter Property="TextWrapping"
+            Value="Wrap"/>
+    </Style>
+
+</ResourceDictionary>

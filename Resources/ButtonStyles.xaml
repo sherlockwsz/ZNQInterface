@@ -3,11 +3,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        按钮内部公共样式。
-        页面中不直接使用，只供普通按钮和状态按钮继承。
+    按钮内部公共样式。
+    页面中不直接使用，只供普通按钮和状态按钮继承。
     -->
     <Style x:Key="ButtonBaseStyle"
-           TargetType="{x:Type ButtonBase}">
+        TargetType="{x:Type ButtonBase}">
 
         <!-- 自适应尺寸 -->
         <Setter Property="MinWidth" Value="80"/>
@@ -39,11 +39,11 @@
                 <ControlTemplate TargetType="{x:Type ButtonBase}">
 
                     <Border x:Name="ButtonBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}"
-                            CornerRadius="4">
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        CornerRadius="4">
 
                         <!-- 按钮文字或其他内容 -->
                         <ContentPresenter
@@ -58,34 +58,34 @@
 
                         <!-- 鼠标悬停：按钮轻微透明 -->
                         <Trigger Property="IsMouseOver"
-                                 Value="True">
+                            Value="True">
 
                             <Setter TargetName="ButtonBorder"
-                                    Property="Opacity"
-                                    Value="0.85"/>
+                                Property="Opacity"
+                                Value="0.85"/>
 
                         </Trigger>
 
                         <!-- 鼠标按下：透明度进一步降低 -->
                         <Trigger Property="IsPressed"
-                                 Value="True">
+                            Value="True">
 
                             <Setter TargetName="ButtonBorder"
-                                    Property="Opacity"
-                                    Value="0.70"/>
+                                Property="Opacity"
+                                Value="0.70"/>
 
                         </Trigger>
 
                         <!-- 按钮不可用 -->
                         <Trigger Property="IsEnabled"
-                                 Value="False">
+                            Value="False">
 
                             <Setter TargetName="ButtonBorder"
-                                    Property="Opacity"
-                                    Value="0.45"/>
+                                Property="Opacity"
+                                Value="0.45"/>
 
                             <Setter Property="Cursor"
-                                    Value="Arrow"/>
+                                Value="Arrow"/>
 
                         </Trigger>
 
@@ -98,12 +98,12 @@
 
     <!-- 第一种：普通按钮 -->
     <Style x:Key="NormalButtonStyle"
-           TargetType="{x:Type Button}"
-           BasedOn="{StaticResource ButtonBaseStyle}"/>
+        TargetType="{x:Type Button}"
+        BasedOn="{StaticResource ButtonBaseStyle}"/>
 
     <!-- 第二种：可以保持切换状态的按钮 -->
     <Style x:Key="ToggleStateButtonStyle"
-           TargetType="{x:Type ToggleButton}"
-           BasedOn="{StaticResource ButtonBaseStyle}"/>
+        TargetType="{x:Type ToggleButton}"
+        BasedOn="{StaticResource ButtonBaseStyle}"/>
 
 </ResourceDictionary>
