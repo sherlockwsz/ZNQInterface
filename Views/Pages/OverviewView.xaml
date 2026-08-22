@@ -7,6 +7,30 @@
     xmlns:controls="clr-namespace:ZNQInterface.Controls"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+
+        <!-- 料位矩阵行号、列号样式 -->
+        <Style x:Key="SlotCoordinateTextStyle"
+           TargetType="{x:Type TextBlock}">
+
+            <Setter Property="FontSize"
+                Value="13"/>
+
+            <Setter Property="FontWeight"
+                Value="SemiBold"/>
+
+            <Setter Property="Foreground"
+                Value="#FF374151"/>
+
+            <Setter Property="HorizontalAlignment"
+                Value="Center"/>
+
+            <Setter Property="VerticalAlignment"
+                Value="Center"/>
+        </Style>
+
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -29,48 +53,494 @@
                 </Grid.RowDefinitions>
 
                 <!--料位状态-->
-                <HeaderedContentControl Grid.Row="0"
-                    Header="料位状态"
-                    Style="{StaticResource TitledPanelStyle}"
-                    Margin="0,0,1,0">
+                <HeaderedContentControl Style="{StaticResource TitledPanelStyle}">
+                    <!-- 自定义标题栏 -->
+                    <HeaderedContentControl.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="主要内容"
-                        FontSize="16"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+                            <!-- 左侧标题 -->
+                            <TextBlock Grid.Column="0"
+                       Text="料位状态"
+                       FontSize="15"
+                       FontWeight="Bold"
+                       Foreground="Black"
+                       VerticalAlignment="Center"/>
 
+                            <!-- 右侧当前调整层 -->
+                            <TextBlock Grid.Column="1"
+                       Margin="12,0,4,0"
+                       FontSize="14"
+                       FontWeight="Normal"
+                       Foreground="Black"
+                       VerticalAlignment="Center">
+
+                <Run Text="当前调整：第3"/>
+                <Run Text="{Binding CurrentAdjustmentLayer,
+                                    Mode=OneWay}"/>
+                <Run Text="层"/>
+                            </TextBlock>
+                        </Grid>
+                    </HeaderedContentControl.Header>
+                    <!-- 料位状态主体：左侧料位矩阵，右侧信息区 -->
+                    <Grid>
+
+                        <Grid.ColumnDefinitions>
+                            <!-- 左侧占80% -->
+                            <ColumnDefinition Width="4*"/>
+
+                            <!-- 右侧占20% -->
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 左侧：A-D、1-6料位矩阵 -->
+                        <Border Grid.Column="0"
+                Margin="0,0,1,0"
+                Padding="1"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <!-- 顶部列号 -->
+                                    <RowDefinition Height="15"/>
+
+                                    <!-- 指示灯区域 -->
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <!-- 左侧行号 -->
+                                    <ColumnDefinition Width="15"/>
+
+                                    <!-- 料位矩阵 -->
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 左上角空白区域 -->
+                                <Border Grid.Row="0"
+                        Grid.Column="0"/>
+
+                                <!-- 顶部列号：1-6 -->
+                                <UniformGrid Grid.Row="0"
+                             Grid.Column="1"
+                             Rows="1"
+                             Columns="6"
+                            HorizontalAlignment="Stretch">
+
+                                    <TextBlock Text="1"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="2"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="3"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="4"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="5"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="6"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                </UniformGrid>
+
+                                <!-- 左侧行号：A-D -->
+                                <UniformGrid Grid.Row="1"
+                             Grid.Column="0"
+                             Rows="4"
+                             Columns="1"
+                             HorizontalAlignment="Stretch">
+
+                                    <TextBlock Text="A"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="B"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="C"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="D"
+                               Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                </UniformGrid>
+
+                                <!-- 24个料位指示灯 -->
+                                <ItemsControl Grid.Row="1"
+                              Grid.Column="1"
+                              ItemsSource="{Binding MaterialSlots}">
+
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="4"
+                                         Columns="6"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="1"
+                                    Padding="1"
+                                    Background="White"
+                                    BorderBrush="#FFE5E7EB"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    ToolTip="{Binding PositionCode}">
+
+                                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+
+                                                    <!-- 状态指示灯 -->
+                                                    <Ellipse Width="24"
+         Height="24"
+         StrokeThickness="2">
+
+                                                        <Ellipse.Style>
+                                                            <Style TargetType="{x:Type Ellipse}">
+                                                                <Setter Property="Fill"
+                    Value="#FF22C55E"/>
+
+                                                                <Setter Property="Stroke"
+                    Value="#FF15803D"/>
+
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsQualified}"
+                             Value="False">
+                                                                        <Setter Property="Fill"
+                            Value="#FFEF4444"/>
+
+                                                                        <Setter Property="Stroke"
+                            Value="#FFB91C1C"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Ellipse.Style>
+                                                    </Ellipse>
+
+                                                    <!-- 指示灯下方状态文字 -->
+                                                    <TextBlock Margin="0,4,0,0"
+                                               Text="{Binding StatusText}"
+                                               FontSize="12"
+                                               Foreground="#FF374151"
+                                               HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+
+                        <!-- 右侧：状态统计区域 -->
+                        <Border Grid.Column="1"
+                Margin="6,0,0,0"
+                Padding="10"
+                Background="#FFF9FAFB"
+                BorderBrush="#FFE5E7EB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                            <StackPanel>
+                                <TextBlock Text="料位统计"
+                           Margin="0,0,0,12"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+
+                                <TextBlock Text="总料位:24"
+                           Margin="0,4"
+                           FontSize="14"/>
+
+                                <TextBlock Text="合格:24"
+                           Margin="0,4"
+                           FontSize="14"
+                           Foreground="#FF16A34A"/>
+
+                                <TextBlock Text="不合格:0"
+                           Margin="0,4"
+                           FontSize="14"
+                           Foreground="#FFDC2626"/>
+
+                                <TextBlock Text="当前调整:1-A5"
+                           Margin="0,4"
+                           FontSize="14"
+                           Foreground="Blue"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </HeaderedContentControl>
+                <!-- 不合格料位状态 -->
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
                     <!--不合格料位-->
+
                     <HeaderedContentControl Grid.Column="0"
-                        Header="不合格料位"
-                        Style="{StaticResource TitledPanelStyle}"
-                        Margin="1,0,0,0">
+                    Header="不合格料位"
+                    Style="{StaticResource TitledPanelStyle}"
+                    Margin="1,0,0,0">
 
-                        <TextBlock Text="主要内容"
-                            FontSize="16"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+                        <!-- 不合格料位矩阵 -->
+                        <Border Margin="0,0,1,0"
+        Padding="1"
+        BorderThickness="1"
+        CornerRadius="4">
 
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <!-- 顶部列号 -->
+                                    <RowDefinition Height="15"/>
+
+                                    <!-- 指示灯矩阵 -->
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <!-- 左侧行号 -->
+                                    <ColumnDefinition Width="15"/>
+
+                                    <!-- 料位矩阵 -->
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 左上角空白 -->
+                                <Border Grid.Row="0"
+                Grid.Column="0"/>
+
+                                <!-- 顶部列号：1-6 -->
+                                <UniformGrid Grid.Row="0"
+                        Grid.Column="1"
+                        Rows="1"
+                        Columns="6"
+                        HorizontalAlignment="Stretch">
+
+                                    <TextBlock Text="1"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="2"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="3"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="4"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="5"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="6"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                </UniformGrid>
+
+                                <!-- 左侧行号：A-D -->
+                                <UniformGrid Grid.Row="1"
+                        Grid.Column="0"
+                        Rows="4"
+                        Columns="1"
+                        HorizontalAlignment="Stretch">
+
+                                    <TextBlock Text="A"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="B"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="C"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+
+                                    <TextBlock Text="D"
+                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                </UniformGrid>
+
+                                <!-- 24个不合格料位 -->
+                                <ItemsControl Grid.Row="1"
+                        Grid.Column="1"
+                        ItemsSource="{Binding UnqualifiedMaterialSlots}">
+
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="4"
+                                    Columns="6"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="1"
+                            Padding="1"
+                            Background="White"
+                            BorderBrush="#FFE5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            ToolTip="{Binding PositionCode}">
+
+                                                <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+
+                                                    <!-- 不合格状态指示灯 -->
+                                                    <Ellipse Width="24"
+                                        Height="24"
+                                        StrokeThickness="2">
+
+                                                        <Ellipse.Style>
+                                                            <Style TargetType="{x:Type Ellipse}">
+                                                                <!-- 默认绿色 -->
+                                                                <Setter Property="Fill"
+                                                Value="#FF22C55E"/>
+
+                                                                <Setter Property="Stroke"
+                                                Value="#FF15803D"/>
+
+                                                                <Style.Triggers>
+                                                                    <!-- 不合格显示红色 -->
+                                                                    <DataTrigger Binding="{Binding IsQualified}"
+                                                            Value="False">
+                                                                        <Setter Property="Fill"
+                                                        Value="#FFEF4444"/>
+
+                                                                        <Setter Property="Stroke"
+                                                        Value="#FFB91C1C"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Ellipse.Style>
+                                                    </Ellipse>
+
+                                                    <!-- 指示灯下方状态文字 -->
+                                                    <TextBlock Margin="0,4,0,0"
+                                        Text="{Binding StatusText}"
+                                        FontSize="12"
+                                        Foreground="#FF374151"
+                                        HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
                     </HeaderedContentControl>
 
-                    <!--缓冲料位-->
+
+                    <!-- 缓冲料位 -->
                     <HeaderedContentControl Grid.Column="1"
                         Header="缓冲料位"
                         Style="{StaticResource TitledPanelStyle}"
                         Margin="1,0,0,0">
 
-                        <TextBlock Text="主要内容"
-                            FontSize="16"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+                        <!-- 四个缓冲料位垂直排列 -->
+                        <UniformGrid Rows="4"
+                 Columns="1">
 
+                            <!-- 缓冲料位1 -->
+                            <Border Margin="1"
+                Padding="1"
+                Background="White"
+                BorderBrush="#FFE5E7EB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                                <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                                    <Ellipse Width="24"
+                         Height="24"
+                         Fill="#FF22C55E"
+                         Stroke="#FF15803D"
+                         StrokeThickness="2"/>
+
+                                    <TextBlock Margin="0,4,0,0"
+                           Text="合格"
+                           FontSize="12"
+                           Foreground="#FF374151"
+                           HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 缓冲料位2 -->
+                            <Border Margin="1"
+                Padding="1"
+                Background="White"
+                BorderBrush="#FFE5E7EB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                                <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                                    <Ellipse Width="24"
+                         Height="24"
+                         Fill="Gray"
+                         Stroke="Gray"
+                         StrokeThickness="2"/>
+
+                                    <TextBlock Margin="0,4,0,0"
+                           Text="空"
+                           FontSize="12"
+                           Foreground="#FF374151"
+                           HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 缓冲料位3 -->
+                            <Border Margin="1"
+                Padding="1"
+                Background="White"
+                BorderBrush="#FFE5E7EB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                                <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                                    <Ellipse Width="24"
+                         Height="24"
+                         Fill="Gray"
+                         Stroke="Gray"
+                         StrokeThickness="2"/>
+
+                                    <TextBlock Margin="0,4,0,0"
+                           Text="空"
+                           FontSize="12"
+                           Foreground="#FF374151"
+                           HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 缓冲料位4 -->
+                            <Border Margin="1"
+                Padding="1"
+                Background="White"
+                BorderBrush="#FFE5E7EB"
+                BorderThickness="1"
+                CornerRadius="4">
+
+                                <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                                    <Ellipse Width="24"
+                         Height="24"
+                         Fill="Gray"
+                         Stroke="Gray"
+                         StrokeThickness="2"/>
+
+                                    <TextBlock Margin="0,4,0,0"
+                           Text="空"
+                           FontSize="12"
+                           Foreground="#FF374151"
+                           HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
                     </HeaderedContentControl>
-
                 </Grid>
 
             </Grid>
@@ -89,10 +559,242 @@
                     Style="{StaticResource TitledPanelStyle}"
                     Margin="0,0,1,0">
 
-                    <TextBlock Text="主要内容"
-                        FontSize="16"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+                    <!-- 五层料仓状态 -->
+                    <Grid Margin="1">
+
+                        <Grid.RowDefinitions>
+                            <!-- 最上层：第五层 -->
+                            <RowDefinition Height="1*"/>
+
+                            <!-- 第四层 -->
+                            <RowDefinition Height="1*"/>
+
+                            <!-- 第三层 -->
+                            <RowDefinition Height="1*"/>
+
+                            <!-- 第二层 -->
+                            <RowDefinition Height="1*"/>
+
+                            <!-- 最下层：第一层 -->
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 第五层：已调整 -->
+                        <Border Grid.Row="0"
+            Margin="1"
+            Padding="4,1"
+            Background="White"
+            BorderBrush="#FF22C55E"
+            BorderThickness="1"
+            CornerRadius="4">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <!-- 层号 -->
+                                    <ColumnDefinition Width="30"/>
+
+                                    <!-- 指示灯 -->
+                                    <ColumnDefinition Width="Auto"/>
+
+                                    <!-- 状态文字 -->
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                       Text="五层"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#FF374151"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                                <Ellipse Grid.Column="1"
+                     Width="24"
+                     Height="24"
+                     Margin="8,0"
+                     Fill="#FF22C55E"
+                     Stroke="#FF22C55E"
+                     StrokeThickness="2"
+                     VerticalAlignment="Center"
+                                         HorizontalAlignment="Left"/>
+
+                                <TextBlock Grid.Column="2"
+                       Text="已调整"
+                       FontSize="13"
+                       Foreground="#FF16A34A"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 第四层：已调整 -->
+                        <Border Grid.Row="1"
+            Margin="1"
+            Padding="4,1"
+            Background="White"
+            BorderBrush="#FF22C55E"
+            BorderThickness="1"
+            CornerRadius="4">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                       Text="四层"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#FF374151"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                                <Ellipse Grid.Column="1"
+                     Width="24"
+                     Height="24"
+                     Margin="8,0"
+                     Fill="#FF22C55E"
+                     Stroke="#FF22C55E"
+                     StrokeThickness="2"
+                     VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="2"
+                       Text="已调整"
+                       FontSize="13"
+                       Foreground="#FF16A34A"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 第三层：调整中 -->
+                        <Border Grid.Row="2"
+            Margin="1"
+            Padding="4,1"
+            Background="White"
+            BorderBrush="#FF3B82F6"
+            BorderThickness="1"
+            CornerRadius="4">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                       Text="三层"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#FF374151"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                                <Ellipse Grid.Column="1"
+                     Width="24"
+                     Height="24"
+                     Margin="8,0"
+                     Fill="#FF3B82F6"
+                     Stroke="#FF3B82F6"
+                     StrokeThickness="2"
+                     VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="2"
+                       Text="调整中"
+                       FontSize="13"
+                       Foreground="#FF2563EB"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 第二层：未调整 -->
+                        <Border Grid.Row="3"
+            Margin="1"
+            Padding="4,1"
+            Background="White"
+            BorderBrush="#FFF59E0B"
+            BorderThickness="1"
+            CornerRadius="4">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                       Text="二层"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#FF374151"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                                <Ellipse Grid.Column="1"
+                     Width="24"
+                     Height="24"
+                     Margin="8,0"
+                     Fill="#FFF59E0B"
+                     Stroke="#FFF59E0B"
+                     StrokeThickness="2"
+                     VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="2"
+                       Text="未调整"
+                       FontSize="13"
+                       Foreground="#FFD97706"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 第一层：未调整，位于最下方 -->
+                        <Border Grid.Row="4"
+            Margin="1"
+            Padding="4,1"
+            Background="White"
+            BorderBrush="#FFF59E0B"
+            BorderThickness="1"
+            CornerRadius="4">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                       Text="一层"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#FF374151"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                                <Ellipse Grid.Column="1"
+                     Width="24"
+                     Height="24"
+                     Margin="8,0"
+                     Fill="#FFF59E0B"
+                     Stroke="#FFF59E0B"
+                     StrokeThickness="2"
+                     VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="2"
+                       Text="未调整"
+                       FontSize="13"
+                       Foreground="#FFD97706"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
 
                 </HeaderedContentControl>
 
