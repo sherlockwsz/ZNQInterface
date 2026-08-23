@@ -42,7 +42,28 @@ namespace ZNQInterface.ViewModels.Pages
                             isQualified: false));
                 }
             }
+            LoadingProcess.LoadFromFile(
+                @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\LoadingProcess.txt");
+
+            AdjustmentProcess.LoadFromFile(
+                @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\AdjustmentProcess.txt");
+
         }
+        /// <summary>
+        /// 上下料流程显示内容。
+        /// </summary>
+        public ProcessTextViewModel LoadingProcess
+        {
+            get;
+        } = new ProcessTextViewModel();
+
+        /// <summary>
+        /// 同轴度调整流程显示内容。
+        /// </summary>
+        public ProcessTextViewModel AdjustmentProcess
+        {
+            get;
+        } = new ProcessTextViewModel();
 
         /// <summary>
         /// A1～D6共24个料位

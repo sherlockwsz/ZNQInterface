@@ -967,7 +967,8 @@
                     Style="{StaticResource TitledPanelStyle}"
                     Margin="0,0,1,0">
 
-                    <TextBox Text="{Binding LoadingProcessText}"
+                    <TextBox Text="{Binding LoadingProcess.Text,
+                        Mode=OneWay}"
                         IsReadOnly="True"
                         TextWrapping="Wrap"
                         AcceptsReturn="True"
@@ -984,7 +985,8 @@
                     Style="{StaticResource TitledPanelStyle}"
                     Margin="1,0,0,0">
 
-                    <TextBox Text="{Binding AdjustmentProcessText}"
+                    <TextBox Text="{Binding AdjustmentProcess.Text,
+                        Mode=OneWay}"
                         IsReadOnly="True"
                         TextWrapping="Wrap"
                         AcceptsReturn="True"
