@@ -1,8 +1,10 @@
-﻿using Prism.Mvvm;
-using System.Linq;
+﻿using Prism.Commands;
+using Prism.Mvvm;
+using System;
 using System.Collections.ObjectModel;
-using ZNQInterface.ViewModels.Pages.Axis;
+using System.Linq;
 using ZNQInterface.ViewModels.Components;
+using ZNQInterface.ViewModels.Pages.Axis;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -23,6 +25,9 @@ namespace ZNQInterface.ViewModels.Pages
         public ManualControlViewModel()
         {
             DebugInput = new AxisDebugInputViewModel();
+
+            RelativeMoveCommand =
+                new DelegateCommand<double?>(ExecuteRelativeMove);
 
             // 阻尼器上下料轴。
             DamperLoadingAxes = new ObservableCollection<AxisItemViewModel>
@@ -48,7 +53,12 @@ namespace ZNQInterface.ViewModels.Pages
                     IsCommunicationOk = false,
                     PositiveLimit = true,
                     NegativeLimit = false,
-                    HasFault = true
+                    HasFault = true,
+                    RelativeButton1Text = "前移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "后移",
+                    RelativeButton2Factor = -1.0
                 },
                 // Y轴模拟
                 new AxisItemViewModel
@@ -69,7 +79,13 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "定位中",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "左移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "右移",
+                    RelativeButton2Factor = -1.0
+
                 },
                 // Z轴模拟
                 new AxisItemViewModel
@@ -90,7 +106,13 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "上移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "下移",
+                    RelativeButton2Factor = -1.0
+
                 },
                 // 转轴
                 new AxisItemViewModel
@@ -110,7 +132,13 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "顺时针",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "逆时针",
+                    RelativeButton2Factor = -1.0
+
                 },
 
                 // 夹爪
@@ -132,7 +160,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "夹紧",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "松开",
+                    RelativeButton2Factor = -1.0
                 }
 
             };
@@ -158,7 +191,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "前移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "后移",
+                    RelativeButton2Factor = -1.0
                 },
                 // Y轴
                 new AxisItemViewModel
@@ -179,7 +217,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "左移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "右移",
+                    RelativeButton2Factor = -1.0
                 }
 
             };
@@ -204,7 +247,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "顺时针",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "逆时针",
+                    RelativeButton2Factor = -1.0
                 },
 
                 // 夹爪
@@ -226,7 +274,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "上移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "下移",
+                    RelativeButton2Factor = -1.0
                 }
 
             };
@@ -252,7 +305,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "前移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "后移",
+                    RelativeButton2Factor = -1.0
                 },
                 // Y
                 new AxisItemViewModel
@@ -273,7 +331,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "左移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "右移",
+                    RelativeButton2Factor = -1.0
                 },
                 // Z
                 new AxisItemViewModel
@@ -294,7 +357,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "上移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "下移",
+                    RelativeButton2Factor = -1.0
                 },
 
             };
@@ -319,7 +387,13 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "左移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "右移",
+                    RelativeButton2Factor = -1.0
+
                 },
                 // Z轴模拟
                 new AxisItemViewModel
@@ -339,7 +413,12 @@ namespace ZNQInterface.ViewModels.Pages
                     MotionStatus = "已到位",
                     IsEnabled = false,
                     IsHomed = false,
-                    IsCommunicationOk = true
+                    IsCommunicationOk = true,
+                    RelativeButton1Text = "上移",
+                    RelativeButton1Factor = 1.0,
+
+                    RelativeButton2Text = "下移",
+                    RelativeButton2Factor = -1.0
                 }
 
             };
@@ -347,7 +426,48 @@ namespace ZNQInterface.ViewModels.Pages
             // 默认选中第一根轴。
             SelectedAxis = DamperLoadingAxes.FirstOrDefault();
         }
+        /// <summary>
+        /// 相对运动命令。
+        /// 参数为运动方向系数：1.0或-1.0。
+        /// </summary>
+        public DelegateCommand<double?> RelativeMoveCommand
+        {
+            get;
+        }
+        private void ExecuteRelativeMove(double? directionFactor)
+        {
+            if (SelectedAxis == null ||
+                directionFactor == null)
+            {
+                return;
+            }
 
+            // 读取用户输入的相对距离
+            if (!double.TryParse(
+                DebugInput.RelativeDistanceText,
+                out double inputDistance))
+            {
+                return;
+            }
+
+            // 输入框只表示距离大小，正负方向由按钮决定
+            double targetDistance =
+                Math.Abs(inputDistance) *
+                directionFactor.Value;
+
+            /*
+            后续通过ADS发送：
+
+            1. 当前选中的轴 SelectedAxis
+            2. 相对运动距离 targetDistance
+            3. 相对运动触发命令
+
+            例如：
+            _axisService.MoveRelative(
+                SelectedAxis.AxisIndex,
+                targetDistance);
+            */
+        }
         // 各功能组轴集合。
         public ObservableCollection<AxisItemViewModel> DamperLoadingAxes { get; }
         public ObservableCollection<AxisItemViewModel> TrayLoadingAxes { get; }

@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:ZNQInterface.Views.Pages"
     xmlns:controls="clr-namespace:ZNQInterface.Controls"
     mc:Ignorable="d"
-    d:DesignHeight="450" d:DesignWidth="800">
+    d:DesignHeight="960" d:DesignWidth="1920">
     <UserControl.Resources>
 
         <!-- 料位矩阵行号、列号样式 -->
@@ -70,19 +70,18 @@
                        Foreground="Black"
                        VerticalAlignment="Center"/>
 
-                            <!-- 右侧当前调整层 -->
+                            <!--
+                            右侧当前调整层。
+                            当前阶段仅完成 XAML 界面，因此先显示示例值“第3层”；
+                            后续接入 ViewModel 时，只需把 Text 改为对应 Binding。
+                            -->
                             <TextBlock Grid.Column="1"
-                       Margin="12,0,4,0"
-                       FontSize="14"
-                       FontWeight="Normal"
-                       Foreground="Black"
-                       VerticalAlignment="Center">
-
-                <Run Text="当前调整：第3"/>
-                <Run Text="{Binding CurrentAdjustmentLayer,
-                                    Mode=OneWay}"/>
-                <Run Text="层"/>
-                            </TextBlock>
+                                Margin="12,0,4,0"
+                                Text="当前调整：第3层"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Foreground="#FF2563EB"
+                                VerticalAlignment="Center"/>
                         </Grid>
                     </HeaderedContentControl.Header>
                     <!-- 料位状态主体：左侧料位矩阵，右侧信息区 -->
@@ -252,21 +251,21 @@
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"/>
 
-                                <TextBlock Text="总料位:24"
+                                <TextBlock Text="总料位：24"
                            Margin="0,4"
                            FontSize="14"/>
 
-                                <TextBlock Text="合格:24"
+                                <TextBlock Text="合格：24"
                            Margin="0,4"
                            FontSize="14"
                            Foreground="#FF16A34A"/>
 
-                                <TextBlock Text="不合格:0"
+                                <TextBlock Text="不合格：0"
                            Margin="0,4"
                            FontSize="14"
                            Foreground="#FFDC2626"/>
 
-                                <TextBlock Text="当前调整:1-A5"
+                                <TextBlock Text="当前调整：1-A5"
                            Margin="0,4"
                            FontSize="14"
                            Foreground="Blue"/>
@@ -908,7 +907,7 @@
                         ClipToBounds="True">
 
                         <!-- 第一层：实时图像 -->
-                        <Image Source="{Binding ScrewAngleImage.Image}"
+                        <Image Source="{Binding ScrewAngleMonitor.Image}"
                             Stretch="Uniform"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"/>
@@ -918,7 +917,20 @@
                             FontSize="15"
                             Foreground="#FF9CA3AF"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+                            VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <!-- 已有图像时隐藏占位文字，避免文字覆盖实时画面。 -->
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ScrewAngleMonitor.Image}"
+                                            Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                         <!-- 第二层：左下角角度信息 -->
                         <Border Panel.ZIndex="10"
@@ -1026,7 +1038,20 @@
                             FontSize="16"
                             Foreground="#FF9CA3AF"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+                            VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <!-- 已有图像时隐藏占位文字，避免文字覆盖实时画面。 -->
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CoaxialityMonitor.Image}"
+                                            Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                         <!-- 第二层：底部同轴度数据 -->
                         <Border Panel.ZIndex="10"

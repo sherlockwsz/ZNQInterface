@@ -30,7 +30,6 @@
                             </Grid.RowDefinitions>
 
                             <!-- 标题区域：支持文字或自定义布局 -->
-                            <!-- 标题区域：支持文字或自定义布局 -->
                             <ContentPresenter Grid.Row="0"
                                 ContentSource="Header"
                                 Margin="0,0,0,5"

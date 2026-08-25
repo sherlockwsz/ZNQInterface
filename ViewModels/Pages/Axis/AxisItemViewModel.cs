@@ -68,5 +68,28 @@ namespace ZNQInterface.ViewModels.Pages.Axis
             get => _displayName;
             set => SetProperty(ref _displayName, value);
         }
+        /// <summary>
+        /// 相对运动第一个方向按钮显示文字。
+        /// 例如：前移、左移、上移、正转。
+        /// </summary>
+        public string RelativeButton1Text { get; set; } = "正向运动";
+
+        /// <summary>
+        /// 第一个按钮对应的坐标方向。
+        /// 1表示坐标正方向，-1表示坐标负方向。
+        /// </summary>
+        public double RelativeButton1Factor { get; set; } = 1.0;
+
+        /// <summary>
+        /// 相对运动第二个方向按钮显示文字。
+        /// 例如：后移、右移、下移、反转。
+        /// </summary>
+        public string RelativeButton2Text { get; set; } = "负向运动";
+
+        /// <summary>
+        /// 第二个按钮对应的坐标方向。
+        /// </summary>
+        public double RelativeButton2Factor { get; set; } = -1.0;
+
     }
 }
