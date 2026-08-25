@@ -1,0 +1,132 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:slotModels=
+    "clr-namespace:ZNQInterface.ViewModels.Components.MaterialSlots">
+
+    <!--
+    料位状态指示灯样式。
+
+    ViewModel负责提供State；
+    该样式负责将不同State显示为不同颜色。
+    -->
+    <Style x:Key="MaterialSlotIndicatorStyle"
+        TargetType="{x:Type Ellipse}">
+
+        <!-- 所有料位指示灯的公共外观 -->
+        <Setter Property="Width"
+            Value="24"/>
+
+        <Setter Property="Height"
+            Value="24"/>
+
+        <Setter Property="StrokeThickness"
+            Value="2"/>
+
+        <!-- 未知状态时的默认颜色 -->
+        <Setter Property="Fill"
+            Value="#FF6B7280"/>
+
+        <Setter Property="Stroke"
+            Value="#FF374151"/>
+
+        <Style.Triggers>
+
+            <!-- 空料位：灰色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Empty}">
+
+                <Setter Property="Fill"
+                    Value="#FF9CA3AF"/>
+
+                <Setter Property="Stroke"
+                    Value="#FF6B7280"/>
+            </DataTrigger>
+
+            <!-- 等待检测：黄色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Waiting}">
+
+                <Setter Property="Fill"
+                    Value="#FFF59E0B"/>
+
+                <Setter Property="Stroke"
+                    Value="#FFD97706"/>
+            </DataTrigger>
+
+            <!-- 检测中：蓝色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Inspecting}">
+
+                <Setter Property="Fill"
+                    Value="#FF3B82F6"/>
+
+                <Setter Property="Stroke"
+                    Value="#FF1D4ED8"/>
+            </DataTrigger>
+
+            <!-- 合格：绿色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Qualified}">
+
+                <Setter Property="Fill"
+                    Value="#FF22C55E"/>
+
+                <Setter Property="Stroke"
+                    Value="#FF15803D"/>
+            </DataTrigger>
+
+            <!-- 不合格：红色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Unqualified}">
+
+                <Setter Property="Fill"
+                    Value="#FFEF4444"/>
+
+                <Setter Property="Stroke"
+                    Value="#FFB91C1C"/>
+            </DataTrigger>
+
+            <!-- 人工调整：紫色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.ManualAdjusting}">
+
+                <Setter Property="Fill"
+                    Value="#FF8B5CF6"/>
+
+                <Setter Property="Stroke"
+                    Value="#FF6D28D9"/>
+            </DataTrigger>
+
+            <!-- 异常：深红色 -->
+            <DataTrigger Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Fault}">
+
+                <Setter Property="Fill"
+                    Value="#FF991B1B"/>
+
+                <Setter Property="Stroke"
+                    Value="#FF7F1D1D"/>
+            </DataTrigger>
+
+        </Style.Triggers>
+    </Style>
+
+    <!-- 料位状态文字的公共样式 -->
+    <Style x:Key="MaterialSlotStatusTextStyle"
+        TargetType="{x:Type TextBlock}">
+
+        <Setter Property="Margin"
+            Value="0,4,0,0"/>
+
+        <Setter Property="FontSize"
+            Value="12"/>
+
+        <Setter Property="Foreground"
+            Value="#FF374151"/>
+
+        <Setter Property="HorizontalAlignment"
+            Value="Center"/>
+    </Style>
+
+</ResourceDictionary>

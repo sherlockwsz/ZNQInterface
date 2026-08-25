@@ -14,6 +14,10 @@
                 <ResourceDictionary Source="/Resources/DataGridStyles.xaml"/>
                 <ResourceDictionary Source="/Resources/PaginationStyles.xaml"/>
 
+                <!-- 料位状态指示灯样式 -->
+                <ResourceDictionary
+                    Source="/Resources/MaterialSlots/MaterialSlotStyles.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

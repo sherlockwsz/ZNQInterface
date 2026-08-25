@@ -1,47 +1,17 @@
-﻿using System.Collections.ObjectModel;
-using Prism.Mvvm;
+﻿using Prism.Mvvm;
 using ZNQInterface.ViewModels.Components;
+using ZNQInterface.ViewModels.Components.MaterialSlots;
 
 namespace ZNQInterface.ViewModels.Pages
 {
     /// <summary>
-    /// 设备总览页面
+    /// 设备总览页面。
+    /// 只负责组合各个相对独立的功能区域。
     /// </summary>
     public class OverviewViewModel : BindableBase
     {
         public OverviewViewModel()
         {
-            MaterialSlots =
-                new ObservableCollection<MaterialSlotViewModel>();
-            UnqualifiedMaterialSlots =
-    new ObservableCollection<MaterialSlotViewModel>();
-            string[] rowLabels =
-            {
-                "A",
-                "B",
-                "C",
-                "D"
-            };
-
-            foreach (string rowLabel in rowLabels)
-            {
-                for (int columnNumber = 1;
-                     columnNumber <= 6;
-                     columnNumber++)
-                {
-                    MaterialSlots.Add(
-                        new MaterialSlotViewModel(
-                            rowLabel,
-                            columnNumber,
-                            isQualified: true));
-                    // 不合格料位：暂时全部设置为不合格
-                    UnqualifiedMaterialSlots.Add(
-                        new MaterialSlotViewModel(
-                            rowLabel,
-                            columnNumber,
-                            isQualified: false));
-                }
-            }
             LoadingProcess.LoadFromFile(
                 @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\LoadingProcess.txt");
 
@@ -49,6 +19,15 @@ namespace ZNQInterface.ViewModels.Pages
                 @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\AdjustmentProcess.txt");
 
         }
+        /// <summary>
+        /// 设备总览页面的料位状态区域。
+        /// 主料位、不合格料位以及后续料位统计均由该对象管理。
+        /// </summary>
+        public MaterialSlotStatusViewModel MaterialSlotStatus
+        {
+            get;
+        } = new MaterialSlotStatusViewModel();
+
         /// <summary>
         /// 上下料流程显示内容。
         /// </summary>
@@ -64,22 +43,6 @@ namespace ZNQInterface.ViewModels.Pages
         {
             get;
         } = new ProcessTextViewModel();
-
-        /// <summary>
-        /// A1～D6共24个料位
-        /// </summary>
-        public ObservableCollection<MaterialSlotViewModel> MaterialSlots
-        {
-            get;
-        }
-        /// <summary>
-        /// 不合格料位A1～D6，共24个料位。
-        /// </summary>
-        public ObservableCollection<MaterialSlotViewModel>
-            UnqualifiedMaterialSlots
-        {
-            get;
-        }
         /// <summary>
         /// 螺钉角度实时检测模块
         /// </summary>

@@ -64,11 +64,11 @@
 
                             <!-- 左侧标题 -->
                             <TextBlock Grid.Column="0"
-                       Text="料位状态"
-                       FontSize="15"
-                       FontWeight="Bold"
-                       Foreground="Black"
-                       VerticalAlignment="Center"/>
+                               Text="料位状态"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="Black"
+                               VerticalAlignment="Center"/>
 
                             <!--
                             右侧当前调整层。
@@ -86,21 +86,19 @@
                     </HeaderedContentControl.Header>
                     <!-- 料位状态主体：左侧料位矩阵，右侧信息区 -->
                     <Grid>
-
                         <Grid.ColumnDefinitions>
                             <!-- 左侧占80% -->
                             <ColumnDefinition Width="4*"/>
-
                             <!-- 右侧占20% -->
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- 左侧：A-D、1-6料位矩阵 -->
                         <Border Grid.Column="0"
-                Margin="0,0,1,0"
-                Padding="1"
-                BorderThickness="1"
-                CornerRadius="4">
+                            Margin="0,0,1,0"
+                            Padding="1"
+                            BorderThickness="1"
+                            CornerRadius="4">
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -121,14 +119,14 @@
 
                                 <!-- 左上角空白区域 -->
                                 <Border Grid.Row="0"
-                        Grid.Column="0"/>
+                                    Grid.Column="0"/>
 
                                 <!-- 顶部列号：1-6 -->
                                 <UniformGrid Grid.Row="0"
-                             Grid.Column="1"
-                             Rows="1"
-                             Columns="6"
-                            HorizontalAlignment="Stretch">
+                                    Grid.Column="1"
+                                    Rows="1"
+                                    Columns="6"
+                                    HorizontalAlignment="Stretch">
 
                                     <TextBlock Text="1"
                                Style="{StaticResource SlotCoordinateTextStyle}"/>
@@ -151,10 +149,10 @@
 
                                 <!-- 左侧行号：A-D -->
                                 <UniformGrid Grid.Row="1"
-                             Grid.Column="0"
-                             Rows="4"
-                             Columns="1"
-                             HorizontalAlignment="Stretch">
+                                     Grid.Column="0"
+                                     Rows="4"
+                                     Columns="1"
+                                     HorizontalAlignment="Stretch">
 
                                     <TextBlock Text="A"
                                Style="{StaticResource SlotCoordinateTextStyle}"/>
@@ -171,62 +169,43 @@
 
                                 <!-- 24个料位指示灯 -->
                                 <ItemsControl Grid.Row="1"
-                              Grid.Column="1"
-                              ItemsSource="{Binding MaterialSlots}">
+                                    Grid.Column="1"
+                                    ItemsSource="{Binding MaterialSlotStatus.MaterialSlots}">
 
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <UniformGrid Rows="4"
-                                         Columns="6"/>
+                                                Columns="6"/>
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
 
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border Margin="1"
-                                    Padding="1"
-                                    Background="White"
-                                    BorderBrush="#FFE5E7EB"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
-                                    ToolTip="{Binding PositionCode}">
+                                                Padding="1"
+                                                Background="White"
+                                                BorderBrush="#FFE5E7EB"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                ToolTip="{Binding PositionCode}">
 
-                                                <StackPanel HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
+                                                <StackPanel
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
 
-                                                    <!-- 状态指示灯 -->
-                                                    <Ellipse Width="24"
-         Height="24"
-         StrokeThickness="2">
+                                                    <!--
+                                                    XAML只放置一个指示灯。
+                                                    指示灯根据当前料位的State自动选择颜色。
+                                                    -->
+                                                    <Ellipse
+                                                        Style="{StaticResource MaterialSlotIndicatorStyle}"
+                                                        ToolTip="{Binding ToolTipText}"/>
 
-                                                        <Ellipse.Style>
-                                                            <Style TargetType="{x:Type Ellipse}">
-                                                                <Setter Property="Fill"
-                    Value="#FF22C55E"/>
+                                                    <!-- 状态文字 -->
+                                                    <TextBlock
+                                                        Text="{Binding StatusText}"
+                                                        Style="{StaticResource MaterialSlotStatusTextStyle}"/>
 
-                                                                <Setter Property="Stroke"
-                    Value="#FF15803D"/>
-
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsQualified}"
-                             Value="False">
-                                                                        <Setter Property="Fill"
-                            Value="#FFEF4444"/>
-
-                                                                        <Setter Property="Stroke"
-                            Value="#FFB91C1C"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Ellipse.Style>
-                                                    </Ellipse>
-
-                                                    <!-- 指示灯下方状态文字 -->
-                                                    <TextBlock Margin="0,4,0,0"
-                                               Text="{Binding StatusText}"
-                                               FontSize="12"
-                                               Foreground="#FF374151"
-                                               HorizontalAlignment="Center"/>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>
@@ -237,38 +216,136 @@
 
                         <!-- 右侧：状态统计区域 -->
                         <Border Grid.Column="1"
-                Margin="6,0,0,0"
-                Padding="10"
-                Background="#FFF9FAFB"
-                BorderBrush="#FFE5E7EB"
-                BorderThickness="1"
-                CornerRadius="4">
+                            Margin="6,0,0,0"
+                            Padding="10"
+                            Background="#FFF9FAFB"
+                            BorderBrush="#FFE5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="4">
 
                             <StackPanel>
-                                <TextBlock Text="料位统计"
-                           Margin="0,0,0,12"
-                           FontSize="15"
-                           FontWeight="SemiBold"
-                           HorizontalAlignment="Center"/>
 
-                                <TextBlock Text="总料位：24"
-                           Margin="0,4"
-                           FontSize="14"/>
+                                <TextBlock
+                                    Text="料位统计"
+                                    Margin="0,0,0,8"
+                                    FontSize="15"
+                                    FontWeight="SemiBold"
+                                    HorizontalAlignment="Center"/>
 
-                                <TextBlock Text="合格：24"
-                           Margin="0,4"
-                           FontSize="14"
-                           Foreground="#FF16A34A"/>
+                                <!-- 总料位 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14">
 
-                                <TextBlock Text="不合格：0"
-                           Margin="0,4"
-                           FontSize="14"
-                           Foreground="#FFDC2626"/>
+                                <Run Text="总料位："/>
 
-                                <TextBlock Text="当前调整：1-A5"
-                           Margin="0,4"
-                           FontSize="14"
-                           Foreground="Blue"/>
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.TotalSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 空料位 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FF6B7280">
+
+                                <Run Text="空："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.EmptySlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 待检 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FFD97706">
+
+                                <Run Text="待检："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.WaitingSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 检测中 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FF2563EB">
+
+                                <Run Text="检测中："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.InspectingSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 合格 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FF16A34A">
+
+                                <Run Text="合格："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.QualifiedSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 不合格 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FFDC2626">
+
+                                <Run Text="不合格："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.UnqualifiedSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 人工调整 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FF7C3AED">
+
+                                <Run Text="人工调整："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.ManualAdjustingSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 异常 -->
+                                <TextBlock Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FF991B1B">
+
+                                <Run Text="异常："/>
+
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.FaultSlotCount,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
+                                <!-- 当前调整料位 -->
+                                <TextBlock Margin="0,6,0,0"
+                                    FontSize="14"
+                                    Foreground="#FF2563EB">
+                                <Run Text="当前调整："/>
+                                <Run
+                                    Text="{Binding MaterialSlotStatus.CurrentAdjustingSlotText,
+                                    Mode=OneWay}"
+                                    FontWeight="SemiBold"/>
+                                </TextBlock>
+
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -288,9 +365,9 @@
 
                         <!-- 不合格料位矩阵 -->
                         <Border Margin="0,0,1,0"
-        Padding="1"
-        BorderThickness="1"
-        CornerRadius="4">
+                                Padding="1"
+                                BorderThickness="1"
+                                CornerRadius="4">
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -311,114 +388,92 @@
 
                                 <!-- 左上角空白 -->
                                 <Border Grid.Row="0"
-                Grid.Column="0"/>
+                                    Grid.Column="0"/>
 
                                 <!-- 顶部列号：1-6 -->
                                 <UniformGrid Grid.Row="0"
-                        Grid.Column="1"
-                        Rows="1"
-                        Columns="6"
-                        HorizontalAlignment="Stretch">
+                                    Grid.Column="1"
+                                    Rows="1"
+                                    Columns="6"
+                                    HorizontalAlignment="Stretch">
 
                                     <TextBlock Text="1"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="2"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="3"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="4"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="5"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="6"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
                                 </UniformGrid>
 
                                 <!-- 左侧行号：A-D -->
                                 <UniformGrid Grid.Row="1"
-                        Grid.Column="0"
-                        Rows="4"
-                        Columns="1"
-                        HorizontalAlignment="Stretch">
+                                    Grid.Column="0"
+                                    Rows="4"
+                                    Columns="1"
+                                    HorizontalAlignment="Stretch">
 
                                     <TextBlock Text="A"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="B"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="C"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
 
                                     <TextBlock Text="D"
-                        Style="{StaticResource SlotCoordinateTextStyle}"/>
+                                        Style="{StaticResource SlotCoordinateTextStyle}"/>
                                 </UniformGrid>
 
                                 <!-- 24个不合格料位 -->
                                 <ItemsControl Grid.Row="1"
-                        Grid.Column="1"
-                        ItemsSource="{Binding UnqualifiedMaterialSlots}">
+                                    Grid.Column="1"
+                                    ItemsSource=
+                                    "{Binding MaterialSlotStatus.UnqualifiedMaterialSlots}">
 
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <UniformGrid Rows="4"
-                                    Columns="6"/>
+                                                Columns="6"/>
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
 
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
+
                                             <Border Margin="1"
-                            Padding="1"
-                            Background="White"
-                            BorderBrush="#FFE5E7EB"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            ToolTip="{Binding PositionCode}">
+                                                Padding="1"
+                                                Background="White"
+                                                BorderBrush="#FFE5E7EB"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                ToolTip="{Binding ToolTipText}">
 
-                                                <StackPanel HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
+                                                <StackPanel
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
 
-                                                    <!-- 不合格状态指示灯 -->
-                                                    <Ellipse Width="24"
-                                        Height="24"
-                                        StrokeThickness="2">
+                                                    <!--
+                                                    只使用统一料位指示灯样式。
+                                                    颜色根据State自动变化。
+                                                    -->
+                                                    <Ellipse
+                                                        Style="{StaticResource MaterialSlotIndicatorStyle}"/>
 
-                                                        <Ellipse.Style>
-                                                            <Style TargetType="{x:Type Ellipse}">
-                                                                <!-- 默认绿色 -->
-                                                                <Setter Property="Fill"
-                                                Value="#FF22C55E"/>
-
-                                                                <Setter Property="Stroke"
-                                                Value="#FF15803D"/>
-
-                                                                <Style.Triggers>
-                                                                    <!-- 不合格显示红色 -->
-                                                                    <DataTrigger Binding="{Binding IsQualified}"
-                                                            Value="False">
-                                                                        <Setter Property="Fill"
-                                                        Value="#FFEF4444"/>
-
-                                                                        <Setter Property="Stroke"
-                                                        Value="#FFB91C1C"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Ellipse.Style>
-                                                    </Ellipse>
-
-                                                    <!-- 指示灯下方状态文字 -->
-                                                    <TextBlock Margin="0,4,0,0"
-                                        Text="{Binding StatusText}"
-                                        FontSize="12"
-                                        Foreground="#FF374151"
-                                        HorizontalAlignment="Center"/>
+                                                    <TextBlock
+                                                        Text="{Binding StatusText}"
+                                                        Style="{StaticResource MaterialSlotStatusTextStyle}"/>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>
@@ -427,7 +482,6 @@
                             </Grid>
                         </Border>
                     </HeaderedContentControl>
-
 
                     <!-- 缓冲料位 -->
                     <HeaderedContentControl Grid.Column="1"

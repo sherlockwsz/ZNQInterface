@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Prism.Ioc;
@@ -23,10 +24,14 @@ namespace ZNQInterface
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // 注册各功能页面的导航映射。
-            containerRegistry.RegisterForNavigation<OverviewView, OverviewViewModel>(NavigationKeys.Overview); // 设备总览页面
-            containerRegistry.RegisterForNavigation<ManualControlView, ManualControlViewModel>(NavigationKeys.ManualControl); // 手动调试页面
-            containerRegistry.RegisterForNavigation<ProductDataView, ProductDataViewModel>(NavigationKeys.ProductData); // 产品数据页面
-            containerRegistry.RegisterForNavigation<OperationLogView, OperationLogViewModel>(NavigationKeys.OperationLog); // 操作日志页面
+            containerRegistry.RegisterForNavigation
+                <OverviewView, OverviewViewModel>(NavigationKeys.Overview); // 设备总览页面
+            containerRegistry.RegisterForNavigation
+                <ManualControlView, ManualControlViewModel>(NavigationKeys.ManualControl); // 手动调试页面
+            containerRegistry.RegisterForNavigation
+                <ProductDataView, ProductDataViewModel>(NavigationKeys.ProductData); // 产品数据页面
+            containerRegistry.RegisterForNavigation
+                <OperationLogView, OperationLogViewModel>(NavigationKeys.OperationLog); // 操作日志页面
         }
 
         protected override void OnInitialized()
@@ -44,6 +49,71 @@ namespace ZNQInterface
                             RegionNames.ContentRegion,
                             NavigationKeys.Overview);
                 }));
+        }
+
+        public App()
+        {
+            DispatcherUnhandledException +=
+                OnDispatcherUnhandledException;
+
+            AppDomain.CurrentDomain.UnhandledException +=
+                OnUnhandledException;
+        }
+
+        private void OnDispatcherUnhandledException(
+            object sender,
+            DispatcherUnhandledExceptionEventArgs eventArgs)
+        {
+            string errorMessage = eventArgs.Exception.ToString();
+
+            try
+            {
+                File.WriteAllText(
+                    Path.Combine(
+                        AppContext.BaseDirectory,
+                        "startup-error.log"),
+                    errorMessage);
+            }
+            catch
+            {
+                // 写入日志失败时不再抛出异常。
+            }
+
+            MessageBox.Show(
+                errorMessage,
+                "程序发生未处理异常",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            // 仅用于排查问题，正式程序中应根据异常决定是否继续。
+            eventArgs.Handled = true;
+        }
+
+        private void OnUnhandledException(
+            object sender,
+            UnhandledExceptionEventArgs eventArgs)
+        {
+            string errorMessage =
+                eventArgs.ExceptionObject?.ToString()
+                ?? "未知非UI线程异常";
+
+            try
+            {
+                File.WriteAllText(
+                    Path.Combine(
+                        AppContext.BaseDirectory,
+                        "fatal-error.log"),
+                    errorMessage);
+            }
+            catch
+            {
+            }
+
+            MessageBox.Show(
+                errorMessage,
+                "程序发生严重异常",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 }

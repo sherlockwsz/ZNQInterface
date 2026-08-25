@@ -10,8 +10,6 @@ namespace ZNQInterface.ViewModels.Pages
     /// </summary>
     public class ProductDataViewModel : BindableBase
     {
-        public string PageTitle => "产品数据";
-
         // 日期范围筛选器。
         public DateRangeFilterViewModel DateFilter { get; }
 

@@ -19,9 +19,6 @@ namespace ZNQInterface.ViewModels.Pages
         private AxisItemViewModel _selectedTurntableAxis;
         private AxisItemViewModel _selectedAdjustmentAxis;
         private AxisItemViewModel _selectedScrewdriverAxis;
-        private double _setPosition;
-        private double _setVelocity;
-
         public ManualControlViewModel()
         {
             DebugInput = new AxisDebugInputViewModel();
@@ -118,7 +115,7 @@ namespace ZNQInterface.ViewModels.Pages
                 new AxisItemViewModel
                 {
                     GroupName = "阻尼器上下料",
-                    DisplayName = "转轴",
+                    DisplayName = "转轴(螺钉角度旋转)",
                     ActualPosition = 76.200,
                     ActualVelocity = 0,
                     SetPosition = 110.00,
@@ -140,7 +137,6 @@ namespace ZNQInterface.ViewModels.Pages
                     RelativeButton2Factor = -1.0
 
                 },
-
                 // 夹爪
                 new AxisItemViewModel
                 {
