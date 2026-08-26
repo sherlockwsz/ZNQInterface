@@ -1,0 +1,150 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:warehouseModels=
+    "clr-namespace:ZNQInterface.ViewModels.Components.Warehouse">
+
+    <!--
+    料仓状态指示灯样式。
+
+    WarehouseLevelViewModel负责提供State；
+    当前样式根据State决定指示灯颜色。
+    -->
+    <Style
+        x:Key="WarehouseLevelIndicatorStyle"
+        TargetType="{x:Type Ellipse}">
+
+        <!-- 指示灯公共外观 -->
+        <Setter
+            Property="Width"
+            Value="24"/>
+
+        <Setter
+            Property="Height"
+            Value="24"/>
+
+        <Setter
+            Property="Margin"
+            Value="8,0"/>
+
+        <Setter
+            Property="StrokeThickness"
+            Value="2"/>
+
+        <Setter
+            Property="VerticalAlignment"
+            Value="Center"/>
+
+        <!-- 未知状态时的默认颜色 -->
+        <Setter
+            Property="Fill"
+            Value="#FF6B7280"/>
+
+        <Setter
+            Property="Stroke"
+            Value="#FF374151"/>
+
+        <Style.Triggers>
+
+            <!-- 空仓：灰色 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static warehouseModels:WarehouseLevelState.Empty}">
+
+                <Setter
+                    Property="Fill"
+                    Value="#FF9CA3AF"/>
+
+                <Setter
+                    Property="Stroke"
+                    Value="#FF6B7280"/>
+
+            </DataTrigger>
+
+            <!-- 未调整：黄色 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static warehouseModels:WarehouseLevelState.Unadjusted}">
+
+                <Setter
+                    Property="Fill"
+                    Value="#FFF59E0B"/>
+
+                <Setter
+                    Property="Stroke"
+                    Value="#FFD97706"/>
+
+            </DataTrigger>
+
+            <!-- 调整中：蓝色 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static warehouseModels:WarehouseLevelState.Adjusting}">
+
+                <Setter
+                    Property="Fill"
+                    Value="#FF3B82F6"/>
+
+                <Setter
+                    Property="Stroke"
+                    Value="#FF2563EB"/>
+
+            </DataTrigger>
+
+            <!-- 已调整：绿色 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static warehouseModels:WarehouseLevelState.Adjusted}">
+
+                <Setter
+                    Property="Fill"
+                    Value="#FF22C55E"/>
+
+                <Setter
+                    Property="Stroke"
+                    Value="#FF15803D"/>
+
+            </DataTrigger>
+
+            <!-- 异常：红色 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static warehouseModels:WarehouseLevelState.Fault}">
+
+                <Setter
+                    Property="Fill"
+                    Value="#FFEF4444"/>
+
+                <Setter
+                    Property="Stroke"
+                    Value="#FFB91C1C"/>
+
+            </DataTrigger>
+
+        </Style.Triggers>
+    </Style>
+
+    <!-- 料仓状态文字公共样式 -->
+    <Style
+        x:Key="WarehouseLevelStatusTextStyle"
+        TargetType="{x:Type TextBlock}">
+
+        <Setter
+            Property="FontSize"
+            Value="13"/>
+
+        <Setter
+            Property="Foreground"
+            Value="#FF374151"/>
+
+        <Setter
+            Property="HorizontalAlignment"
+            Value="Right"/>
+
+        <Setter
+            Property="VerticalAlignment"
+            Value="Center"/>
+
+    </Style>
+
+</ResourceDictionary>

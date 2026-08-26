@@ -49,7 +49,15 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
         {
             get;
         } = new ObservableCollection<MaterialSlotViewModel>();
-
+        /// <summary>
+        /// 缓冲料位集合。
+        /// 当前包含缓冲料位1～4。
+        /// </summary>
+        public ObservableCollection<MaterialSlotViewModel>
+            BufferSlots
+        {
+            get;
+        } = new ObservableCollection<MaterialSlotViewModel>();
         /// <summary>
         /// 初始化两组料位。
         /// </summary>
@@ -67,7 +75,11 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
             {
                 slot.State = MaterialSlotState.Empty;
             }
-
+            // 缓冲料位全部初始化为空。
+            foreach (MaterialSlotViewModel slot in BufferSlots)
+            {
+                slot.State = MaterialSlotState.Empty;
+            }
             SetMaterialSlotState(
                 "A1",
                 MaterialSlotState.Waiting);
@@ -78,11 +90,13 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
             SetUnqualifiedSlotState(
                 "A1",
                 MaterialSlotState.Unqualified);
+            // 缓冲料位预览。
+            // 正式连接PLC以后可以删除。
+            SetBufferSlotState(
+                1,
+                MaterialSlotState.Qualified);
 
         }
-        /// <summary>
-        /// 创建主料位和不合格料位。
-        /// </summary>
         private void CreateSlots()
         {
             string[] rowLabels =
@@ -92,6 +106,9 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                 "C",
                 "D"
             };
+            /// <summary>
+            /// 创建主料位和不合格料位。
+            /// </summary>
 
             foreach (string rowLabel in rowLabels)
             {
@@ -116,6 +133,18 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                     UnqualifiedMaterialSlots.Add(
                         unqualifiedSlot);
                 }
+            }
+            // 创建4个缓冲料位。
+            for (int bufferSlotNumber = 1;
+                 bufferSlotNumber <= 4;
+                 bufferSlotNumber++)
+            {
+                MaterialSlotViewModel bufferSlot =
+                    new MaterialSlotViewModel(
+                        "缓冲",
+                        bufferSlotNumber);
+
+                BufferSlots.Add(bufferSlot);
             }
         }
 
@@ -219,6 +248,38 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
             MaterialSlotViewModel slot =
                 UnqualifiedMaterialSlots.FirstOrDefault(
                     item => item.PositionCode == positionCode);
+
+            if (slot == null)
+            {
+                return false;
+            }
+
+            slot.State = state;
+
+            return true;
+        }
+        /// <summary>
+        /// 修改指定缓冲料位的状态。
+        /// </summary>
+        /// <param name="bufferSlotNumber">
+        /// 缓冲料位编号，允许范围为1～4。
+        /// </param>
+        /// <param name="state">
+        /// 需要设置的新状态。
+        /// </param>
+        /// <returns>
+        /// 找到并修改成功返回true；
+        /// 编号不存在时返回false。
+        /// </returns>
+        public bool SetBufferSlotState(
+            int bufferSlotNumber,
+            MaterialSlotState state)
+        {
+            MaterialSlotViewModel slot =
+                BufferSlots.FirstOrDefault(
+                    item =>
+                        item.ColumnNumber ==
+                        bufferSlotNumber);
 
             if (slot == null)
             {

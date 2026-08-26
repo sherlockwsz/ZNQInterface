@@ -1,6 +1,7 @@
 ﻿using Prism.Mvvm;
 using ZNQInterface.ViewModels.Components;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
+using ZNQInterface.ViewModels.Components.Warehouse;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -27,7 +28,13 @@ namespace ZNQInterface.ViewModels.Pages
         {
             get;
         } = new MaterialSlotStatusViewModel();
-
+        /// <summary>
+        /// 设备总览页面的五层料仓状态模块。
+        /// </summary>
+        public WarehouseStatusViewModel WarehouseStatus
+        {
+            get;
+        } = new WarehouseStatusViewModel();
         /// <summary>
         /// 上下料流程显示内容。
         /// </summary>
