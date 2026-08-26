@@ -1,0 +1,275 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 状态文字公共样式 -->
+    <Style x:Key="AxisStatusTextStyle"
+        TargetType="{x:Type TextBlock}">
+
+        <Setter Property="FontSize"
+            Value="12"/>
+
+        <Setter Property="HorizontalAlignment"
+            Value="Center"/>
+
+        <Setter Property="VerticalAlignment"
+            Value="Center"/>
+
+        <Setter Property="TextAlignment"
+            Value="Center"/>
+
+    </Style>
+
+    <!-- 轴使能状态 -->
+    <DataTemplate x:Key="AxisEnabledStatusTemplate">
+
+        <TextBlock>
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}"
+                BasedOn="{StaticResource AxisStatusTextStyle}">
+
+                    <Setter Property="Text"
+                    Value="● 未使能"/>
+
+                    <Setter Property="Foreground"
+                    Value="#FF9CA3AF"/>
+
+                    <Style.Triggers>
+                        <DataTrigger
+                        Binding="{Binding Runtime.IsEnabled}"
+                        Value="True">
+
+                            <Setter Property="Text"
+                            Value="● 已使能"/>
+
+                            <Setter Property="Foreground"
+                            Value="#FF16A34A"/>
+
+                        </DataTrigger>
+                    </Style.Triggers>
+
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+    </DataTemplate>
+    <!-- 回零状态 -->
+    <DataTemplate x:Key="AxisHomedStatusTemplate">
+
+        <TextBlock>
+
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}"
+                    BasedOn="{StaticResource AxisStatusTextStyle}">
+
+                    <Setter Property="Text"
+                        Value="● 未回零"/>
+
+                    <Setter Property="Foreground"
+                        Value="#FF9CA3AF"/>
+
+                    <Style.Triggers>
+
+                        <DataTrigger
+                            Binding="{Binding Runtime.IsHomed}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 已回零"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FF16A34A"/>
+
+                        </DataTrigger>
+
+                    </Style.Triggers>
+
+                </Style>
+            </TextBlock.Style>
+
+        </TextBlock>
+
+    </DataTemplate>
+
+    <!-- 通信状态 -->
+    <DataTemplate x:Key="AxisCommunicationStatusTemplate">
+
+        <TextBlock>
+
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}"
+                    BasedOn="{StaticResource AxisStatusTextStyle}">
+
+                    <Setter Property="Text"
+                        Value="● 通信异常"/>
+
+                    <Setter Property="Foreground"
+                        Value="#FFDC2626"/>
+
+                    <Style.Triggers>
+
+                        <DataTrigger
+                            Binding="{Binding Runtime.IsCommunicationOk}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 通信正常"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FF16A34A"/>
+
+                        </DataTrigger>
+
+                    </Style.Triggers>
+
+                </Style>
+            </TextBlock.Style>
+
+        </TextBlock>
+
+    </DataTemplate>
+
+    <!-- 限位状态 -->
+    <DataTemplate x:Key="AxisLimitStatusTemplate">
+
+        <TextBlock>
+
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}"
+                    BasedOn="{StaticResource AxisStatusTextStyle}">
+
+                    <Setter Property="Text"
+                        Value="● 无限位"/>
+
+                    <Setter Property="Foreground"
+                        Value="#FF16A34A"/>
+
+                    <Style.Triggers>
+
+                        <DataTrigger
+                            Binding="{Binding Runtime.PositiveLimit}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 正限位"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FFF59E0B"/>
+
+                        </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding Runtime.NegativeLimit}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 负限位"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FFF59E0B"/>
+
+                        </DataTrigger>
+
+                    </Style.Triggers>
+
+                </Style>
+            </TextBlock.Style>
+
+        </TextBlock>
+
+    </DataTemplate>
+
+    <!-- 故障状态 -->
+    <DataTemplate x:Key="AxisFaultStatusTemplate">
+
+        <TextBlock>
+
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}"
+                    BasedOn="{StaticResource AxisStatusTextStyle}">
+
+                    <Setter Property="Text"
+                        Value="● 正常"/>
+
+                    <Setter Property="Foreground"
+                        Value="#FF16A34A"/>
+
+                    <Style.Triggers>
+
+                        <DataTrigger
+                            Binding="{Binding Runtime.HasFault}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 故障"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FFDC2626"/>
+
+                            <Setter Property="FontWeight"
+                                Value="SemiBold"/>
+
+                        </DataTrigger>
+
+                    </Style.Triggers>
+
+                </Style>
+            </TextBlock.Style>
+
+        </TextBlock>
+
+    </DataTemplate>
+
+    <!-- 轴卡片使用：简要状态 -->
+    <DataTemplate x:Key="AxisStatusSummaryTemplate">
+
+        <UniformGrid Rows="1"
+            Columns="3">
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisEnabledStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisCommunicationStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisFaultStatusTemplate}"/>
+
+        </UniformGrid>
+
+    </DataTemplate>
+
+    <!-- 详情区使用：完整状态 -->
+    <DataTemplate x:Key="AxisStatusDetailTemplate">
+
+        <UniformGrid Rows="1"
+            Columns="5">
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisEnabledStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisHomedStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisCommunicationStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisLimitStatusTemplate}"/>
+
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource AxisFaultStatusTemplate}"/>
+
+        </UniformGrid>
+
+    </DataTemplate>
+
+</ResourceDictionary>

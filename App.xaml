@@ -23,6 +23,9 @@
                 <!-- 实时检测结果显示样式 -->
                 <ResourceDictionary
                     Source="/Resources/Detection/DetectionResultStyles.xaml"/>
+                <!-- 轴状态显示模板 -->
+                <ResourceDictionary
+                    Source="/Resources/Axes/AxisStatusStyles.xaml"/>
 
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
