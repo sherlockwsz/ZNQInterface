@@ -79,7 +79,7 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                     "待检",
 
                 MaterialSlotState.Inspecting =>
-                    "检测中",
+                    "调整中",
 
                 MaterialSlotState.Qualified =>
                     "合格",

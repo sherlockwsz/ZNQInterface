@@ -2,6 +2,7 @@
 using ZNQInterface.ViewModels.Components;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
+using ZNQInterface.ViewModels.Components.Axes;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -11,8 +12,14 @@ namespace ZNQInterface.ViewModels.Pages
     /// </summary>
     public class OverviewViewModel : BindableBase
     {
-        public OverviewViewModel()
+        public OverviewViewModel(AxisStatusViewModel axisStatus)
         {
+            /*
+            该对象由Prism容器提供。
+            因为已经在App.xaml.cs中注册为单例，
+            所以这里不会重新创建14根轴。
+            */
+            AxisStatus = axisStatus;
             LoadingProcess.LoadFromFile(
                 @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\LoadingProcess.txt");
 
@@ -35,6 +42,19 @@ namespace ZNQInterface.ViewModels.Pages
         {
             get;
         } = new WarehouseStatusViewModel();
+
+        /// <summary>
+        /// 螺钉角度实时检测模块
+        /// </summary>
+        public ScrewAngleMonitorViewModel ScrewAngleMonitor { get; } =
+            ScrewAngleMonitorViewModel.CreatePreview();
+
+        /// <summary>
+        /// 同轴度实时检测模块
+        /// </summary>
+        public CoaxialityMonitorViewModel CoaxialityMonitor { get; } =
+            CoaxialityMonitorViewModel.CreatePreview();
+
         /// <summary>
         /// 上下料流程显示内容。
         /// </summary>
@@ -51,15 +71,9 @@ namespace ZNQInterface.ViewModels.Pages
             get;
         } = new ProcessTextViewModel();
         /// <summary>
-        /// 螺钉角度实时检测模块
+        /// 整台设备14根轴的共享状态。
+        /// 设备总览只负责读取和显示，不负责创建轴。
         /// </summary>
-        public ScrewAngleMonitorViewModel ScrewAngleMonitor { get; } =
-            ScrewAngleMonitorViewModel.CreatePreview();
-
-        /// <summary>
-        /// 同轴度实时检测模块
-        /// </summary>
-        public CoaxialityMonitorViewModel CoaxialityMonitor { get; } =
-            CoaxialityMonitorViewModel.CreatePreview();
+        public AxisStatusViewModel AxisStatus { get; }
     }
 }

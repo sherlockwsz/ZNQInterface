@@ -8,6 +8,7 @@ using ZNQInterface.Infrastructure;
 using ZNQInterface.ViewModels.Pages;
 using ZNQInterface.Views;
 using ZNQInterface.Views.Pages;
+using ZNQInterface.ViewModels.Components.Axes;
 
 namespace ZNQInterface
 {
@@ -23,6 +24,13 @@ namespace ZNQInterface
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            /*
+           整个应用程序只创建一个AxisStatusViewModel。
+
+           OverviewViewModel、ManualControlViewModel以及后续ADS通信服务
+           注入的都是同一个对象，确保各页面轴数据同步。
+           */
+            containerRegistry.RegisterSingleton<AxisStatusViewModel>();
             // 注册各功能页面的导航映射。
             containerRegistry.RegisterForNavigation
                 <OverviewView, OverviewViewModel>(NavigationKeys.Overview); // 设备总览页面

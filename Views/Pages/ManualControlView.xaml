@@ -145,14 +145,14 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0"
-                            Text="{Binding DisplayName}"
+                            Text="{Binding Definition.DisplayName}"
                             FontSize="15"
                             FontWeight="SemiBold"
                             Foreground="#FF1F2937"
                             VerticalAlignment="Center"/>
 
                         <TextBlock Grid.Column="1"
-                            Text="{Binding MotionStatus,
+                            Text="{Binding MotionStatusText,
                             FallbackValue=静止}"
                             FontSize="14"
                             Foreground="#FF2563EB"
@@ -195,10 +195,10 @@
                             FontSize="13"
                             FontWeight="SemiBold"
                             VerticalAlignment="Center">
-                            <Run Text="{Binding ActualPosition,
+                            <Run Text="{Binding Runtime.ActualPosition,
                                 StringFormat={}{0:F3}}"/>
                                 <Run Text=" "/>
-                            <Run Text="{Binding PositionUnit,
+                            <Run Text="{Binding Definition.Units.Position,
                                 FallbackValue=mm}"/>
                         </TextBlock>
 
@@ -216,10 +216,10 @@
                             FontSize="13"
                             FontWeight="SemiBold"
                             VerticalAlignment="Center">
-                            <Run Text="{Binding ActualVelocity,
+                            <Run Text="{Binding Runtime.ActualVelocity,
                                 StringFormat={}{0:F2}}"/>
                                 <Run Text=" "/>
-                            <Run Text="{Binding VelocityUnit,
+                            <Run Text="{Binding Definition.Units.Velocity,
                                 FallbackValue=mm/s}"/>
                         </TextBlock>
 
@@ -236,14 +236,14 @@
                             FontSize="13"
                             FontWeight="SemiBold"
                             VerticalAlignment="Center">
-                            <Run Text="{Binding SetPosition,
+                            <Run Text="{Binding CommandParameters.TargetPosition,
                                 StringFormat={}{0:F3}}"/>
                                 <Run Text=" "/>
-                            <Run Text="{Binding PositionUnit,
+                            <Run Text="{Binding Definition.Units.Position,
                                 FallbackValue=mm}"/>
                         </TextBlock>
 
-                        <!-- 第二行：跟随误差 -->
+                        <!-- 第二行：设定速度 -->
                         <TextBlock Grid.Row="1"
                             Grid.Column="2"
                             Margin="12,0,0,0"
@@ -257,10 +257,10 @@
                                 FontSize="13"
                                 FontWeight="SemiBold"
                                 VerticalAlignment="Center">
-                                <Run Text="{Binding SetVelocity,
+                                <Run Text="{Binding CommandParameters.Velocity,
                                     StringFormat={}{0:F2}}"/>
                                     <Run Text=" "/>
-                                <Run Text="{Binding VelocityUnit,
+                                <Run Text="{Binding Definition.Units.Velocity,
                                     FallbackValue=mm/s}"/>
                         </TextBlock>
                     </Grid>
@@ -279,7 +279,7 @@
                                     <Setter Property="Foreground" Value="#FF9CA3AF"/>
 
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsEnabled}"
+                                        <DataTrigger Binding="{Binding Runtime.IsEnabled}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 使能"/>
                                             <Setter Property="Foreground" Value="#FF16A34A"/>
@@ -300,7 +300,7 @@
                                         Value="#FF9CA3AF"/>
 
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsHomed}"
+                                        <DataTrigger Binding="{Binding Runtime.IsHomed}"
                                             Value="True">
                                             <Setter Property="Text"
                                                 Value="● 已回零"/>
@@ -323,7 +323,7 @@
                                         Value="#FFDC2626"/>
 
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCommunicationOk}"
+                                        <DataTrigger Binding="{Binding Runtime.IsCommunicationOk}"
                                             Value="True">
                                             <Setter Property="Text"
                                                 Value="● 通信正常"/>
@@ -346,7 +346,7 @@
                                         Value="#FF6B7280"/>
 
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PositiveLimit}"
+                                        <DataTrigger Binding="{Binding Runtime.PositiveLimit}"
                                             Value="True">
                                             <Setter Property="Text"
                                                 Value="● 正限位"/>
@@ -354,7 +354,7 @@
                                                 Value="#FFF59E0B"/>
                                         </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding NegativeLimit}"
+                                        <DataTrigger Binding="{Binding Runtime.NegativeLimit}"
                                             Value="True">
                                             <Setter Property="Text"
                                                 Value="● 负限位"/>
@@ -377,7 +377,7 @@
                                         Value="#FF16A34A"/>
 
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding HasFault}"
+                                        <DataTrigger Binding="{Binding Runtime.HasFault}"
                                             Value="True">
                                             <Setter Property="Text"
                                                 Value="● 故障"/>
@@ -426,7 +426,7 @@
                 Margin="0,0,1,0">
 
                 <!-- 5根轴 -->
-                <ListBox ItemsSource="{Binding DamperLoadingAxes}"
+                <ListBox ItemsSource="{Binding AxisStatus.DamperLoadingGroup.Axes}"
                     SelectedItem="{Binding SelectedDamperAxis, Mode=TwoWay}"
                     SelectionMode="Single"
                     ItemTemplate="{StaticResource AxisItemTemplate}"
@@ -453,7 +453,7 @@
                     Style="{StaticResource TitledPanelStyle}"
                     Margin="0,0,0,1">
 
-                    <ListBox ItemsSource="{Binding TrayLoadingAxes}"
+                    <ListBox ItemsSource="{Binding AxisStatus.TrayLoadingGroup.Axes}"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedTrayAxis, Mode=TwoWay}"
                         Style="{StaticResource AxisListBoxStyle}"
@@ -465,7 +465,7 @@
                     Header="转台及夹紧"
                     Style="{StaticResource TitledPanelStyle}">
 
-                    <ListBox ItemsSource="{Binding TurntableAxes}"
+                    <ListBox ItemsSource="{Binding AxisStatus.TurntableGroup.Axes}"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedTurntableAxis, Mode=TwoWay}"
                         Style="{StaticResource AxisListBoxStyle}"
@@ -491,7 +491,7 @@
                     Style="{StaticResource TitledPanelStyle}"
                     Margin="0,0,0,2">
 
-                    <ListBox ItemsSource="{Binding AdjustmentAxes}"
+                    <ListBox ItemsSource="{Binding AxisStatus.AdjustmentGroup.Axes}"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedAdjustmentAxis, Mode=TwoWay}"
                         Style="{StaticResource AxisListBoxStyle}"
@@ -503,7 +503,7 @@
                     Header="螺丝刀轴"
                     Style="{StaticResource TitledPanelStyle}">
 
-                    <ListBox ItemsSource="{Binding ScrewdriverAxes}"
+                    <ListBox ItemsSource="{Binding AxisStatus.ScrewdriverGroup.Axes}"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedScrewdriverAxis, Mode=TwoWay}"
                         Style="{StaticResource AxisListBoxStyle}"
@@ -548,11 +548,12 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="实际位置："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.ActualPosition,
+                                <Run Text="{Binding SelectedAxis.Runtime.ActualPosition,
                                     StringFormat={}{0:F3}}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.PositionUnit,
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Position,
+                                    Mode=OneWay,
                                     FallbackValue=mm}"/>
                             </TextBlock>
                         </Border>
@@ -562,11 +563,12 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="实际速度："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.ActualVelocity,
+                                <Run Text="{Binding SelectedAxis.Runtime.ActualVelocity,
                                     StringFormat={}{0:F2}}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.VelocityUnit,
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Velocity,
+                                    Mode=OneWay,
                                     FallbackValue=mm/s}"/>
                             </TextBlock>
                         </Border>
@@ -576,11 +578,12 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="实际转矩："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.ActualTorque,
+                                <Run Text="{Binding SelectedAxis.Runtime.ActualTorque,
                                     StringFormat={}{0:F1}}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.TorqueUnit,
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Torque,
+                                    Mode=OneWay,
                                     FallbackValue=N·m}"/>
                             </TextBlock>
                         </Border>
@@ -595,11 +598,12 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="设定位置："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.SetPosition,
+                                <Run Text="{Binding SelectedAxis.CommandParameters.TargetPosition,
                                     StringFormat={}{0:F2}}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.PositionUnit}"/>
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Position,
+                                    Mode=OneWay}"/>
                             </TextBlock>
                         </Border>
                         <!-- 设定速度 -->
@@ -607,12 +611,13 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="设定速度："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.SetVelocity,
+                                <Run Text="{Binding SelectedAxis.CommandParameters.Velocity,
                                     StringFormat={}{0:F2}}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.VelocityUnit}"
-                                    />
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Velocity,
+                                    Mode=OneWay,
+                                    FallbackValue=mm/s}"/>
                             </TextBlock>
                         </Border>
                         <!-- 设定转矩 -->
@@ -624,7 +629,8 @@
                                     FallbackValue=--}"
                                     FontWeight="SemiBold"/>
                                 <Run Text=" "/>
-                                <Run Text="{Binding SelectedAxis.TorqueUnit,
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Torque,
+                                    Mode=OneWay,
                                     FallbackValue=N·m}"/>
                             </TextBlock>
                         </Border>
@@ -660,7 +666,7 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="运动状态："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.MotionStatus,
+                                <Run Text="{Binding SelectedAxis.MotionStatusText,
                                     FallbackValue=--}"
                                     FontWeight="SemiBold"
                                     Foreground="#FF2563EB"/>
@@ -685,7 +691,7 @@
                                     <Setter Property="Text" Value="● 未使能"/>
                                     <Setter Property="Foreground" Value="#FF9CA3AF"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedAxis.IsEnabled}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.IsEnabled}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 已使能"/>
                                             <Setter Property="Foreground" Value="#FF16A34A"/>
@@ -702,7 +708,7 @@
                                     <Setter Property="Text" Value="● 未回零"/>
                                     <Setter Property="Foreground" Value="#FF9CA3AF"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedAxis.IsHomed}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.IsHomed}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 已回零"/>
                                             <Setter Property="Foreground" Value="#FF16A34A"/>
@@ -719,7 +725,7 @@
                                     <Setter Property="Text" Value="● 通信异常"/>
                                     <Setter Property="Foreground" Value="#FFDC2626"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedAxis.IsCommunicationOk}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.IsCommunicationOk}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 通信正常"/>
                                             <Setter Property="Foreground" Value="#FF16A34A"/>
@@ -736,12 +742,12 @@
                                     <Setter Property="Text" Value="● 无限位"/>
                                     <Setter Property="Foreground" Value="#FF16A34A"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedAxis.PositiveLimit}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.PositiveLimit}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 正限位"/>
                                             <Setter Property="Foreground" Value="#FFF59E0B"/>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedAxis.NegativeLimit}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.NegativeLimit}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 负限位"/>
                                             <Setter Property="Foreground" Value="#FFF59E0B"/>
@@ -758,7 +764,7 @@
                                     <Setter Property="Text" Value="● 无故障"/>
                                     <Setter Property="Foreground" Value="#FF16A34A"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedAxis.HasFault}"
+                                        <DataTrigger Binding="{Binding SelectedAxis.Runtime.HasFault}"
                                             Value="True">
                                             <Setter Property="Text" Value="● 有故障"/>
                                             <Setter Property="Foreground" Value="#FFDC2626"/>
@@ -1119,7 +1125,7 @@
                                     -->
                                     <Button Grid.Column="0"
                                         Width="120"
-                                        Content="{Binding SelectedAxis.RelativeButton1Text,
+                                        Content="{Binding SelectedAxis.Definition.PositiveDirectionText,
                                             FallbackValue=左移}"
                                         Command="{Binding RelativeMoveCommand}"
                                         CommandParameter="{Binding SelectedAxis.RelativeButton1Factor}"
@@ -1129,7 +1135,7 @@
 
                                     <Button Grid.Column="2"
                                         Width="120"
-                                        Content="{Binding SelectedAxis.RelativeButton2Text,
+                                        Content="{Binding SelectedAxis.Definition.NegativeDirectionText,
                                             FallbackValue=右移}"
                                         Command="{Binding RelativeMoveCommand}"
                                         CommandParameter="{Binding SelectedAxis.RelativeButton2Factor}"
@@ -1181,7 +1187,7 @@
                                     Grid.Column="0"
                                     Height="44"
                                     Width="120"
-                                    Content="{Binding SelectedAxis.RelativeButton1Text,
+                                    Content="{Binding SelectedAxis.Definition.PositiveDirectionText,
                                         FallbackValue=正向点动}"
                                     Style="{StaticResource NormalButtonStyle}"
                                     Background="#FF2563EB"
@@ -1197,7 +1203,7 @@
                                     Grid.Column="2"
                                     Height="44"
                                     Width="120"
-                                    Content="{Binding SelectedAxis.RelativeButton2Text,
+                                    Content="{Binding SelectedAxis.Definition.NegativeDirectionText,
                                         FallbackValue=负向点动}"
                                     Style="{StaticResource NormalButtonStyle}"
                                     Background="#FF4B5563"

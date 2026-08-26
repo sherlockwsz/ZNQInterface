@@ -54,7 +54,7 @@
                     Value="#FFD97706"/>
             </DataTrigger>
 
-            <!-- 检测中：蓝色 -->
+            <!-- 调整中：蓝色 -->
             <DataTrigger Binding="{Binding State}"
                 Value="{x:Static slotModels:MaterialSlotState.Inspecting}">
 

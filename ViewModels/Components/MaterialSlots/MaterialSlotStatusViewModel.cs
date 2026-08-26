@@ -366,7 +366,7 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                         .Where(
                             slot =>
                                 slot.State ==
-                                MaterialSlotState.ManualAdjusting)
+                                MaterialSlotState.Inspecting)
                         .Select(
                             slot =>
                                 slot.PositionCode)

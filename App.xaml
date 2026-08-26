@@ -20,7 +20,10 @@
                 <!-- 料仓状态样式 -->
                 <ResourceDictionary
                     Source="/Resources/Warehouse/WarehouseLevelStyles.xaml"/>
-                
+                <!-- 实时检测结果显示样式 -->
+                <ResourceDictionary
+                    Source="/Resources/Detection/DetectionResultStyles.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
