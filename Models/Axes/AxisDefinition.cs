@@ -45,5 +45,24 @@
         /// 轴使用的单位。
         /// </summary>
         public AxisUnitSet Units { get; init; }
+
+        /// <summary>
+        /// PLC 中该轴运行接口的 ADS 符号前缀。
+        /// 当前首轮联调只有阻尼器上下料 X 轴映射到
+        /// GVL_AxisRuntime.Axis1，其余轴保持 null。
+        /// </summary>
+        public string AdsSymbolPrefix { get; init; }
+
+        /// <summary>
+        /// PLC 中该轴限位配置的 ADS 符号前缀。
+        /// 只读，用于在界面显示实际软件限位范围。
+        /// </summary>
+        public string AdsLimitSymbolPrefix { get; init; }
+
+        /// <summary>
+        /// 当前轴是否已经配置 PLC ADS 映射。
+        /// </summary>
+        public bool IsAdsMapped =>
+            !string.IsNullOrWhiteSpace(AdsSymbolPrefix);
     }
 }

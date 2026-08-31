@@ -3,7 +3,30 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:slotModels=
     "clr-namespace:ZNQInterface.ViewModels.Components.MaterialSlots">
+    <!-- 料位状态公共颜色：料位指示灯和标题栏图例共同使用 -->
+    <SolidColorBrush x:Key="MaterialSlotUnknownBrush"
+                 Color="#FF6B7280"/>
 
+    <SolidColorBrush x:Key="MaterialSlotEmptyBrush"
+                 Color="#FF9CA3AF"/>
+
+    <SolidColorBrush x:Key="MaterialSlotWaitingBrush"
+                 Color="#FFF59E0B"/>
+
+    <SolidColorBrush x:Key="MaterialSlotInspectingBrush"
+                 Color="#FF3B82F6"/>
+
+    <SolidColorBrush x:Key="MaterialSlotQualifiedBrush"
+                 Color="#FF22C55E"/>
+
+    <SolidColorBrush x:Key="MaterialSlotUnqualifiedBrush"
+                 Color="#FFEF4444"/>
+
+    <SolidColorBrush x:Key="MaterialSlotManualAdjustingBrush"
+                 Color="#FF8B5CF6"/>
+
+    <SolidColorBrush x:Key="MaterialSlotFaultBrush"
+                 Color="#FF991B1B"/>
     <!--
     料位状态指示灯样式。
 
@@ -37,7 +60,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Empty}">
 
                 <Setter Property="Fill"
-                    Value="#FF9CA3AF"/>
+                    Value="{StaticResource MaterialSlotEmptyBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FF6B7280"/>
@@ -48,7 +71,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Waiting}">
 
                 <Setter Property="Fill"
-                    Value="#FFF59E0B"/>
+                    Value="{StaticResource MaterialSlotWaitingBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FFD97706"/>
@@ -59,7 +82,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Inspecting}">
 
                 <Setter Property="Fill"
-                    Value="#FF3B82F6"/>
+                    Value="{StaticResource MaterialSlotInspectingBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FF1D4ED8"/>
@@ -70,7 +93,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Qualified}">
 
                 <Setter Property="Fill"
-                    Value="#FF22C55E"/>
+                    Value="{StaticResource MaterialSlotQualifiedBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FF15803D"/>
@@ -81,7 +104,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Unqualified}">
 
                 <Setter Property="Fill"
-                    Value="#FFEF4444"/>
+                    Value="{StaticResource MaterialSlotUnqualifiedBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FFB91C1C"/>
@@ -92,7 +115,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.ManualAdjusting}">
 
                 <Setter Property="Fill"
-                    Value="#FF8B5CF6"/>
+                    Value="{StaticResource MaterialSlotManualAdjustingBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FF6D28D9"/>
@@ -103,7 +126,7 @@
                 Value="{x:Static slotModels:MaterialSlotState.Fault}">
 
                 <Setter Property="Fill"
-                    Value="#FF991B1B"/>
+                    Value="{StaticResource MaterialSlotFaultBrush}"/>
 
                 <Setter Property="Stroke"
                     Value="#FF7F1D1D"/>

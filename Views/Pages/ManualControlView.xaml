@@ -6,6 +6,8 @@
     xmlns:local="clr-namespace:ZNQInterface.Views.Pages"
     xmlns:controls="clr-namespace:ZNQInterface.Controls"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:axisModels="clr-namespace:ZNQInterface.Models.Axes"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -312,21 +314,21 @@
 
                         </TextBlock>
 
-                        <!-- 设定位置 -->
+                        <!-- 目标位置 -->
                         <TextBlock Grid.Row="1"
-                    Grid.Column="0"
-                    Text="设定位置："
-                    FontSize="13"
-                    Foreground="#FF6B7280"
-                    VerticalAlignment="Center"/>
+                            Grid.Column="0"
+                            Text="目标位置："
+                            FontSize="13"
+                            Foreground="#FF6B7280"
+                            VerticalAlignment="Center"/>
 
                         <TextBlock Grid.Row="1"
-                    Grid.Column="1"
-                    FontSize="13"
-                    FontWeight="SemiBold"
-                    VerticalAlignment="Center">
+                            Grid.Column="1"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            VerticalAlignment="Center">
 
-                    <Run Text="{Binding CommandParameters.TargetPosition,
+                    <Run Text="{Binding Runtime.TargetPosition,
                                 Mode=OneWay,
                                 StringFormat={}{0:F3}}"/>
 
@@ -338,22 +340,22 @@
 
                         </TextBlock>
 
-                        <!-- 设定速度 -->
+                        <!-- 定位速度 -->
                         <TextBlock Grid.Row="1"
-                    Grid.Column="2"
-                    Margin="12,0,0,0"
-                    Text="设定速度："
-                    FontSize="13"
-                    Foreground="#FF6B7280"
-                    VerticalAlignment="Center"/>
+                            Grid.Column="2"
+                            Margin="12,0,0,0"
+                            Text="定位速度："
+                            FontSize="13"
+                            Foreground="#FF6B7280"
+                            VerticalAlignment="Center"/>
 
                         <TextBlock Grid.Row="1"
-                    Grid.Column="3"
-                    FontSize="13"
-                    FontWeight="SemiBold"
-                    VerticalAlignment="Center">
+                            Grid.Column="3"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            VerticalAlignment="Center">
 
-                    <Run Text="{Binding CommandParameters.Velocity,
+                    <Run Text="{Binding Runtime.PositionVelocitySetting,
                                 Mode=OneWay,
                                 StringFormat={}{0:F2}}"/>
 
@@ -581,12 +583,12 @@
                     <UniformGrid Grid.Row="1"
                         Rows="1"
                         Columns="3">
-                        <!-- 设定位置 -->
+                        <!-- 目标位置 -->
                         <Border Style="{StaticResource AxisDetailCellStyle}">
                             <TextBlock VerticalAlignment="Center">
-                                <Run Text="设定位置："
+                                <Run Text="目标位置："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.CommandParameters.TargetPosition,
+                                <Run Text="{Binding SelectedAxis.Runtime.TargetPosition,
                                     Mode=OneWay,
                                     StringFormat={}{0:F2}}"
                                     FontWeight="SemiBold"/>
@@ -595,12 +597,12 @@
                                     Mode=OneWay}"/>
                             </TextBlock>
                         </Border>
-                        <!-- 设定速度 -->
+                        <!-- 定位速度 -->
                         <Border Style="{StaticResource AxisDetailCellStyle}">
                             <TextBlock VerticalAlignment="Center">
-                                <Run Text="设定速度："
+                                <Run Text="定位速度："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.CommandParameters.Velocity,
+                                <Run Text="{Binding SelectedAxis.Runtime.PositionVelocitySetting,
                                     Mode=OneWay,
                                     StringFormat={}{0:F2}}"
                                     FontWeight="SemiBold"/>
@@ -615,7 +617,7 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="设定转矩："
                                     Foreground="#FF6B7280"/>
-                                <Run Text="{Binding SelectedAxis.CommandParameters.Torque,
+                                <Run Text="{Binding SelectedAxis.Runtime.SetTorque,
                                     Mode=OneWay,
                                     StringFormat={}{0:F2},
                                     FallbackValue=--}"
@@ -647,10 +649,15 @@
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="跟随误差："
                                     Foreground="#FF6B7280"/>
-                                <!-- 预留项：当前阶段不新增 C# 属性或绑定。 -->
-                                <Run Text="--"
+                                <Run Text="{Binding SelectedAxis.Runtime.FollowingError,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:F3}}"
                                     FontWeight="SemiBold"
                                     Foreground="#FFF59E0B"/>
+                                <Run Text=" "/>
+                                <Run Text="{Binding SelectedAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"/>
                             </TextBlock>
                         </Border>
 
@@ -723,7 +730,8 @@
                 Header="{Binding SelectedAxisDebugHeader}"
                 Style="{StaticResource TitledPanelStyle}"
                 Margin="1,0,0,0">
-                <Grid Margin="6">
+                <Grid Margin="6"
+                    IsEnabled="{Binding CanControlSelectedAxis}">
                     <!--
                     当前调试轴横向划分为三个区域：
                     运动模式 : 参数设置 : 基础操作 = 4 : 2 : 4。
@@ -756,7 +764,9 @@
                                     Width="120"
                                     Height="44"
                                     Padding="10,4"
-                                    SelectedIndex="0"
+                                    SelectedValuePath="Tag"
+                                    SelectedValue="{Binding SelectedMotionMode,
+                                        Mode=TwoWay}"
                                     FontSize="16"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
@@ -764,12 +774,15 @@
                                     VerticalContentAlignment="Center">
 
                                 <ComboBoxItem Content="绝对运动"
+                                    Tag="{x:Static axisModels:ManualMotionMode.Absolute}"
                                     HorizontalContentAlignment="Center"/>
 
                                 <ComboBoxItem Content="相对运动"
+                                    Tag="{x:Static axisModels:ManualMotionMode.Relative}"
                                     HorizontalContentAlignment="Center"/>
 
                                 <ComboBoxItem Content="点动运动"
+                                    Tag="{x:Static axisModels:ManualMotionMode.Jog}"
                                     HorizontalContentAlignment="Center"/>
 
                             </ComboBox>
@@ -791,9 +804,8 @@
                                         <Style.Triggers>
 
                                             <!-- SelectedIndex=0 对应“绝对运动” -->
-                                            <DataTrigger Binding="{Binding SelectedIndex,
-                                                ElementName=MotionModeComboBox}"
-                                                Value="0">
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Absolute}">
 
                                                 <Setter Property="Visibility"
                                                         Value="Visible"/>
@@ -848,7 +860,8 @@
                                         Padding="10,4"
                                         Text="{Binding DebugInput.TargetPosition,
                                         Mode=TwoWay,
-                                        UpdateSourceTrigger=LostFocus}"
+                                        UpdateSourceTrigger=LostFocus,
+                                        StringFormat={}{0:F3}}"
                                         FontSize="16"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Center"
@@ -886,7 +899,13 @@
                                         VerticalAlignment="Center">
 
                                         <Run Text="输入范围："/>
-                                        <Run Text="-100.00 ～ 500.00"/>
+                                        <Run Text="{Binding SelectedAxis.Runtime.SoftwareLimitNegative,
+                                            Mode=OneWay,
+                                            StringFormat={}{0:F2}}"/>
+                                        <Run Text=" ～ "/>
+                                        <Run Text="{Binding SelectedAxis.Runtime.SoftwareLimitPositive,
+                                            Mode=OneWay,
+                                            StringFormat={}{0:F2}}"/>
                                         <Run Text=" "/>
                                         <Run Text="{Binding SelectedAxis.Definition.Units.Position,
                                             Mode=OneWay,
@@ -900,6 +919,8 @@
                                     Width="120"
                                     Height="44"
                                     Content="绝对运动"
+                                    Focusable="True"
+                                    Command="{Binding AbsoluteMoveCommand}"
                                     Style="{StaticResource NormalButtonStyle}"
                                     Background="#FF2563EB"
                                     BorderBrush="#FF1D4ED8"
@@ -922,9 +943,8 @@
                                             Value="Collapsed"/>
 
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedIndex,
-                                                ElementName=MotionModeComboBox}"
-                                                Value="1">
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Relative}">
 
                                                 <Setter Property="Visibility"
                                                         Value="Visible"/>
@@ -1009,8 +1029,14 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center">
 
-                                        <Run Text="输入范围："/>
-                                        <Run Text="0.00 ～ 500.00"/>
+                                        <Run Text="最终目标须在软限位："/>
+                                        <Run Text="{Binding SelectedAxis.Runtime.SoftwareLimitNegative,
+                                            Mode=OneWay,
+                                            StringFormat={}{0:F2}}"/>
+                                        <Run Text=" ～ "/>
+                                        <Run Text="{Binding SelectedAxis.Runtime.SoftwareLimitPositive,
+                                            Mode=OneWay,
+                                            StringFormat={}{0:F2}}"/>
                                         <Run Text=" "/>
                                         <Run Text="{Binding SelectedAxis.Definition.Units.Position,
                                             Mode=OneWay,
@@ -1073,9 +1099,8 @@
                                                 Value="Collapsed"/>
 
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedIndex,
-                                                ElementName=MotionModeComboBox}"
-                                                Value="2">
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Jog}">
 
                                                 <Setter Property="Visibility"
                                                         Value="Visible"/>
@@ -1105,7 +1130,24 @@
                                     Background="#FF2563EB"
                                     BorderBrush="#FF1D4ED8"
                                     VerticalAlignment="Center"
-                                    ToolTip="按住开始点动，松开停止"/>
+                                    ToolTip="按住开始点动，松开停止">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                            <i:InvokeCommandAction
+                                                Command="{Binding JogStartCommand}"
+                                                CommandParameter="{StaticResource PositiveDirectionFactor}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="MouseLeave">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="LostMouseCapture">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Button>
 
                                 <!--
                                 第二个方向：
@@ -1121,7 +1163,24 @@
                                     Background="#FF4B5563"
                                     BorderBrush="#FF374151"
                                     VerticalAlignment="Center"
-                                    ToolTip="按住开始点动，松开停止"/>
+                                    ToolTip="按住开始点动，松开停止">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                            <i:InvokeCommandAction
+                                                Command="{Binding JogStartCommand}"
+                                                CommandParameter="{StaticResource NegativeDirectionFactor}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="MouseLeave">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="LostMouseCapture">
+                                            <i:InvokeCommandAction Command="{Binding JogStopCommand}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </Button>
 
                             </Grid>
                         </Grid>
@@ -1140,8 +1199,9 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <!-- 轴使能保持为状态按钮，当前不绑定实际使能命令。 -->
+                            <!-- IsChecked 显示 PLC 实际使能反馈，点击发送保持型 bEnable。 -->
                             <ToggleButton Grid.Row="0"
+                                          Command="{Binding ToggleEnableCommand}"
                                           IsChecked="{Binding SelectedAxis.Runtime.IsEnabled,
                                           Mode=OneWay}"
                                           Width="120">
@@ -1165,6 +1225,8 @@
                             <Button Grid.Row="2"
                                 Width="120"
                                 Content="回零"
+                                IsEnabled="False"
+                                ToolTip="本次 Axis1 通信联调暂不开放回零"
                                 Style="{StaticResource NormalButtonStyle}"
                                 Background="#FF2563EB"
                                 BorderBrush="#FF1D4ED8"/>
@@ -1172,6 +1234,7 @@
                             <Button Grid.Row="4"
                                 Width="120"
                                 Content="故障复位"
+                                Command="{Binding ResetCommand}"
                                 Style="{StaticResource NormalButtonStyle}"
                                 Background="#FFF59E0B"
                                 BorderBrush="#FFD97706"/>
@@ -1179,6 +1242,7 @@
                             <Button Grid.Row="6"
                                 Width="120"
                                 Content="停止"
+                                Command="{Binding StopCommand}"
                                 Style="{StaticResource NormalButtonStyle}"
                                 Background="#FFDC2626"
                                 BorderBrush="#FFB91C1C"/>
@@ -1214,23 +1278,35 @@
                                 FontWeight="SemiBold"
                                 Foreground="#FF1F2937"/>
 
-                            <!-- 速度设置 -->
-                            <Grid Grid.Row="2"
-                                Margin="0,4">
-
+                            <!--
+                            定位速度与点动速度是两个独立参数，但按运动模式只显示一个：
+                            绝对/相对 -> Set.Position.fVelocity；点动 -> Set.Jog.fVelocity。
+                            -->
+                            <Grid Grid.Row="2" Margin="0,4">
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Absolute}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Relative}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="75"/>
+                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="65"/>
                                 </Grid.ColumnDefinitions>
-
-                                <!-- 第一列：参数名称 -->
                                 <TextBlock Grid.Column="0"
-                                    Text="速度"
+                                    Text="定位速度"
                                     Style="{StaticResource CurrentDebugParameterLabelStyle}"/>
-
-                                <!-- 第二列：输入范围 -->
                                 <TextBlock Grid.Column="1"
                                     Text="(0 ～ 100):"
                                     Margin="4,0,8,0"
@@ -1238,28 +1314,69 @@
                                     Foreground="#FF6B7280"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"/>
-
-                                <!-- 第三列：输入框 -->
-                                <TextBox x:Name="VelocityTextBox"
-                                    Height="30"
+                                <TextBox x:Name="PositionVelocityTextBox"
                                     Grid.Column="2"
-                                    Text="{Binding DebugInput.Velocity,
-                                    Mode=TwoWay,
-                                    UpdateSourceTrigger=LostFocus}"
+                                    Text="{Binding DebugInput.PositionVelocity,
+                                        Mode=TwoWay,
+                                        UpdateSourceTrigger=LostFocus}"
                                     HorizontalContentAlignment="Left"
                                     Style="{StaticResource CurrentDebugParameterTextBoxStyle}"/>
-
-                                <!-- 第四列：单位 -->
                                 <TextBlock Grid.Column="3"
                                     Margin="8,0,0,0"
                                     Text="{Binding SelectedAxis.Definition.Units.Velocity,
-                                    Mode=OneWay,
-                                    FallbackValue=mm/s}"
+                                        Mode=OneWay,
+                                        FallbackValue=mm/s}"
+                                    VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <Grid Grid.Row="2" Margin="0,4">
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
+                                                Value="{x:Static axisModels:ManualMotionMode.Jog}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="75"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="65"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                    Text="点动速度"
+                                    Style="{StaticResource CurrentDebugParameterLabelStyle}"/>
+                                <TextBlock Grid.Column="1"
+                                    Text="(0 ～ 100):"
+                                    Margin="4,0,8,0"
+                                    FontSize="13"
+                                    Foreground="#FF6B7280"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                                <TextBox x:Name="JogVelocityTextBox"
+                                    Grid.Column="2"
+                                    Text="{Binding DebugInput.JogVelocity,
+                                        Mode=TwoWay,
+                                        UpdateSourceTrigger=LostFocus}"
+                                    HorizontalContentAlignment="Left"
+                                    Style="{StaticResource CurrentDebugParameterTextBoxStyle}"/>
+                                <TextBlock Grid.Column="3"
+                                    Margin="8,0,0,0"
+                                    Text="{Binding SelectedAxis.Definition.Units.Velocity,
+                                        Mode=OneWay,
+                                        FallbackValue=mm/s}"
                                     VerticalAlignment="Center"/>
                             </Grid>
                             <!-- 力矩设置 -->
                             <Grid Grid.Row="3"
-                                Margin="0,4">
+                                Margin="0,4"
+                                IsEnabled="False"
+                                Opacity="0.55"
+                                ToolTip="本次 Axis1 通信联调暂不开放扭矩设置">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="100"/>
@@ -1294,7 +1411,10 @@
 
                             <!-- 零位位置设置 -->
                             <Grid Grid.Row="4"
-                                Margin="0,4">
+                                Margin="0,4"
+                                IsEnabled="False"
+                                Opacity="0.55"
+                                ToolTip="本次 Axis1 通信联调暂不开放零位设置">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="100"/>
@@ -1327,17 +1447,13 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
 
-                            <!-- 设置速度、力矩和零位位置 -->
-                            <Button x:Name="SetParametersButton"
-                                Grid.Row="5"
-                                Height="44"
-                                Width="120"
-                                Margin="90,8,65,0"
-                                Content="写入参数"
-                                Style="{StaticResource NormalButtonStyle}"
-                                Background="#FF2563EB"
-                                BorderBrush="#FF1D4ED8"
-                                HorizontalAlignment="Stretch"
+                            <!-- 速度在发出相应运动命令前自动写入，不再单独“写入参数”。 -->
+                            <TextBlock Grid.Row="5"
+                                Margin="0,8,0,0"
+                                Text="{Binding LastCommandMessage}"
+                                Foreground="#FF6B7280"
+                                TextTrimming="CharacterEllipsis"
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center"/>
                         </Grid>
                     </Border>

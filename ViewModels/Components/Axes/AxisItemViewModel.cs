@@ -1,4 +1,5 @@
 ﻿using Prism.Mvvm;
+using System;
 using ZNQInterface.Models.Axes;
 
 namespace ZNQInterface.ViewModels.Components.Axes
@@ -9,12 +10,14 @@ namespace ZNQInterface.ViewModels.Components.Axes
     public class AxisItemViewModel : BindableBase
     {
         private string _motionStatusText = "未知";
+        private bool _commandParametersInitialized;
 
         public AxisItemViewModel(
             AxisDefinition definition)
         {
             Definition = definition;
             Runtime = new AxisRuntimeData();
+            Runtime.IsMapped = definition.IsAdsMapped;
 
             Runtime.PropertyChanged +=
                 OnRuntimePropertyChanged;
@@ -63,11 +66,14 @@ namespace ZNQInterface.ViewModels.Components.Axes
             MotionStatusText =
                 Runtime.MotionState switch
                 {
-                    AxisMotionState.Unknown =>
+                    AxisMotionState.Undefined =>
                         "未知",
 
                     AxisMotionState.Disabled =>
                         "未使能",
+
+                    AxisMotionState.NotReady =>
+                        "未准备好",
 
                     AxisMotionState.Standstill =>
                         "停止",
@@ -75,23 +81,69 @@ namespace ZNQInterface.ViewModels.Components.Axes
                     AxisMotionState.Homing =>
                         "回零中",
 
-                    AxisMotionState.MovingPositive =>
-                        Definition.PositiveDirectionText,
+                    AxisMotionState.Moving =>
+                        "定位运动中",
 
-                    AxisMotionState.MovingNegative =>
-                        Definition.NegativeDirectionText,
-
-                    AxisMotionState.InPosition =>
-                        "已到位",
+                    AxisMotionState.Jogging =>
+                        "点动中",
 
                     AxisMotionState.Stopping =>
                         "停止中",
 
-                    AxisMotionState.Fault =>
+                    AxisMotionState.Resetting =>
+                        "复位中",
+
+                    AxisMotionState.Error =>
                         "故障",
+
+                    AxisMotionState.TorqueRunning =>
+                        "力矩运行中",
 
                     _ => "未知"
                 };
+        }
+
+        /// <summary>
+        /// 第一次成功读取PLC后初始化手动调试输入参数。
+        ///
+        /// 目标位置使用当前实际位置，而不是默认0或PLC上一次目标，
+        /// 防止WPF重新打开后误点绝对运动导致轴返回0位置。
+        /// </summary>
+        public void InitializeCommandParameters(
+            double actualPosition,
+            double positionVelocity,
+            double jogVelocity)
+        {
+            if (_commandParametersInitialized)
+            {
+                return;
+            }
+
+            /*
+             * 绝对运动输入框默认等于当前实际位置。
+             * 即使操作员没有重新输入而误点按钮，
+             * 也不会从当前位置突然运动到默认0位置。
+             */
+            CommandParameters.TargetPosition =
+                Math.Round(
+                    actualPosition,
+                    3,
+                    MidpointRounding.AwayFromZero);
+            /*
+             * 相对距离默认清零，
+             * 防止以后加入参数保存后误用旧距离。
+             */
+            CommandParameters.RelativeDistance = 0.0;
+
+            // 使用PLC当前定位速度初始化输入框。
+            CommandParameters.PositionVelocity =
+                positionVelocity;
+
+            // 使用PLC当前点动速度初始化输入框。
+            CommandParameters.JogVelocity =
+                jogVelocity;
+
+            _commandParametersInitialized = true;
         }
     }
 }

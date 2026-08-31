@@ -39,7 +39,11 @@ namespace ZNQInterface.ViewModels.Components.Axes
                     AxisType.Linear,
                     positiveDirectionText: "前移",
                     negativeDirectionText: "后移",
-                    AxisUnits.Linear);
+                    AxisUnits.Linear,
+                    adsSymbolPrefix:
+                        "GVL_AxisRuntime.Axis1",
+                    adsLimitSymbolPrefix:
+                        "GVL_AxisConfig.Axis1Limit");
 
             // 阻尼器上下料Y轴。
             DamperYAxis =
@@ -488,6 +492,36 @@ namespace ZNQInterface.ViewModels.Components.Axes
             string negativeDirectionText,
             AxisUnitSet units)
         {
+            return CreateAxis(
+                axisId,
+                plcAxisNumber,
+                groupId,
+                groupName,
+                displayName,
+                axisType,
+                positiveDirectionText,
+                negativeDirectionText,
+                units,
+                adsSymbolPrefix: null,
+                adsLimitSymbolPrefix: null);
+        }
+
+        /// <summary>
+        /// 创建一根轴，并可选配置其 PLC ADS 符号映射。
+        /// </summary>
+        private static AxisItemViewModel CreateAxis(
+            AxisId axisId,
+            int plcAxisNumber,
+            AxisGroupId groupId,
+            string groupName,
+            string displayName,
+            AxisType axisType,
+            string positiveDirectionText,
+            string negativeDirectionText,
+            AxisUnitSet units,
+            string adsSymbolPrefix,
+            string adsLimitSymbolPrefix)
+        {
             AxisDefinition definition =
                 new AxisDefinition
                 {
@@ -512,7 +546,13 @@ namespace ZNQInterface.ViewModels.Components.Axes
                         negativeDirectionText,
 
                     Units =
-                        units
+                        units,
+
+                    AdsSymbolPrefix =
+                        adsSymbolPrefix,
+
+                    AdsLimitSymbolPrefix =
+                        adsLimitSymbolPrefix
                 };
 
             return new AxisItemViewModel(

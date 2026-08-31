@@ -54,38 +54,151 @@
 
                 <!--料位状态-->
                 <HeaderedContentControl Style="{StaticResource TitledPanelStyle}">
-                    <!-- 自定义标题栏 -->
+                    <!-- 自定义料位状态标题栏 -->
                     <HeaderedContentControl.Header>
+
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
+
+                                <!-- 左侧：标题 -->
+                                <ColumnDefinition Width="Auto"/>
+
+                                <!-- 中间：当前调整层数 -->
+                                <ColumnDefinition Width="*"/>
+
+                                <!-- 右侧：状态图例 -->
+                                <ColumnDefinition Width="Auto"/>
+
                             </Grid.ColumnDefinitions>
 
                             <!-- 左侧标题 -->
                             <TextBlock Grid.Column="0"
-                               Text="料位状态"
-                               FontSize="15"
-                               FontWeight="Bold"
-                               Foreground="Black"
-                               VerticalAlignment="Center"/>
+                   Text="料位状态"
+                   FontSize="15"
+                   FontWeight="Bold"
+                   Foreground="Black"
+                   VerticalAlignment="Center"/>
 
-                            <!--
-                            右侧当前调整层。
-                            当前阶段仅完成 XAML 界面，因此先显示示例值“第3层”；
-                            后续接入 ViewModel 时，只需把 Text 改为对应 Binding。
-                            -->
+                            <!-- 当前调整层数 -->
                             <TextBlock Grid.Column="1"
-                                Margin="12,0,4,0"
-                                Text="{Binding WarehouseStatus.CurrentAdjustingLevelText,
-                                               Mode=OneWay,
-                                               StringFormat=当前调整层数：{0}}"
-                                FontSize="14"
-                                FontWeight="SemiBold"
-                                Foreground="#FF2563EB"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Left"/>
+                   Margin="16,0,8,0"
+                   Text="{Binding WarehouseStatus.CurrentAdjustingLevelText,
+                                  Mode=OneWay,
+                                  StringFormat=当前调整层数：{0}}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   Foreground="#FF2563EB"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"/>
+
+                            <!-- 右侧料位状态图例 -->
+                            <WrapPanel Grid.Column="2"
+                   Orientation="Horizontal"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center">
+
+                                <!-- 空 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotEmptyBrush}"
+                         Stroke="#FF6B7280"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="空"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 待检 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotWaitingBrush}"
+                         Stroke="#FFD97706"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="待检"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 调整中 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotInspectingBrush}"
+                         Stroke="#FF1D4ED8"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="调整中"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 合格 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotQualifiedBrush}"
+                         Stroke="#FF15803D"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="合格"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 不合格 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotUnqualifiedBrush}"
+                         Stroke="#FFB91C1C"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="不合格"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 人工调整 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotManualAdjustingBrush}"
+                         Stroke="#FF6D28D9"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="人工调整"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 异常 -->
+                                <StackPanel Margin="3,0"
+                        Orientation="Horizontal">
+                                    <Ellipse Width="11"
+                         Height="11"
+                         Margin="0,0,3,0"
+                         Fill="{StaticResource MaterialSlotFaultBrush}"
+                         Stroke="#FF7F1D1D"
+                         StrokeThickness="1"/>
+                                    <TextBlock Text="异常"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                            </WrapPanel>
+
                         </Grid>
+
                     </HeaderedContentControl.Header>
                     <!-- 料位状态主体：左侧料位矩阵，右侧信息区 -->
                     <Grid>

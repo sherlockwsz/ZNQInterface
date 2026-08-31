@@ -78,7 +78,10 @@
                     <!-- 开始连接按钮 -->
                     <Grid Grid.Column="0"
                         Margin="20,0,10,0">
-                        <ToggleButton>
+                        <ToggleButton
+                            Command="{Binding ToggleAdsConnectionCommand}"
+                            IsChecked="{Binding IsAdsConnected, Mode=OneWay}"
+                            ToolTip="应用启动后自动连接本机 PLC Runtime 1（ADS 851）">
                             <ToggleButton.Style>
                                 <Style TargetType="{x:Type ToggleButton}"
                                     BasedOn="{StaticResource ToggleStateButtonStyle}">
@@ -222,7 +225,7 @@
                     VerticalAlignment="Center"
                     FontSize="16"
                     Foreground="White"
-                    Text="ADS通信：未连接" />
+                    Text="{Binding AdsStatusText, Mode=OneWay}" />
 
                 <TextBlock Grid.Column="3"
                     Margin="12,0"

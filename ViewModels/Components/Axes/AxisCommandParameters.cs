@@ -9,7 +9,8 @@ namespace ZNQInterface.ViewModels.Components.Axes
     {
         private double _targetPosition;
         private double _relativeDistance;
-        private double _velocity;
+        private double _positionVelocity = 20.0;
+        private double _jogVelocity = 5.0;
         private double _acceleration;
         private double _deceleration;
         private double _torque;
@@ -27,10 +28,24 @@ namespace ZNQInterface.ViewModels.Components.Axes
             set => SetProperty(ref _relativeDistance, value);
         }
 
-        public double Velocity
+        /// <summary>
+        /// 绝对运动和相对运动共用的定位速度。
+        /// 对应 PLC Set.Position.fVelocity。
+        /// </summary>
+        public double PositionVelocity
         {
-            get => _velocity;
-            set => SetProperty(ref _velocity, value);
+            get => _positionVelocity;
+            set => SetProperty(ref _positionVelocity, value);
+        }
+
+        /// <summary>
+        /// 正向和负向点动共用的点动速度。
+        /// 对应 PLC Set.Jog.fVelocity。
+        /// </summary>
+        public double JogVelocity
+        {
+            get => _jogVelocity;
+            set => SetProperty(ref _jogVelocity, value);
         }
 
         public double Acceleration

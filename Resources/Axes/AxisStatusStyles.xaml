@@ -101,12 +101,25 @@
                     BasedOn="{StaticResource AxisStatusTextStyle}">
 
                     <Setter Property="Text"
-                        Value="● 通信异常"/>
+                        Value="● 未接入"/>
 
                     <Setter Property="Foreground"
-                        Value="#FFDC2626"/>
+                        Value="#FF9CA3AF"/>
 
                     <Style.Triggers>
+
+                        <!-- 已配置 ADS 映射但尚未读通时，才显示通信异常。 -->
+                        <DataTrigger
+                            Binding="{Binding Runtime.IsMapped}"
+                            Value="True">
+
+                            <Setter Property="Text"
+                                Value="● 通信异常"/>
+
+                            <Setter Property="Foreground"
+                                Value="#FFDC2626"/>
+
+                        </DataTrigger>
 
                         <DataTrigger
                             Binding="{Binding Runtime.IsCommunicationOk}"

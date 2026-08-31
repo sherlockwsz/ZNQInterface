@@ -14,9 +14,9 @@ namespace ZNQInterface.ViewModels.Pages
             = new ObservableCollection<ProductDataItem>();
 
         // 当前选中的产品记录。
-        private ProductDataItem? _selectedProduct;
+        private ProductDataItem _selectedProduct;
 
-        public ProductDataItem? SelectedProduct
+        public ProductDataItem SelectedProduct
         {
             get => _selectedProduct;
             set => SetProperty(ref _selectedProduct, value);
