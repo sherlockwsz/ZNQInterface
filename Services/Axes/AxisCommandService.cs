@@ -194,30 +194,105 @@ namespace ZNQInterface.Services.Axes
                 _commandGate.Release();
             }
         }
-        public async Task MoveAbsoluteAsync(
+        /// <summary>
+        /// 将速度参数写入当前轴。
+        ///
+        /// 注意：
+        /// 1. 本方法只写速度，不触发任何运动命令；
+        /// 2. 绝对和相对运动共用定位速度；
+        /// 3. 点动使用独立的点动速度；
+        /// 4. 当前WPF界面规定允许范围为 0～100，0不能作为有效速度。
+        /// </summary>
+        public async Task WriteVelocityAsync(
             AxisId axisId,
-            double targetPosition,
+            ManualMotionMode motionMode,
             double velocity,
             CancellationToken cancellationToken = default)
         {
-            ValidateFinite(targetPosition, "目标位置");
+            // 防止NaN、无穷大、零值、负值或超范围值写入PLC。
             ValidatePositiveVelocity(velocity);
+
             AxisItemViewModel axis = GetMappedAxis(axisId);
 
-            await _commandGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _commandGate
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             try
             {
                 string prefix = axis.Definition.AdsSymbolPrefix;
+                string velocitySymbol;
+
+                switch (motionMode)
+                {
+                    case ManualMotionMode.Absolute:
+                    case ManualMotionMode.Relative:
+
+                        // 绝对定位和相对定位共用定位速度。
+                        velocitySymbol = AdsAxisSymbols.Setting(
+                            prefix,
+                            "Position",
+                            "fVelocity");
+                        break;
+
+                    case ManualMotionMode.Jog:
+
+                        // 正向点动和负向点动共用点动速度。
+                        velocitySymbol = AdsAxisSymbols.Setting(
+                            prefix,
+                            "Jog",
+                            "fVelocity");
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(motionMode),
+                            motionMode,
+                            "无法识别当前运动模式。");
+                }
+
+                // 这里只写入速度参数，不触发运动。
                 await _ads.WriteAsync(
-                    AdsAxisSymbols.Setting(prefix, "Position", "fAbsolutePosition"),
-                    targetPosition,
-                    cancellationToken).ConfigureAwait(false);
-                await _ads.WriteAsync(
-                    AdsAxisSymbols.Setting(prefix, "Position", "fVelocity"),
+                    velocitySymbol,
                     velocity,
                     cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _commandGate.Release();
+            }
+        }
+        public async Task MoveAbsoluteAsync(
+            AxisId axisId,
+            double targetPosition,
+            CancellationToken cancellationToken = default)
+        {
+            ValidateFinite(targetPosition, "目标位置");
+            AxisItemViewModel axis = GetMappedAxis(axisId);
+
+            await _commandGate
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            try
+            {
+                string prefix = axis.Definition.AdsSymbolPrefix;
+
+                // 目标位置属于本次运动命令，点击绝对运动时写入。
+                await _ads.WriteAsync(
+                    AdsAxisSymbols.Setting(
+                        prefix,
+                        "Position",
+                        "fAbsolutePosition"),
+                    targetPosition,
+                    cancellationToken).ConfigureAwait(false);
+
+                // 这里不再写入fVelocity。
+                // 定位速度只能通过“写入参数”按钮修改。
                 await PulseCommandUnsafeAsync(
-                    prefix, "bMoveAbs", cancellationToken).ConfigureAwait(false);
+                    prefix,
+                    "bMoveAbs",
+                    cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -228,27 +303,34 @@ namespace ZNQInterface.Services.Axes
         public async Task MoveRelativeAsync(
             AxisId axisId,
             double distance,
-            double velocity,
             CancellationToken cancellationToken = default)
         {
             ValidateFinite(distance, "相对距离");
-            ValidatePositiveVelocity(velocity);
             AxisItemViewModel axis = GetMappedAxis(axisId);
 
-            await _commandGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _commandGate
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             try
             {
                 string prefix = axis.Definition.AdsSymbolPrefix;
+
+                // 相对距离属于本次运动命令，点击相对运动时写入。
                 await _ads.WriteAsync(
-                    AdsAxisSymbols.Setting(prefix, "Position", "fRelativeDistance"),
+                    AdsAxisSymbols.Setting(
+                        prefix,
+                        "Position",
+                        "fRelativeDistance"),
                     distance,
                     cancellationToken).ConfigureAwait(false);
-                await _ads.WriteAsync(
-                    AdsAxisSymbols.Setting(prefix, "Position", "fVelocity"),
-                    velocity,
-                    cancellationToken).ConfigureAwait(false);
+
+                // 这里不再写入fVelocity。
+                // 相对运动使用之前通过按钮写入的定位速度。
                 await PulseCommandUnsafeAsync(
-                    prefix, "bMoveRel", cancellationToken).ConfigureAwait(false);
+                    prefix,
+                    "bMoveRel",
+                    cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -259,28 +341,31 @@ namespace ZNQInterface.Services.Axes
         public async Task StartJogAsync(
             AxisId axisId,
             bool positiveDirection,
-            double velocity,
             CancellationToken cancellationToken = default)
         {
-            ValidatePositiveVelocity(velocity);
             AxisItemViewModel axis = GetMappedAxis(axisId);
 
-            await _commandGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _commandGate
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             try
             {
                 string prefix = axis.Definition.AdsSymbolPrefix;
+
+                // 开始点动前，先保证两个方向信号均为FALSE。
                 await _ads.WriteAsync(
                     AdsAxisSymbols.Command(prefix, "bJogPos"),
                     false,
                     cancellationToken).ConfigureAwait(false);
+
                 await _ads.WriteAsync(
                     AdsAxisSymbols.Command(prefix, "bJogNeg"),
                     false,
                     cancellationToken).ConfigureAwait(false);
-                await _ads.WriteAsync(
-                    AdsAxisSymbols.Setting(prefix, "Jog", "fVelocity"),
-                    velocity,
-                    cancellationToken).ConfigureAwait(false);
+
+                // 这里不再写入Set.Jog.fVelocity。
+                // 点动使用之前通过“写入参数”按钮写入的速度。
                 await _ads.WriteAsync(
                     AdsAxisSymbols.Command(
                         prefix,
@@ -435,17 +520,28 @@ namespace ZNQInterface.Services.Axes
             return axis;
         }
 
+        /// <summary>
+        /// 校验手动调试速度。
+        /// 当前界面标注的允许范围为 0～100，因此有效范围为 (0, 100]。
+        /// </summary>
         private static void ValidatePositiveVelocity(double velocity)
         {
             ValidateFinite(velocity, "速度");
-            if (velocity <= 0)
+
+            if (velocity <= 0.0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(velocity),
-                    "速度必须大于 0。");
+                    "速度必须大于0。");
+            }
+
+            if (velocity > 100.0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(velocity),
+                    "速度不能大于100。");
             }
         }
-
         private static void ValidateFinite(double value, string displayName)
         {
             if (double.IsNaN(value) || double.IsInfinity(value))

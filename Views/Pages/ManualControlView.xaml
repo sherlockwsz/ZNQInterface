@@ -1185,7 +1185,7 @@
                             </Grid>
                         </Grid>
                     </Border>
-                    <!-- 右侧20%：四个基础操作按钮，自上而下排列。 -->
+                    <!-- 中间20%：四个基础操作按钮，自上而下排列。 -->
                     <Border Grid.Column="1"
                         Style="{StaticResource CurrentDebugSectionBorderStyle}">
                         <Grid>
@@ -1248,7 +1248,7 @@
                                 BorderBrush="#FFB91C1C"/>
                         </Grid>
                     </Border>
-                    <!-- 中间40%：速度、力矩和零位位置设置。 -->
+                    <!-- 右侧40%：速度、力矩和零位位置设置。 -->
                     <Border Grid.Column="2"
                         Style="{StaticResource CurrentDebugSectionBorderStyle}">
                         <Grid>
@@ -1262,16 +1262,19 @@
                                 <!-- 速度 -->
                                 <RowDefinition Height="*"/>
 
-                                <!-- 力矩 -->
+                                <!-- 力矩：当前禁用 -->
                                 <RowDefinition Height="*"/>
 
-                                <!-- 零位 -->
+                                <!-- 零位：当前禁用 -->
                                 <RowDefinition Height="*"/>
 
-                                <!-- 设置参数按钮 -->
+                                <!-- 写入参数按钮 -->
+                                <RowDefinition Height="Auto"/>
+
+                                <!-- 操作结果 -->
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            
+
                             <TextBlock Grid.Row="0"
                                 Text="参数设置"
                                 FontSize="16"
@@ -1279,77 +1282,26 @@
                                 Foreground="#FF1F2937"/>
 
                             <!--
-                            定位速度与点动速度是两个独立参数，但按运动模式只显示一个：
-                            绝对/相对 -> Set.Position.fVelocity；点动 -> Set.Jog.fVelocity。
+                            统一速度输入框：
+                            绝对/相对模式编辑PositionVelocity；
+                            点动模式编辑JogVelocity；
+                            具体映射由ViewModel的CurrentVelocity完成。
                             -->
-                            <Grid Grid.Row="2" Margin="0,4">
-                                <Grid.Style>
-                                    <Style TargetType="{x:Type Grid}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
-                                                Value="{x:Static axisModels:ManualMotionMode.Absolute}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
-                                                Value="{x:Static axisModels:ManualMotionMode.Relative}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Grid.Style>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="75"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="65"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                    Text="定位速度"
-                                    Style="{StaticResource CurrentDebugParameterLabelStyle}"/>
-                                <TextBlock Grid.Column="1"
-                                    Text="(0 ～ 100):"
-                                    Margin="4,0,8,0"
-                                    FontSize="13"
-                                    Foreground="#FF6B7280"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"/>
-                                <TextBox x:Name="PositionVelocityTextBox"
-                                    Grid.Column="2"
-                                    Text="{Binding DebugInput.PositionVelocity,
-                                        Mode=TwoWay,
-                                        UpdateSourceTrigger=LostFocus}"
-                                    HorizontalContentAlignment="Left"
-                                    Style="{StaticResource CurrentDebugParameterTextBoxStyle}"/>
-                                <TextBlock Grid.Column="3"
-                                    Margin="8,0,0,0"
-                                    Text="{Binding SelectedAxis.Definition.Units.Velocity,
-                                        Mode=OneWay,
-                                        FallbackValue=mm/s}"
-                                    VerticalAlignment="Center"/>
-                            </Grid>
+                            <Grid Grid.Row="2"
+                                  Margin="0,4">
 
-                            <Grid Grid.Row="2" Margin="0,4">
-                                <Grid.Style>
-                                    <Style TargetType="{x:Type Grid}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedMotionMode}"
-                                                Value="{x:Static axisModels:ManualMotionMode.Jog}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Grid.Style>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="75"/>
                                     <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="65"/>
                                 </Grid.ColumnDefinitions>
+
+                                <!-- 根据运动模式显示“定位速度”或“点动速度” -->
                                 <TextBlock Grid.Column="0"
-                                    Text="点动速度"
+                                    Text="{Binding CurrentVelocityLabel}"
                                     Style="{StaticResource CurrentDebugParameterLabelStyle}"/>
+
                                 <TextBlock Grid.Column="1"
                                     Text="(0 ～ 100):"
                                     Margin="4,0,8,0"
@@ -1357,13 +1309,17 @@
                                     Foreground="#FF6B7280"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"/>
-                                <TextBox x:Name="JogVelocityTextBox"
+
+                                <!-- 整个参数设置区域只保留这一个速度输入框 -->
+                                <TextBox x:Name="VelocityTextBox"
+                                    Height="25"
                                     Grid.Column="2"
-                                    Text="{Binding DebugInput.JogVelocity,
+                                    Text="{Binding CurrentVelocity,
                                         Mode=TwoWay,
                                         UpdateSourceTrigger=LostFocus}"
                                     HorizontalContentAlignment="Left"
                                     Style="{StaticResource CurrentDebugParameterTextBoxStyle}"/>
+
                                 <TextBlock Grid.Column="3"
                                     Margin="8,0,0,0"
                                     Text="{Binding SelectedAxis.Definition.Units.Velocity,
@@ -1394,7 +1350,7 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"/>
                                 <TextBox x:Name="TorqueTextBox"
-                                    Height="30"
+                                    Height="25"
                                     Grid.Column="2"
                                     Text="{Binding DebugInput.Torque,
                                     Mode=TwoWay,
@@ -1432,7 +1388,7 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"/>
                                 <TextBox x:Name="ZeroPositionTextBox"
-                                    Height="30"
+                                    Height="25"
                                     Grid.Column="2"
                                     Text="{Binding DebugInput.ZeroPosition,
                                     Mode=TwoWay,
@@ -1447,14 +1403,33 @@
                                     VerticalAlignment="Center"/>
                             </Grid>
 
-                            <!-- 速度在发出相应运动命令前自动写入，不再单独“写入参数”。 -->
-                            <TextBlock Grid.Row="5"
-                                Margin="0,8,0,0"
-                                Text="{Binding LastCommandMessage}"
-                                Foreground="#FF6B7280"
-                                TextTrimming="CharacterEllipsis"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"/>
+                            <!--
+                            当前阶段“写入参数”按钮只写入速度：
+                            绝对/相对模式写入定位速度；
+                            点动模式写入点动速度；
+                            不会触发任何运动。
+                            -->
+                            <Button Grid.Row="5"
+                                    Width="120"
+                                    Height="38"
+                                    Margin="0,10,0,0"
+                                    Content="写入参数"
+                                    Command="{Binding WriteParametersCommand}"
+                                    Focusable="True"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource NormalButtonStyle}"
+                                    Background="#FF2563EB"
+                                    BorderBrush="#FF1D4ED8"
+                                    ToolTip="将当前显示的速度写入PLC，不启动轴运动"/>
+
+                            <!-- 显示写入成功或失败信息 -->
+                            <TextBlock Grid.Row="6"
+                                       Margin="0,6,0,0"
+                                       Text="{Binding LastCommandMessage}"
+                                       Foreground="#FF6B7280"
+                                       TextTrimming="CharacterEllipsis"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </Grid>

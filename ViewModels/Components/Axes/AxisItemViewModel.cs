@@ -54,55 +54,127 @@ namespace ZNQInterface.ViewModels.Components.Axes
             object sender,
             System.ComponentModel.PropertyChangedEventArgs eventArgs)
         {
+            // 以下状态变化都可能改变界面运动文字：
+            // 1. PLC运动状态变化；
+            // 2. PLC运动方向变化；
+            // 3. ADS通信状态变化。
             if (eventArgs.PropertyName ==
-                nameof(AxisRuntimeData.MotionState))
+                    nameof(AxisRuntimeData.MotionState) ||
+                eventArgs.PropertyName ==
+                    nameof(AxisRuntimeData.MotionDirection) ||
+                eventArgs.PropertyName ==
+                    nameof(AxisRuntimeData.IsCommunicationOk))
             {
                 UpdateMotionStatusText();
             }
         }
 
+        /// <summary>
+        /// 根据PLC运动状态和运动方向生成界面状态文字。
+        ///
+        /// 显示优先级：
+        /// 通信断开 > 故障/停止/复位等状态 > 运动方向。
+        ///
+        /// 只有PLC状态为Moving或Jogging时，
+        /// 才把Positive和Negative转换为机械方向文字。
+        /// </summary>
         private void UpdateMotionStatusText()
         {
-            MotionStatusText =
-                Runtime.MotionState switch
-                {
-                    AxisMotionState.Undefined =>
-                        "未知",
+            // 只有已经配置ADS映射的轴才判断通信断开。
+            // 当前未映射的其他轴不会全部显示“通信断开”。
+            if (Runtime.IsMapped &&
+                !Runtime.IsCommunicationOk)
+            {
+                MotionStatusText = "通信断开";
+                return;
+            }
 
-                    AxisMotionState.Disabled =>
-                        "未使能",
+            switch (Runtime.MotionState)
+            {
+                case AxisMotionState.Undefined:
+                    MotionStatusText = "未知";
+                    break;
 
-                    AxisMotionState.NotReady =>
-                        "未准备好",
+                case AxisMotionState.Disabled:
+                    MotionStatusText = "未使能";
+                    break;
 
-                    AxisMotionState.Standstill =>
-                        "停止",
+                case AxisMotionState.NotReady:
+                    MotionStatusText = "未准备好";
+                    break;
 
-                    AxisMotionState.Homing =>
-                        "回零中",
+                case AxisMotionState.Standstill:
+                    // 即使PLC仍保留旧目标位置，只要状态为Standstill，
+                    // 就必须显示停止。
+                    MotionStatusText = "停止";
+                    break;
 
-                    AxisMotionState.Moving =>
-                        "定位运动中",
+                case AxisMotionState.Homing:
+                    MotionStatusText = "回零中";
+                    break;
 
-                    AxisMotionState.Jogging =>
-                        "点动中",
+                case AxisMotionState.Moving:
+                case AxisMotionState.Jogging:
+                    // 定位和点动使用同一套方向映射。
+                    MotionStatusText = GetMotionDirectionText();
+                    break;
 
-                    AxisMotionState.Stopping =>
-                        "停止中",
+                case AxisMotionState.Stopping:
+                    // 停止过程中不显示原来的运动方向。
+                    MotionStatusText = "停止中";
+                    break;
 
-                    AxisMotionState.Resetting =>
-                        "复位中",
+                case AxisMotionState.Resetting:
+                    MotionStatusText = "复位中";
+                    break;
 
-                    AxisMotionState.Error =>
-                        "故障",
+                case AxisMotionState.Error:
+                    MotionStatusText = "故障";
+                    break;
 
-                    AxisMotionState.TorqueRunning =>
-                        "力矩运行中",
+                case AxisMotionState.TorqueRunning:
+                    MotionStatusText = "力矩运行中";
+                    break;
 
-                    _ => "未知"
-                };
+                default:
+                    MotionStatusText = "未知";
+                    break;
+            }
         }
+        /// <summary>
+        /// 将PLC坐标方向转换为当前轴对应的机械方向文字。
+        ///
+        /// 例如：
+        /// X轴：Positive=前移，Negative=后移；
+        /// Y轴：Positive=左移，Negative=右移；
+        /// Z轴：Positive=上移，Negative=下移。
+        /// </summary>
+        private string GetMotionDirectionText()
+        {
+            switch (Runtime.MotionDirection)
+            {
+                case AxisMotionDirection.Positive:
 
+                    return string.IsNullOrWhiteSpace(
+                        Definition.PositiveDirectionText)
+                        ? "正向运动"
+                        : Definition.PositiveDirectionText;
+
+                case AxisMotionDirection.Negative:
+
+                    return string.IsNullOrWhiteSpace(
+                        Definition.NegativeDirectionText)
+                        ? "负向运动"
+                        : Definition.NegativeDirectionText;
+
+                case AxisMotionDirection.None:
+                default:
+
+                    // 运动命令刚被PLC接受时，速度方向可能尚未建立。
+                    // 此时显示“运动中”，而不是错误地猜测方向。
+                    return "运动中";
+            }
+        }
         /// <summary>
         /// 第一次成功读取PLC后初始化手动调试输入参数。
         ///

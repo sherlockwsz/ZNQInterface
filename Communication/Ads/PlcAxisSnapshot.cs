@@ -31,6 +31,11 @@ namespace ZNQInterface.Communication.Ads
         public bool CommandAborted { get; init; }
         public bool CommandRejected { get; init; }
         public short MotionState { get; init; }
+        /// <summary>
+        /// PLC的E_AxisMotionDirection默认底层类型为INT，
+        /// TwinCAT INT对应C# short。
+        /// </summary>
+        public short MotionDirection { get; init; }
         public bool SoftLimitEnabled { get; init; }
         public bool SoftLimitReady { get; init; }
         public bool SoftLimitPositive { get; init; }

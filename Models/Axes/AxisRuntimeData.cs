@@ -39,7 +39,7 @@ namespace ZNQInterface.ViewModels.Components.Axes
         private double _softwareLimitPositive;
 
         private AxisMotionState _motionState;
-
+        private AxisMotionDirection _motionDirection = AxisMotionDirection.None;// PLC反馈的轴当前坐标运动方向。
         private bool _isMapped;
         private bool _isReady;
         private bool _isBusy;
@@ -174,7 +174,17 @@ namespace ZNQInterface.ViewModels.Components.Axes
             get => _motionState;
             set => SetProperty(ref _motionState, value);
         }
-
+        /// <summary>
+        /// PLC反馈的当前运动方向。
+        ///
+        /// 该属性只保存None、Positive或Negative，
+        /// 不直接保存“前移、后移”等界面文字。
+        /// </summary>
+        public AxisMotionDirection MotionDirection
+        {
+            get => _motionDirection;
+            set => SetProperty(ref _motionDirection, value);
+        }
         public bool IsEnabled
         {
             get => _isEnabled;

@@ -44,7 +44,9 @@ namespace ZNQInterface.ViewModels.Pages
             ToggleEnableCommand = new DelegateCommand(ExecuteToggleEnable);
             ResetCommand = new DelegateCommand(ExecuteReset);
             StopCommand = new DelegateCommand(ExecuteStop);
-
+            // 只有点击该命令时，速度输入值才通过ADS写入PLC。
+            WriteParametersCommand =
+                new DelegateCommand(ExecuteWriteParameters);
             // 首轮 ADS 联调默认定位到唯一已映射的 Axis1。
             SelectedAxis = AxisStatus.DamperXAxis;
         }
@@ -71,9 +73,16 @@ namespace ZNQInterface.ViewModels.Pages
         public ManualMotionMode SelectedMotionMode
         {
             get => _selectedMotionMode;
-            set => SetProperty(ref _selectedMotionMode, value);
+            set
+            {
+                if (SetProperty(ref _selectedMotionMode, value))
+                {
+                    // 切换运动模式后，通知同一个输入框重新读取对应速度。
+                    RaisePropertyChanged(nameof(CurrentVelocity));
+                    RaisePropertyChanged(nameof(CurrentVelocityLabel));
+                }
+            }
         }
-
         /// <summary>
         /// 只有“已映射且当前通信正常”的轴允许手动操作。
         /// 因此其余 13 根未映射轴即使被选中，也不会发送任何 ADS 命令。
@@ -95,7 +104,11 @@ namespace ZNQInterface.ViewModels.Pages
         public DelegateCommand ToggleEnableCommand { get; }
         public DelegateCommand ResetCommand { get; }
         public DelegateCommand StopCommand { get; }
-
+        /// <summary>
+        /// 参数写入命令。
+        /// 当前阶段只写入当前运动模式对应的速度。
+        /// </summary>
+        public DelegateCommand WriteParametersCommand { get; }
         private async void ExecuteAbsoluteMove()
         {
             AxisItemViewModel axis = SelectedAxis;
@@ -107,8 +120,7 @@ namespace ZNQInterface.ViewModels.Pages
             await ExecuteSafelyAsync(
                 () => _axisCommandService.MoveAbsoluteAsync(
                     axis.Definition.AxisId,
-                    DebugInput.TargetPosition,
-                    DebugInput.PositionVelocity),
+                    DebugInput.TargetPosition),
                 "绝对运动命令已发送");
         }
 
@@ -127,8 +139,7 @@ namespace ZNQInterface.ViewModels.Pages
             await ExecuteSafelyAsync(
                 () => _axisCommandService.MoveRelativeAsync(
                     axis.Definition.AxisId,
-                    distance,
-                    DebugInput.PositionVelocity),
+                    distance),
                 "相对运动命令已发送");
         }
 
@@ -143,8 +154,7 @@ namespace ZNQInterface.ViewModels.Pages
             await ExecuteSafelyAsync(
                 () => _axisCommandService.StartJogAsync(
                     axis.Definition.AxisId,
-                    directionFactor.Value > 0,
-                    DebugInput.JogVelocity),
+                    directionFactor.Value > 0),
                 "点动开始；松开按钮停止");
         }
 
@@ -205,7 +215,53 @@ namespace ZNQInterface.ViewModels.Pages
                     axis.Definition.AxisId),
                 "停止命令已发送");
         }
+        /// <summary>
+        /// 将当前界面显示的速度写入PLC。
+        ///
+        /// 绝对/相对模式写入定位速度；
+        /// 点动模式写入点动速度；
+        /// 本方法不启动轴运动。
+        /// </summary>
+        private async void ExecuteWriteParameters()
+        {
+            AxisItemViewModel axis = SelectedAxis;
 
+            if (axis == null)
+            {
+                return;
+            }
+
+            double velocity;
+            string velocityName;
+
+            switch (SelectedMotionMode)
+            {
+                case ManualMotionMode.Absolute:
+                case ManualMotionMode.Relative:
+
+                    velocity = DebugInput.PositionVelocity;
+                    velocityName = "定位速度";
+                    break;
+
+                case ManualMotionMode.Jog:
+
+                    velocity = DebugInput.JogVelocity;
+                    velocityName = "点动速度";
+                    break;
+
+                default:
+                    LastCommandMessage = "写入失败：无法识别当前运动模式";
+                    return;
+            }
+
+            await ExecuteSafelyAsync(
+                () => _axisCommandService.WriteVelocityAsync(
+                    axis.Definition.AxisId,
+                    SelectedMotionMode,
+                    velocity),
+                $"{velocityName}已写入：{velocity:F2} " +
+                $"{axis.Definition.Units.Velocity}");
+        }
         private async Task ExecuteSafelyAsync(
             Func<Task> action,
             string successMessage)
@@ -283,6 +339,8 @@ namespace ZNQInterface.ViewModels.Pages
                 RaisePropertyChanged(nameof(SelectedAxisDetailHeader));
                 RaisePropertyChanged(nameof(SelectedAxisDebugHeader));
                 RaisePropertyChanged(nameof(CanControlSelectedAxis));
+                // 切换轴后，刷新当前速度输入框。
+                RaisePropertyChanged(nameof(CurrentVelocity));
                 LastCommandMessage = value?.Definition.IsAdsMapped == true
                     ? "等待 ADS 通信"
                     : "该轴尚未接入 ADS，本次不可操作";
@@ -389,7 +447,45 @@ namespace ZNQInterface.ViewModels.Pages
                        SelectedAxis.Definition.DisplayName;
             }
         }
+        /// <summary>
+        /// 当前界面显示和编辑的速度。
+        ///
+        /// 该属性只是界面代理：
+        /// 绝对/相对模式映射到PositionVelocity；
+        /// 点动模式映射到JogVelocity。
+        ///
+        /// 两种速度在AxisCommandParameters中仍然独立保存。
+        /// </summary>
+        public double CurrentVelocity
+        {
+            get
+            {
+                return SelectedMotionMode == ManualMotionMode.Jog
+                    ? DebugInput.JogVelocity
+                    : DebugInput.PositionVelocity;
+            }
+            set
+            {
+                if (SelectedMotionMode == ManualMotionMode.Jog)
+                {
+                    DebugInput.JogVelocity = value;
+                }
+                else
+                {
+                    DebugInput.PositionVelocity = value;
+                }
 
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 当前速度输入框的名称。
+        /// </summary>
+        public string CurrentVelocityLabel =>
+            SelectedMotionMode == ManualMotionMode.Jog
+                ? "点动速度"
+                : "定位速度";
         public string SelectedAxisDetailHeader =>
             $"当前选中轴：{SelectedAxisTitle}";
 

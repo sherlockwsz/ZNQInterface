@@ -136,6 +136,10 @@ namespace ZNQInterface.Communication.Ads
                 CommandAborted = await ReadStateAsync<bool>(prefix, "bCommandAborted", cancellationToken),
                 CommandRejected = await ReadStateAsync<bool>(prefix, "bCmdRejected", cancellationToken),
                 MotionState = await ReadStateAsync<short>(prefix, "eMotionState", cancellationToken),
+                // 读取PLC统一生成的运动方向。
+                // 完整ADS符号：
+                // GVL_AxisRuntime.Axis1.State.eMotionDirection
+                MotionDirection = await ReadStateAsync<short>(prefix,"eMotionDirection",cancellationToken),
                 SoftLimitEnabled = await ReadStateAsync<bool>(prefix, "bSoftLimitEnabled", cancellationToken),
                 SoftLimitReady = await ReadStateAsync<bool>(prefix, "bSoftLimitReady", cancellationToken),
                 SoftLimitPositive = await ReadStateAsync<bool>(prefix, "bSoftLimitPositive", cancellationToken),
@@ -238,9 +242,17 @@ namespace ZNQInterface.Communication.Ads
                 runtime.CommandRejected = snapshot.CommandRejected;
                 runtime.MotionState = Enum.IsDefined(
                         typeof(AxisMotionState),
-                        (int)snapshot.MotionState)
+                        (int)snapshot.MotionDirection)
                     ? (AxisMotionState)snapshot.MotionState
                     : AxisMotionState.Undefined;
+
+                // 只有PLC返回已定义值时才进行转换。
+                // 未定义值统一按None处理，避免界面显示错误方向。
+                runtime.MotionDirection = Enum.IsDefined(
+                        typeof(AxisMotionDirection),
+                        (int)snapshot.MotionDirection)
+                    ? (AxisMotionDirection)snapshot.MotionDirection
+                    : AxisMotionDirection.None;
                 runtime.SoftLimitEnabled = snapshot.SoftLimitEnabled;
                 runtime.SoftLimitReady = snapshot.SoftLimitReady;
                 runtime.PositiveLimit = snapshot.SoftLimitPositive;

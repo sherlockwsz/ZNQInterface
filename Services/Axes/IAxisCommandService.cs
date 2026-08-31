@@ -22,23 +22,33 @@ namespace ZNQInterface.Services.Axes
         Task StopAsync(
             AxisId axisId,
             CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 将当前运动模式对应的速度写入PLC。
+        ///
+        /// 绝对运动、相对运动：写入 Set.Position.fVelocity；
+        /// 点动运动：写入 Set.Jog.fVelocity。
+        ///
+        /// 修改输入框不会调用该方法，只有点击“写入参数”按钮才调用。
+        /// </summary>
+        Task WriteVelocityAsync(
+            AxisId axisId,
+            ManualMotionMode motionMode,
+            double velocity,
+            CancellationToken cancellationToken = default);
 
         Task MoveAbsoluteAsync(
             AxisId axisId,
             double targetPosition,
-            double velocity,
             CancellationToken cancellationToken = default);
 
         Task MoveRelativeAsync(
             AxisId axisId,
             double distance,
-            double velocity,
             CancellationToken cancellationToken = default);
 
         Task StartJogAsync(
             AxisId axisId,
             bool positiveDirection,
-            double velocity,
             CancellationToken cancellationToken = default);
 
         Task StopJogAsync(
