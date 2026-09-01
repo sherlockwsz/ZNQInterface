@@ -792,127 +792,127 @@
 
                             <!-- 阻尼器X轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="0"
-            Margin="0,0,0,1"
-            Description="X轴(前后)位置："
+                                Grid.Row="0"
+                                Margin="0,0,0,1"
+                                Description="X轴(前后)位置："
 
-            DisplayValue="{Binding
-                AxisStatus.DamperXAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.DamperXAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.DamperXAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.DamperXAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.DamperXAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.DamperXAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>    
 
                             <!-- 阻尼器Y轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="1"
-            Margin="0,0,0,1"
-            Description="Y轴(左右)位置："
+                                Grid.Row="1"
+                                Margin="0,0,0,1"
+                                Description="Y轴(左右)位置："
 
-            DisplayValue="{Binding
-                AxisStatus.DamperYAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.DamperYAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.DamperYAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.DamperYAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.DamperYAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.DamperYAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>        
 
                             <!-- 阻尼器Z轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="2"
-            Margin="0,0,0,1"
-            Description="Z轴(上下)位置："
+                                Grid.Row="2"
+                                Margin="0,0,0,1"
+                                Description="Z轴(上下)位置："
 
-            DisplayValue="{Binding
-                AxisStatus.DamperZAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.DamperZAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.DamperZAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.DamperZAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.DamperZAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.DamperZAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>
 
                             <!-- 螺钉角度旋转轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="3"
-            Margin="0,0,0,1"
-            Description="旋转轴角度："
+                                Grid.Row="3"
+                                Margin="0,0,0,1"
+                                Description="旋转轴角度："
 
-            DisplayValue="{Binding
-                AxisStatus.DamperRotationAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.DamperRotationAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.DamperRotationAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=°}"
+                                Unit="{Binding
+                                    AxisStatus.DamperRotationAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=°}"
 
-            AxisStatus="{Binding
-                AxisStatus.DamperRotationAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.DamperRotationAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>        
 
                             <!-- 阻尼器夹爪轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="4"
-            Margin="0,0,0,1"
-            Description="夹爪位置："
+                                Grid.Row="4"
+                                Margin="0,0,0,1"
+                                Description="夹爪位置："
 
-            DisplayValue="{Binding
-                AxisStatus.DamperGripperAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.DamperGripperAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.DamperGripperAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.DamperGripperAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.DamperGripperAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.DamperGripperAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>
 
                         </Grid>
                     </HeaderedContentControl>
 
                     <!-- 料盘上下料轴 -->
                     <HeaderedContentControl Grid.Row="1"
-    Header="料盘上下料"
-    Style="{StaticResource TitledPanelStyle}"
-    Margin="0,1,0,0">
+                        Header="料盘上下料"
+                        Style="{StaticResource TitledPanelStyle}"
+                        Margin="0,1,0,0">
 
                         <Grid>
                             <Grid.RowDefinitions>
@@ -922,49 +922,49 @@
 
                             <!-- 料盘X轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="0"
-            Margin="0,0,0,1"
-            Description="X轴(前后)位置："
+                                Grid.Row="0"
+                                Margin="0,0,0,1"
+                                Description="X轴(前后)位置："
 
-            DisplayValue="{Binding
-                AxisStatus.TrayXAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.TrayXAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.TrayXAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.TrayXAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.TrayXAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.TrayXAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>
 
                             <!-- 料盘Y轴 -->
                             <controls:DataDisplayControl
-            Grid.Row="1"
-            Margin="0,0,0,1"
-            Description="Z轴(上下)位置："
+                                Grid.Row="1"
+                                Margin="0,0,0,1"
+                                Description="Z轴(上下)位置："
 
-            DisplayValue="{Binding
-                AxisStatus.TrayZAxis.Runtime.ActualPosition,
-                Mode=OneWay,
-                StringFormat={}{0:+0.00;-0.00;0.00},
-                FallbackValue=--,
-                TargetNullValue=--}"
+                                DisplayValue="{Binding
+                                    AxisStatus.TrayZAxis.Runtime.ActualPosition,
+                                    Mode=OneWay,
+                                    StringFormat={}{0:+0.00;-0.00;0.00},
+                                    FallbackValue=--,
+                                    TargetNullValue=--}"
 
-            Unit="{Binding
-                AxisStatus.TrayZAxis.Definition.Units.Position,
-                Mode=OneWay,
-                FallbackValue=mm}"
+                                Unit="{Binding
+                                    AxisStatus.TrayZAxis.Definition.Units.Position,
+                                    Mode=OneWay,
+                                    FallbackValue=mm}"
 
-            AxisStatus="{Binding
-                AxisStatus.TrayZAxis.MotionStatusText,
-                Mode=OneWay,
-                FallbackValue=未知}"/>
+                                AxisStatus="{Binding
+                                    AxisStatus.TrayZAxis.MotionStatusText,
+                                    Mode=OneWay,
+                                    FallbackValue=未知}"/>
 
                         </Grid>
                     </HeaderedContentControl>

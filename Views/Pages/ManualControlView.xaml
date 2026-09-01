@@ -1410,26 +1410,26 @@
                             不会触发任何运动。
                             -->
                             <Button Grid.Row="5"
-                                    Width="120"
-                                    Height="38"
-                                    Margin="0,10,0,0"
-                                    Content="写入参数"
-                                    Command="{Binding WriteParametersCommand}"
-                                    Focusable="True"
-                                    HorizontalAlignment="Center"
-                                    Style="{StaticResource NormalButtonStyle}"
-                                    Background="#FF2563EB"
-                                    BorderBrush="#FF1D4ED8"
-                                    ToolTip="将当前显示的速度写入PLC，不启动轴运动"/>
+                                Width="120"
+                                Height="38"
+                                Margin="0,10,0,0"
+                                Content="写入参数"
+                                Command="{Binding WriteParametersCommand}"
+                                Focusable="True"
+                                HorizontalAlignment="Center"
+                                Style="{StaticResource NormalButtonStyle}"
+                                Background="#FF2563EB"
+                                BorderBrush="#FF1D4ED8"
+                                ToolTip="将当前显示的速度写入PLC，不启动轴运动"/>
 
                             <!-- 显示写入成功或失败信息 -->
                             <TextBlock Grid.Row="6"
-                                       Margin="0,6,0,0"
-                                       Text="{Binding LastCommandMessage}"
-                                       Foreground="#FF6B7280"
-                                       TextTrimming="CharacterEllipsis"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                                Margin="0,6,0,0"
+                                Text="{Binding LastCommandMessage}"
+                                Foreground="#FF6B7280"
+                                TextTrimming="CharacterEllipsis"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </Grid>

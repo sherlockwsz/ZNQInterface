@@ -15,4 +15,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Watchdog\" />
+  </ItemGroup>
 </Project>

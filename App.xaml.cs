@@ -41,6 +41,21 @@ namespace ZNQInterface
             containerRegistry.RegisterSingleton
                 <IAxisCommandService, AxisCommandService>();
             containerRegistry.RegisterSingleton<AxisMonitoringService>();
+            /*
+             * HMI看门狗服务全应用只允许一个实例：
+             * 避免多个页面分别发送心跳。
+             */
+            containerRegistry.RegisterSingleton
+                <IHmiWatchdogService, HmiWatchdogService>();
+            /*
+             * HMI心跳服务必须为全应用单例。
+             *
+             * App负责启动和停止；
+             * MainWindowViewModel负责显示状态及主动断开时暂停；
+             * 两者使用同一个实例。
+             */
+            containerRegistry.RegisterSingleton
+                <IHmiHeartbeatService, HmiHeartbeatService>();
             // 注册各功能页面的导航映射。
             containerRegistry.RegisterForNavigation
                 <OverviewView, OverviewViewModel>(NavigationKeys.Overview); // 设备总览页面
@@ -76,13 +91,23 @@ namespace ZNQInterface
         {
             IAdsConnectionService connection =
                 Container.Resolve<IAdsConnectionService>();
+
+            IHmiWatchdogService watchdog =
+                Container.Resolve<IHmiWatchdogService>();
+
             AxisMonitoringService monitoring =
                 Container.Resolve<AxisMonitoringService>();
 
+            /*
+             * 启动顺序：
+             * 1. 启动ADS连接循环；
+             * 2. 启动HMI心跳；
+             * 3. 启动Axis1状态监控。
+             */
             await connection.StartAsync();
+            await watchdog.StartAsync();
             await monitoring.StartAsync();
         }
-
         /// <summary>
         /// 退出前先释放所有点动/脉冲命令，再停止轮询和 ADS 连接。
         /// bEnable 不在此处强制修改，避免退出 HMI 意外改变设备使能策略。
@@ -92,6 +117,22 @@ namespace ZNQInterface
             try
             {
                 /*
+                 * 先停止WPF心跳。
+                 *
+                 * 正常情况下，后续StopAndDisableAsync会完成受控停机；
+                 * 如果退出流程卡住或失败，PLC心跳超时后仍能接管。
+                 */
+                Container.Resolve<IHmiWatchdogService>()
+                    .Stop();
+                /*
+                 * 首先停止产生新的心跳写入。
+                 *
+                 * 后面的StopAndDisableAsync仍然使用ADS完成受控停止；
+                 * PLC看门狗超时时间为2秒，正常受控停止约100ms即可送达。
+                 */
+                Container.Resolve<IHmiHeartbeatService>()
+                    .Stop();
+                /*
                 * 关闭软件与主动断开连接使用同一套受控停机时序。
                 * 如果ADS已经断开，StopAndDisableAsync会直接返回。
                 */
@@ -100,11 +141,12 @@ namespace ZNQInterface
                         AxisId.DamperX)
                     .GetAwaiter()
                     .GetResult();
-                // 再次清除全部脉冲及点动位。
+                // 3.再次清除全部脉冲及点动位。
                 Container.Resolve<IAxisCommandService>()
                     .ReleaseAllMotionSignalsAsync()
                     .GetAwaiter()
                     .GetResult();
+                // 4. 停止轴监控。
                 // OnExit 位于 UI 线程，不同步等待轮询器投递 UI 更新，
                 // 避免退出阶段形成 Dispatcher 互等。
                 _ = Container.Resolve<AxisMonitoringService>()

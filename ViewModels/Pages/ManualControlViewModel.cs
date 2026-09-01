@@ -1,12 +1,14 @@
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Windows;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using ZNQInterface.Models.Axes;
 using ZNQInterface.Services.Axes;
 using ZNQInterface.ViewModels.Components.Axes;
+using ZNQInterface.Communication.Ads;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -24,18 +26,26 @@ namespace ZNQInterface.ViewModels.Pages
         private AxisItemViewModel _selectedTurntableAxis;
         private AxisItemViewModel _selectedAdjustmentAxis;
         private AxisItemViewModel _selectedScrewdriverAxis;
+        private readonly IHmiWatchdogService _hmiWatchdogService;
         private AxisCommandParameters _debugInput = new AxisCommandParameters();
         private ManualMotionMode _selectedMotionMode = ManualMotionMode.Absolute;
         private string _lastCommandMessage = "等待操作";
-
+       
+    
         public ManualControlViewModel(
             AxisStatusViewModel axisStatus,
-            IAxisCommandService axisCommandService)
+            IAxisCommandService axisCommandService,
+            IHmiWatchdogService hmiWatchdogService)
         {
             AxisStatus = axisStatus
                 ?? throw new ArgumentNullException(nameof(axisStatus));
             _axisCommandService = axisCommandService
                 ?? throw new ArgumentNullException(nameof(axisCommandService));
+            _hmiWatchdogService = hmiWatchdogService
+                ?? throw new ArgumentNullException(
+                    nameof(hmiWatchdogService));
+            _hmiWatchdogService.StateChanged +=
+                OnHmiWatchdogStateChanged;
 
             AbsoluteMoveCommand = new DelegateCommand(ExecuteAbsoluteMove);
             RelativeMoveCommand = new DelegateCommand<double?>(ExecuteRelativeMove);
@@ -84,13 +94,15 @@ namespace ZNQInterface.ViewModels.Pages
             }
         }
         /// <summary>
-        /// 只有“已映射且当前通信正常”的轴允许手动操作。
-        /// 因此其余 13 根未映射轴即使被选中，也不会发送任何 ADS 命令。
+        /// 允许手动控制必须同时满足：
+        /// 1. 当前轴已经映射ADS；
+        /// 2. Axis1实时数据通信正常；
+        /// 3. PLC看门狗允许HMI控制。
         /// </summary>
         public bool CanControlSelectedAxis =>
             SelectedAxis?.Runtime.IsMapped == true &&
-            SelectedAxis.Runtime.IsCommunicationOk;
-
+            SelectedAxis.Runtime.IsCommunicationOk &&
+            _hmiWatchdogService.IsControlAllowed;
         public string LastCommandMessage
         {
             get => _lastCommandMessage;
@@ -496,5 +508,29 @@ namespace ZNQInterface.ViewModels.Pages
             AxisGroupViewModel group,
             AxisItemViewModel axis) =>
             group != null && axis != null && group.Axes.Contains(axis);
+        /// <summary>
+        /// PLC看门狗控制许可变化后，
+        /// 立即刷新手动调试区域的启用状态。
+        /// </summary>
+        private void OnHmiWatchdogStateChanged(
+            object sender,
+            HmiWatchdogStateChangedEventArgs eventArgs)
+        {
+            void RefreshControlPermission()
+            {
+                RaisePropertyChanged(
+                    nameof(CanControlSelectedAxis));
+            }
+
+            if (Application.Current?.Dispatcher.CheckAccess() != false)
+            {
+                RefreshControlPermission();
+            }
+            else
+            {
+                Application.Current.Dispatcher.BeginInvoke(
+                    (Action)RefreshControlPermission);
+            }
+        }
     }
 }

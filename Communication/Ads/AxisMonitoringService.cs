@@ -240,12 +240,15 @@ namespace ZNQInterface.Communication.Ads
                 runtime.CommandDone = snapshot.Done;
                 runtime.CommandAborted = snapshot.CommandAborted;
                 runtime.CommandRejected = snapshot.CommandRejected;
+                /*
+                 * 判断PLC返回的运动状态是否为WPF已经定义的枚举值。
+                 * 这里必须检查MotionState，不能检查MotionDirection。
+                 */
                 runtime.MotionState = Enum.IsDefined(
                         typeof(AxisMotionState),
-                        (int)snapshot.MotionDirection)
+                        (int)snapshot.MotionState)
                     ? (AxisMotionState)snapshot.MotionState
                     : AxisMotionState.Undefined;
-
                 // 只有PLC返回已定义值时才进行转换。
                 // 未定义值统一按None处理，避免界面显示错误方向。
                 runtime.MotionDirection = Enum.IsDefined(
