@@ -46,6 +46,13 @@
                             Value="#FF16A34A"/>
 
                         </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding Definition.IsExpectedConfigured}"
+                            Value="False">
+                            <Setter Property="Text" Value="● 未接入"/>
+                            <Setter Property="Foreground" Value="#FF9CA3AF"/>
+                        </DataTrigger>
                     </Style.Triggers>
 
                 </Style>
@@ -80,6 +87,13 @@
                             <Setter Property="Foreground"
                                 Value="#FF16A34A"/>
 
+                        </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding Definition.IsExpectedConfigured}"
+                            Value="False">
+                            <Setter Property="Text" Value="● 未接入"/>
+                            <Setter Property="Foreground" Value="#FF9CA3AF"/>
                         </DataTrigger>
 
                     </Style.Triggers>
@@ -133,6 +147,14 @@
 
                         </DataTrigger>
 
+                        <DataTrigger
+                            Binding="{Binding HasConfigurationMismatch}"
+                            Value="True">
+                            <Setter Property="Text" Value="● 配置不一致"/>
+                            <Setter Property="Foreground" Value="#FFDC2626"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </DataTrigger>
+
                     </Style.Triggers>
 
                 </Style>
@@ -164,7 +186,7 @@
                             Value="True">
 
                             <Setter Property="Text"
-                                Value="● 正限位"/>
+                                Value="● 正软限位"/>
 
                             <Setter Property="Foreground"
                                 Value="#FFF59E0B"/>
@@ -176,11 +198,18 @@
                             Value="True">
 
                             <Setter Property="Text"
-                                Value="● 负限位"/>
+                                Value="● 负软限位"/>
 
                             <Setter Property="Foreground"
                                 Value="#FFF59E0B"/>
 
+                        </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding Definition.IsExpectedConfigured}"
+                            Value="False">
+                            <Setter Property="Text" Value="● 未接入"/>
+                            <Setter Property="Foreground" Value="#FF9CA3AF"/>
                         </DataTrigger>
 
                     </Style.Triggers>
@@ -222,6 +251,14 @@
                             <Setter Property="FontWeight"
                                 Value="SemiBold"/>
 
+                        </DataTrigger>
+
+                        <DataTrigger
+                            Binding="{Binding Definition.IsExpectedConfigured}"
+                            Value="False">
+                            <Setter Property="Text" Value="● 未接入"/>
+                            <Setter Property="Foreground" Value="#FF9CA3AF"/>
+                            <Setter Property="FontWeight" Value="Normal"/>
                         </DataTrigger>
 
                     </Style.Triggers>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Prism.Mvvm;
 using ZNQInterface.Models.Product;
-using ZNQInterface.ViewModels.Components;
+using ZNQInterface.ViewModels.Components.Product;
 
 namespace ZNQInterface.ViewModels.Pages
 {

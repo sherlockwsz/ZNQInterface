@@ -2,14 +2,14 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ZNQInterface.Communication.Ads;
+using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Models.Axes;
 using ZNQInterface.ViewModels.Components.Axes;
 
 namespace ZNQInterface.Services.Axes
 {
     /// <summary>
-    /// 将上位机命令映射到 GVL_AxisRuntime.Axis1。
+    /// 将上位机命令映射到GVL_AxisRuntime.Axes[1..14]。
     /// bEnable 是保持量；复位、停止和定位命令是 100 ms 脉冲；
     /// 点动命令在按下时保持 TRUE，松开时立即写回 FALSE。
     /// </summary>
@@ -30,7 +30,7 @@ namespace ZNQInterface.Services.Axes
 
         /// <summary>
         /// 重连成功后清除可能因上次断线而未能复位的脉冲/点动位。
-        /// 本次不启用 PLC 看门狗，因此该恢复动作尤其重要。
+        /// 该动作与PLC看门狗共同防止断线期间命令位粘连。
         /// </summary>
         private void OnAdsStateChanged(
             object sender,
@@ -195,13 +195,243 @@ namespace ZNQInterface.Services.Axes
             }
         }
         /// <summary>
+        /// 停止所有已经配置ADS映射的轴，并撤销使能。
+        ///
+        /// 处理原则：
+        /// 1. 自动查找所有IsAdsMapped为true的轴；
+        /// 2. 相同ADS前缀只处理一次；
+        /// 3. 先同时释放全部点动；
+        /// 4. 再同时发送停止信号；
+        /// 5. 停止信号只等待一个公共脉冲周期；
+        /// 6. 最后撤销全部使能并清除运动命令。
+        ///
+        /// 以后增加新轴时，只需要配置AdsSymbolPrefix，
+        /// 不需要修改本方法、MainWindowViewModel或App。
+        /// </summary>
+        public async Task StopAndDisableAllMappedAxesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            /*
+             * ADS已经断开时，WPF无法继续发送停止命令。
+             * 此时由PLC心跳看门狗负责停止并掉使能。
+             */
+            if (!_ads.IsConnected)
+            {
+                return;
+            }
+
+            /*
+             * 查找所有已经配置ADS运行接口的轴。
+             *
+             * GroupBy用于防止错误配置时，
+             * 两个WPF轴使用同一个PLC ADS前缀而被重复处理。
+             */
+            AxisItemViewModel[] mappedAxes =
+                _axisStatus.AllAxes
+                    .Where(axis =>
+                        axis.Definition.IsAdsMapped)
+                    .GroupBy(
+                        axis =>
+                            axis.Definition.AdsSymbolPrefix,
+                        StringComparer.OrdinalIgnoreCase)
+                    .Select(group =>
+                        group.First())
+                    .ToArray();
+
+            if (mappedAxes.Length == 0)
+            {
+                return;
+            }
+
+            /*
+             * 锁定整个多轴停止过程，
+             * 防止中间插入新的使能、定位或点动命令。
+             */
+            await _commandGate
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            try
+            {
+                /*
+                 * 第一步：释放所有轴的点动命令。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    string prefix =
+                        axis.Definition.AdsSymbolPrefix;
+
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                prefix,
+                                "bJogPos"),
+                            false,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                prefix,
+                                "bJogNeg"),
+                            false,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                /*
+                 * 第二步：先确保所有停止信号为FALSE。
+                 * 下一步统一写TRUE，保证PLC能够检测到新停止请求。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                axis.Definition.AdsSymbolPrefix,
+                                "bStop"),
+                            false,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                /*
+                 * 第三步：向全部已映射轴发送停止请求。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                axis.Definition.AdsSymbolPrefix,
+                                "bStop"),
+                            true,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                /*
+                 * 全部轴共用一次脉冲等待。
+                 *
+                 * 不要逐根等待100ms，否则扩展到14轴后，
+                 * 仅等待时间就会达到1.4秒。
+                 */
+                await Task.Delay(
+                        _ads.Options.CommandPulseWidth,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                /*
+                 * 第四步：释放停止信号。
+                 *
+                 * PLC内部的bStopExecute会继续保持，
+                 * 直到MC_Stop完成受控停止。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                axis.Definition.AdsSymbolPrefix,
+                                "bStop"),
+                            false,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                /*
+                 * 第五步：撤销所有轴的使能请求。
+                 *
+                 * PLC的FB_AxisControl会在停止完成后
+                 * 才真正撤销MC_Power。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    await _ads.WriteAsync(
+                            AdsAxisSymbols.Command(
+                                axis.Definition.AdsSymbolPrefix,
+                                "bEnable"),
+                            false,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                /*
+                 * 第六步：清除其余外部命令。
+                 */
+                string[] commandsToClear =
+                {
+            "bReset",
+            "bMoveAbs",
+            "bMoveRel",
+            "bJogPos",
+            "bJogNeg"
+        };
+
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    string prefix =
+                        axis.Definition.AdsSymbolPrefix;
+
+                    foreach (string member in commandsToClear)
+                    {
+                        await _ads.WriteAsync(
+                                AdsAxisSymbols.Command(
+                                    prefix,
+                                    member),
+                                false,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                }
+            }
+            finally
+            {
+                /*
+                 * 即使停止过程中取消或出现异常，
+                 * 也尽力清除所有持续型命令。
+                 */
+                foreach (AxisItemViewModel axis in mappedAxes)
+                {
+                    string prefix =
+                        axis.Definition.AdsSymbolPrefix;
+
+                    foreach (string member in new[]
+                             {
+                         "bStop",
+                         "bJogPos",
+                         "bJogNeg",
+                         "bEnable"
+                     })
+                    {
+                        try
+                        {
+                            await _ads.WriteAsync(
+                                    AdsAxisSymbols.Command(
+                                        prefix,
+                                        member),
+                                    false,
+                                    CancellationToken.None)
+                                .ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            /*
+                             * ADS已经断开时无法继续写入。
+                             * PLC心跳看门狗将接管停止。
+                             */
+                        }
+                    }
+                }
+
+                _commandGate.Release();
+            }
+        }
+        /// <summary>
         /// 将速度参数写入当前轴。
         ///
         /// 注意：
         /// 1. 本方法只写速度，不触发任何运动命令；
         /// 2. 绝对和相对运动共用定位速度；
         /// 3. 点动使用独立的点动速度；
-        /// 4. 当前WPF界面规定允许范围为 0～100，0不能作为有效速度。
+        /// 4. 优先采用PLC ST_AxisLimit的速度范围；
+        /// 5. PLC范围尚未设置时兼容原有(0, 100]范围。
         /// </summary>
         public async Task WriteVelocityAsync(
             AxisId axisId,
@@ -209,10 +439,8 @@ namespace ZNQInterface.Services.Axes
             double velocity,
             CancellationToken cancellationToken = default)
         {
-            // 防止NaN、无穷大、零值、负值或超范围值写入PLC。
-            ValidatePositiveVelocity(velocity);
-
             AxisItemViewModel axis = GetMappedAxis(axisId);
+            ValidatePositiveVelocity(axis, velocity);
 
             await _commandGate
                 .WaitAsync(cancellationToken)
@@ -267,8 +495,8 @@ namespace ZNQInterface.Services.Axes
             double targetPosition,
             CancellationToken cancellationToken = default)
         {
-            ValidateFinite(targetPosition, "目标位置");
             AxisItemViewModel axis = GetMappedAxis(axisId);
+            ValidatePosition(axis, targetPosition, "目标位置");
 
             await _commandGate
                 .WaitAsync(cancellationToken)
@@ -307,6 +535,10 @@ namespace ZNQInterface.Services.Axes
         {
             ValidateFinite(distance, "相对距离");
             AxisItemViewModel axis = GetMappedAxis(axisId);
+            ValidatePosition(
+                axis,
+                axis.Runtime.ActualPosition + distance,
+                "相对运动目标位置");
 
             await _commandGate
                 .WaitAsync(cancellationToken)
@@ -503,13 +735,24 @@ namespace ZNQInterface.Services.Axes
 
         private AxisItemViewModel GetMappedAxis(AxisId axisId)
         {
-            AxisItemViewModel axis = _axisStatus.AllAxes.FirstOrDefault(
-                item => item.Definition.AxisId == axisId);
+            AxisItemViewModel axis = _axisStatus.FindAxis(axisId);
 
             if (axis == null || !axis.Definition.IsAdsMapped)
             {
                 throw new InvalidOperationException(
-                    $"轴 {axisId} 尚未配置 ADS 映射。当前仅开放 Axis1。 ");
+                    $"轴 {axisId} 尚未配置 ADS 映射");
+            }
+
+            if (!axis.Runtime.IsConfigurationKnown)
+            {
+                throw new InvalidOperationException(
+                    $"轴 {axisId} 尚未读取PLC配置，不能执行控制。");
+            }
+
+            if (!axis.Runtime.IsConfigured || axis.HasConfigurationMismatch)
+            {
+                throw new InvalidOperationException(
+                    $"轴 {axisId} 的PLC配置无效或与WPF映射不一致。");
             }
 
             if (!_ads.IsConnected)
@@ -522,9 +765,12 @@ namespace ZNQInterface.Services.Axes
 
         /// <summary>
         /// 校验手动调试速度。
-        /// 当前界面标注的允许范围为 0～100，因此有效范围为 (0, 100]。
+        /// PLC设置了有效的fMinVelocity/fMaxVelocity时以PLC为准；
+        /// 两者仍为默认0时使用原界面(0, 100]，保证现有行为不变。
         /// </summary>
-        private static void ValidatePositiveVelocity(double velocity)
+        private static void ValidatePositiveVelocity(
+            AxisItemViewModel axis,
+            double velocity)
         {
             ValidateFinite(velocity, "速度");
 
@@ -535,11 +781,65 @@ namespace ZNQInterface.Services.Axes
                     "速度必须大于0。");
             }
 
-            if (velocity > 100.0)
+            double plcMinimum = axis.Runtime.MinimumVelocity;
+            double plcMaximum = axis.Runtime.MaximumVelocity;
+            bool hasPlcRange =
+                plcMaximum > 0.0 && plcMaximum >= plcMinimum;
+
+            double minimum = hasPlcRange
+                ? Math.Max(0.0, plcMinimum)
+                : 0.0;
+            double maximum = hasPlcRange
+                ? plcMaximum
+                : 100.0;
+
+            if (velocity < minimum || velocity > maximum)
             {
+                string interval = minimum > 0.0
+                    ? $"[{minimum:F3}, {maximum:F3}]"
+                    : $"(0, {maximum:F3}]";
+
                 throw new ArgumentOutOfRangeException(
                     nameof(velocity),
-                    "速度不能大于100。");
+                    $"速度必须在{interval}范围内。" +
+                    (hasPlcRange
+                        ? "该范围来自PLC ST_AxisLimit。"
+                        : string.Empty));
+            }
+        }
+
+        private static void ValidatePosition(
+            AxisItemViewModel axis,
+            double position,
+            string displayName)
+        {
+            ValidateFinite(position, displayName);
+
+            AxisRuntimeData runtime = axis.Runtime;
+            if (!runtime.SoftLimitEnabled ||
+                runtime.SoftwareLimitPositive <=
+                    runtime.SoftwareLimitNegative)
+            {
+                return;
+            }
+
+            double minimum = runtime.SoftwareLimitNegative +
+                Math.Max(0.0, runtime.SoftLimitMargin);
+            double maximum = runtime.SoftwareLimitPositive -
+                Math.Max(0.0, runtime.SoftLimitMargin);
+
+            if (minimum > maximum)
+            {
+                throw new InvalidOperationException(
+                    $"轴 {axis.Definition.AxisId} 的PLC软限位与缓冲距离无效。");
+            }
+
+            if (position < minimum || position > maximum)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(position),
+                    $"{displayName}必须在[{minimum:F3}, {maximum:F3}]范围内，" +
+                    "该范围已包含PLC软限位缓冲距离。");
             }
         }
         private static void ValidateFinite(double value, string displayName)

@@ -1,4 +1,4 @@
-namespace ZNQInterface.Models
+namespace ZNQInterface.Models.Device
 {
     /// <summary>
     /// 设备当前运行状态信息。

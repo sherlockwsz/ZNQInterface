@@ -14,8 +14,9 @@
     <Page Update="Resources\PanelStyles.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Watchdog\" />
+    <!-- 流程展示文本随程序发布，OverviewViewModel从运行目录读取。 -->
+    <None Update="Data\Processes\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

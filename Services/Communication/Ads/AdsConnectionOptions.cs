@@ -1,6 +1,6 @@
 using System;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Communication.Ads
 {
     /// <summary>
     /// ADS 连接参数。

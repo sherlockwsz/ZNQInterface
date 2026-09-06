@@ -1,6 +1,6 @@
 using System;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Communication.Ads
 {
     public sealed class AdsConnectionStateChangedEventArgs : EventArgs
     {

@@ -1,4 +1,4 @@
-namespace ZNQInterface.Models
+namespace ZNQInterface.Models.Device
 {
     /// <summary>
     /// 设备整机主状态。

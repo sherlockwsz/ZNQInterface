@@ -6,7 +6,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using ZNQInterface.Models.Product;
 
-namespace ZNQInterface.ViewModels.Components
+namespace ZNQInterface.ViewModels.Components.Product
 {
     /// <summary>
     /// 产品数据分页管理

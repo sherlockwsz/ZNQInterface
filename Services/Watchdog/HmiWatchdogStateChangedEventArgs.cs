@@ -1,7 +1,7 @@
 ﻿using System;
 using ZNQInterface.Models.Communication;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Watchdog
 {
     /// <summary>
     /// HMI看门狗综合状态发生变化时的事件参数。

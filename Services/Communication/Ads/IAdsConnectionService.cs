@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Communication.Ads
 {
     /// <summary>
     /// 应用程序唯一的 ADS 连接入口。
@@ -34,6 +35,14 @@ namespace ZNQInterface.Communication.Ads
 
         Task<T> ReadAsync<T>(
             string symbolName,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 通过一条ADS Sum命令批量读取多个PLC叶子变量。
+        /// 返回值顺序与requests完全一致。
+        /// </summary>
+        Task<IReadOnlyList<object>> ReadManyAsync(
+            IReadOnlyList<AdsReadRequest> requests,
             CancellationToken cancellationToken = default);
 
         Task WriteAsync<T>(

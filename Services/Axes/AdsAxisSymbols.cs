@@ -1,4 +1,4 @@
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Axes
 {
     /// <summary>
     /// 集中生成 ZNQ_MoveCtrl 轴结构中的叶子变量名。

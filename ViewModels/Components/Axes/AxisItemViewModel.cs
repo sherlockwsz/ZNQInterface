@@ -21,6 +21,8 @@ namespace ZNQInterface.ViewModels.Components.Axes
 
             Runtime.PropertyChanged +=
                 OnRuntimePropertyChanged;
+
+            UpdateMotionStatusText();
         }
 
         /// <summary>
@@ -39,6 +41,23 @@ namespace ZNQInterface.ViewModels.Components.Axes
         {
             get;
         } = new AxisCommandParameters();
+
+        /// <summary>
+        /// WPF设计映射与PLC bConfigured不一致。
+        /// 出现该状态时禁止控制，防止轴号或PLC配置错误导致误动作。
+        /// </summary>
+        public bool HasConfigurationMismatch =>
+            Runtime.IsConfigurationKnown &&
+            Definition.IsExpectedConfigured != Runtime.IsConfigured;
+
+        /// <summary>
+        /// 当前轴已按设计接入并得到PLC配置确认。
+        /// </summary>
+        public bool IsAvailable =>
+            Definition.IsExpectedConfigured &&
+            Runtime.IsConfigurationKnown &&
+            Runtime.IsConfigured &&
+            !HasConfigurationMismatch;
         /// <summary>
         /// 界面显示的运动状态文字。
         /// </summary>
@@ -63,8 +82,14 @@ namespace ZNQInterface.ViewModels.Components.Axes
                 eventArgs.PropertyName ==
                     nameof(AxisRuntimeData.MotionDirection) ||
                 eventArgs.PropertyName ==
-                    nameof(AxisRuntimeData.IsCommunicationOk))
+                    nameof(AxisRuntimeData.IsCommunicationOk) ||
+                eventArgs.PropertyName ==
+                    nameof(AxisRuntimeData.IsConfigurationKnown) ||
+                eventArgs.PropertyName ==
+                    nameof(AxisRuntimeData.IsConfigured))
             {
+                RaisePropertyChanged(nameof(HasConfigurationMismatch));
+                RaisePropertyChanged(nameof(IsAvailable));
                 UpdateMotionStatusText();
             }
         }
@@ -80,8 +105,21 @@ namespace ZNQInterface.ViewModels.Components.Axes
         /// </summary>
         private void UpdateMotionStatusText()
         {
-            // 只有已经配置ADS映射的轴才判断通信断开。
-            // 当前未映射的其他轴不会全部显示“通信断开”。
+            if (!Definition.IsExpectedConfigured)
+            {
+                MotionStatusText = HasConfigurationMismatch
+                    ? "配置不一致"
+                    : "未接入";
+                return;
+            }
+
+            if (HasConfigurationMismatch)
+            {
+                MotionStatusText = "配置不一致";
+                return;
+            }
+
+            // 预期接入的轴必须同时通过ADS通信和PLC配置校验。
             if (Runtime.IsMapped &&
                 !Runtime.IsCommunicationOk)
             {

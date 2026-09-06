@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwinCAT;
 using TwinCAT.Ads;
+using TwinCAT.Ads.SumCommand;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Communication.Ads
 {
     /// <summary>
     /// 负责 AdsClient 生命周期、变量句柄缓存和自动重连。
@@ -151,6 +152,102 @@ namespace ZNQInterface.Communication.Ads
                         object value =
                             _client.ReadAny(handle, typeof(T));
                         return (T)value;
+                    }
+                    catch (Exception exception)
+                        when (!(exception is OperationCanceledException))
+                    {
+                        MarkCommunicationFaultUnsafe(exception);
+                        throw;
+                    }
+                    finally
+                    {
+                        _ioGate.Release();
+                    }
+                },
+                cancellationToken);
+        }
+
+        public Task<IReadOnlyList<object>> ReadManyAsync(
+            IReadOnlyList<AdsReadRequest> requests,
+            CancellationToken cancellationToken = default)
+        {
+            if (requests == null)
+            {
+                throw new ArgumentNullException(nameof(requests));
+            }
+
+            if (requests.Count == 0)
+            {
+                return Task.FromResult<IReadOnlyList<object>>(
+                    Array.Empty<object>());
+            }
+
+            // Beckhoff建议单条Sum命令最多500个子命令。
+            if (requests.Count > 500)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(requests),
+                    "单次ADS批量读取不能超过500个变量。");
+            }
+
+            foreach (AdsReadRequest request in requests)
+            {
+                if (request == null)
+                {
+                    throw new ArgumentException(
+                        "ADS批量读取项不能为null。",
+                        nameof(requests));
+                }
+
+                ValidateSymbolName(request.SymbolName);
+            }
+
+            return Task.Run(
+                async () =>
+                {
+                    await _ioGate
+                        .WaitAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    try
+                    {
+                        EnsureConnected();
+
+                        uint[] handles = new uint[requests.Count];
+                        Type[] valueTypes = new Type[requests.Count];
+
+                        for (int index = 0;
+                            index < requests.Count;
+                            index++)
+                        {
+                            AdsReadRequest request = requests[index];
+
+                            handles[index] =
+                                GetOrCreateHandleUnsafe(
+                                    request.SymbolName);
+
+                            valueTypes[index] =
+                                request.ValueType;
+                        }
+
+                        SumHandleReadAnyType command =
+                            new SumHandleReadAnyType(
+                                _client,
+                                handles,
+                                valueTypes);
+
+                        ResultSumValues result =
+                            command.Read();
+
+                        if (result.OverallFailed)
+                        {
+                            throw new InvalidOperationException(
+                                "ADS批量读取失败：" +
+                                $"{result.FirstSubError}。");
+                        }
+
+                        return (IReadOnlyList<object>)
+                            result.Values;
                     }
                     catch (Exception exception)
                         when (!(exception is OperationCanceledException))

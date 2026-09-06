@@ -62,5 +62,13 @@ namespace ZNQInterface.Services.Axes
             AxisId axisId,
             CancellationToken cancellationToken = default);
         Task ReleaseAllMotionSignalsAsync();
+        /// <summary>
+        /// 停止所有已经配置ADS映射的轴，并撤销使能。
+        ///
+        /// AxisDefinition.IsAdsMapped为true的轴会自动加入，
+        /// MainWindow和App不需要逐根指定AxisId。
+        /// </summary>
+        Task StopAndDisableAllMappedAxesAsync(
+            CancellationToken cancellationToken = default);
     }
 }

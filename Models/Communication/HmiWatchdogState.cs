@@ -14,6 +14,11 @@
         AdsDisconnected = 0,
 
         /// <summary>
+        /// WPF正在执行主动断开流程，心跳已暂停。
+        /// </summary>
+        Paused = 5,
+
+        /// <summary>
         /// PLC看门狗功能当前未启用。
         /// </summary>
         Disabled = 10,

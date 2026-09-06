@@ -1,7 +1,7 @@
 ﻿using System;
 using Prism.Mvvm;
 
-namespace ZNQInterface.ViewModels.Components
+namespace ZNQInterface.ViewModels.Components.Product
 {
     /// <summary>
     /// 日期范围筛选条件

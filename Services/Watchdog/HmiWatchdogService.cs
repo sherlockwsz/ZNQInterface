@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using ZNQInterface.Models.Communication;
+using ZNQInterface.Services.Communication.Ads;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Watchdog
 {
     /// <summary>
     /// WPF侧HMI看门狗服务。
@@ -37,6 +38,7 @@ namespace ZNQInterface.Communication.Ads
         private int _cycleRunning;
 
         private bool _started;
+        private bool _sendingEnabled;
 
         /*
          * 使用系统运行时间初始化心跳，
@@ -88,10 +90,12 @@ namespace ZNQInterface.Communication.Ads
         {
             if (_started)
             {
+                Resume();
                 return Task.CompletedTask;
             }
 
             _started = true;
+            _sendingEnabled = true;
 
             if (Application.Current == null ||
                 Application.Current.Dispatcher.CheckAccess())
@@ -107,6 +111,42 @@ namespace ZNQInterface.Communication.Ads
         }
 
         /// <summary>
+        /// 主动断开ADS前暂停发送心跳。
+        ///
+        /// 定时器仍保留，避免重新连接时重复创建Timer；
+        /// 已经进入的ADS调用无法强制撤销，但其结果不会再更新界面状态。
+        /// </summary>
+        public void Pause()
+        {
+            _sendingEnabled = false;
+
+            SetState(
+                HmiWatchdogState.Paused,
+                isControlAllowed: false);
+        }
+
+        /// <summary>
+        /// ADS重新连接或断开失败后恢复心跳。
+        /// 下一次定时周期将重新读取PLC最终反馈。
+        /// </summary>
+        public void Resume()
+        {
+            if (!_started)
+            {
+                _ = StartAsync();
+                return;
+            }
+
+            _sendingEnabled = true;
+
+            SetState(
+                _ads.IsConnected
+                    ? HmiWatchdogState.WaitingHeartbeat
+                    : HmiWatchdogState.AdsDisconnected,
+                isControlAllowed: false);
+        }
+
+        /// <summary>
         /// 停止心跳。
         ///
         /// WPF退出时先停止心跳，
@@ -114,6 +154,7 @@ namespace ZNQInterface.Communication.Ads
         /// </summary>
         public void Stop()
         {
+            _sendingEnabled = false;
             _started = false;
 
             if (Application.Current == null ||
@@ -144,6 +185,11 @@ namespace ZNQInterface.Communication.Ads
             object sender,
             EventArgs eventArgs)
         {
+            if (!_started || !_sendingEnabled)
+            {
+                return;
+            }
+
             /*
              * 如果上一个周期还没有完成，
              * 本周期直接跳过，避免ADS操作不断排队。
@@ -171,9 +217,12 @@ namespace ZNQInterface.Communication.Ads
                  *
                  * 看门狗服务只负责将界面状态切换为未连接。
                  */
-                SetState(
-                    HmiWatchdogState.AdsDisconnected,
-                    isControlAllowed: false);
+                if (_started && _sendingEnabled)
+                {
+                    SetState(
+                        HmiWatchdogState.AdsDisconnected,
+                        isControlAllowed: false);
+                }
             }
             finally
             {
@@ -185,7 +234,7 @@ namespace ZNQInterface.Communication.Ads
 
         private async Task ExecuteHeartbeatCycleAsync()
         {
-            if (!_started)
+            if (!_started || !_sendingEnabled)
             {
                 return;
             }
@@ -218,6 +267,12 @@ namespace ZNQInterface.Communication.Ads
                 HmiWatchdogSymbols.Heartbeat,
                 _heartbeat);
 
+            // 主动断开可能发生在上面的await期间。
+            if (!_started || !_sendingEnabled)
+            {
+                return;
+            }
+
             /*
              * 即使PLC当前尚未启用看门狗，
              * WPF仍持续发送心跳。
@@ -228,6 +283,11 @@ namespace ZNQInterface.Communication.Ads
             bool useWatchdog =
                 await _ads.ReadAsync<bool>(
                     HmiWatchdogSymbols.UseWatchdog);
+
+            if (!_started || !_sendingEnabled)
+            {
+                return;
+            }
 
             if (!useWatchdog)
             {
@@ -259,6 +319,12 @@ namespace ZNQInterface.Communication.Ads
             bool requireEnableReset =
                 await _ads.ReadAsync<bool>(
                     HmiWatchdogSymbols.RequireEnableReset);
+
+            // 不允许暂停前启动的旧周期覆盖“已暂停”状态。
+            if (!_started || !_sendingEnabled)
+            {
+                return;
+            }
 
             if (timeout)
             {

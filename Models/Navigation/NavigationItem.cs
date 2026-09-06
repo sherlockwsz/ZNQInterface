@@ -1,4 +1,4 @@
-﻿namespace ZNQInterface.Models
+﻿namespace ZNQInterface.Models.Navigation
 {
     /// <summary>页面导航项。</summary>
     public sealed class NavigationItem

@@ -1,4 +1,4 @@
-﻿namespace ZNQInterface.Communication.Ads
+﻿namespace ZNQInterface.Services.Watchdog
 {
     /// <summary>
     /// PLC侧HMI看门狗相关ADS符号。

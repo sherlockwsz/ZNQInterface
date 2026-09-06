@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using ZNQInterface.Models.Axes;
 using ZNQInterface.Services.Axes;
 using ZNQInterface.ViewModels.Components.Axes;
-using ZNQInterface.Communication.Ads;
+using ZNQInterface.Services.Communication.Ads;
+using ZNQInterface.Services.Watchdog;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -57,7 +58,7 @@ namespace ZNQInterface.ViewModels.Pages
             // 只有点击该命令时，速度输入值才通过ADS写入PLC。
             WriteParametersCommand =
                 new DelegateCommand(ExecuteWriteParameters);
-            // 首轮 ADS 联调默认定位到唯一已映射的 Axis1。
+            // 保留原页面默认选择：阻尼器X轴。
             SelectedAxis = AxisStatus.DamperXAxis;
         }
 
@@ -95,12 +96,12 @@ namespace ZNQInterface.ViewModels.Pages
         }
         /// <summary>
         /// 允许手动控制必须同时满足：
-        /// 1. 当前轴已经映射ADS；
-        /// 2. Axis1实时数据通信正常；
+        /// 1. 当前轴按设计接入且PLC bConfigured为TRUE；
+        /// 2. 当前轴实时数据通信正常；
         /// 3. PLC看门狗允许HMI控制。
         /// </summary>
         public bool CanControlSelectedAxis =>
-            SelectedAxis?.Runtime.IsMapped == true &&
+            SelectedAxis?.IsAvailable == true &&
             SelectedAxis.Runtime.IsCommunicationOk &&
             _hmiWatchdogService.IsControlAllowed;
         public string LastCommandMessage
@@ -310,7 +311,7 @@ namespace ZNQInterface.ViewModels.Pages
                         OnSelectedRuntimePropertyChanged;
 
                     // 切换轴时尽力释放旧轴点动位，防止按住期间切换选择。
-                    if (previousAxis.Definition.IsAdsMapped &&
+                    if (previousAxis.IsAvailable &&
                         previousAxis.Runtime.IsCommunicationOk)
                     {
                         _ = StopJogSilentlyAsync(previousAxis);
@@ -353,9 +354,8 @@ namespace ZNQInterface.ViewModels.Pages
                 RaisePropertyChanged(nameof(CanControlSelectedAxis));
                 // 切换轴后，刷新当前速度输入框。
                 RaisePropertyChanged(nameof(CurrentVelocity));
-                LastCommandMessage = value?.Definition.IsAdsMapped == true
-                    ? "等待 ADS 通信"
-                    : "该轴尚未接入 ADS，本次不可操作";
+                RaisePropertyChanged(nameof(CurrentVelocityRangeText));
+                LastCommandMessage = GetAxisSelectionMessage(value);
             }
         }
 
@@ -364,9 +364,18 @@ namespace ZNQInterface.ViewModels.Pages
             PropertyChangedEventArgs eventArgs)
         {
             if (eventArgs.PropertyName == nameof(AxisRuntimeData.IsMapped) ||
-                eventArgs.PropertyName == nameof(AxisRuntimeData.IsCommunicationOk))
+                eventArgs.PropertyName == nameof(AxisRuntimeData.IsCommunicationOk) ||
+                eventArgs.PropertyName == nameof(AxisRuntimeData.IsConfigured) ||
+                eventArgs.PropertyName == nameof(AxisRuntimeData.IsConfigurationKnown))
             {
                 RaisePropertyChanged(nameof(CanControlSelectedAxis));
+                LastCommandMessage = GetAxisSelectionMessage(SelectedAxis);
+            }
+
+            if (eventArgs.PropertyName == nameof(AxisRuntimeData.MinimumVelocity) ||
+                eventArgs.PropertyName == nameof(AxisRuntimeData.MaximumVelocity))
+            {
+                RaisePropertyChanged(nameof(CurrentVelocityRangeText));
             }
         }
 
@@ -498,6 +507,27 @@ namespace ZNQInterface.ViewModels.Pages
             SelectedMotionMode == ManualMotionMode.Jog
                 ? "点动速度"
                 : "定位速度";
+
+        /// <summary>
+        /// 界面显示PLC ST_AxisLimit中的有效速度范围。
+        /// PLC最小/最大值均未设置时仍显示原有(0～100)。
+        /// </summary>
+        public string CurrentVelocityRangeText
+        {
+            get
+            {
+                AxisRuntimeData runtime = SelectedAxis?.Runtime;
+                if (runtime != null &&
+                    runtime.MaximumVelocity > 0.0 &&
+                    runtime.MaximumVelocity >= runtime.MinimumVelocity)
+                {
+                    return $"({Math.Max(0.0, runtime.MinimumVelocity):F3} ～ " +
+                           $"{runtime.MaximumVelocity:F3}):";
+                }
+
+                return "(0 ～ 100):";
+            }
+        }
         public string SelectedAxisDetailHeader =>
             $"当前选中轴：{SelectedAxisTitle}";
 
@@ -508,6 +538,29 @@ namespace ZNQInterface.ViewModels.Pages
             AxisGroupViewModel group,
             AxisItemViewModel axis) =>
             group != null && axis != null && group.Axes.Contains(axis);
+
+        private static string GetAxisSelectionMessage(
+            AxisItemViewModel axis)
+        {
+            if (axis == null)
+            {
+                return "未选择调试轴";
+            }
+
+            if (!axis.Definition.IsExpectedConfigured)
+            {
+                return "该轴当前未接入，本次不可操作";
+            }
+
+            if (axis.HasConfigurationMismatch)
+            {
+                return "WPF轴映射与PLC bConfigured不一致，已禁止操作";
+            }
+
+            return axis.Runtime.IsCommunicationOk
+                ? "等待操作"
+                : "等待 ADS 通信";
+        }
         /// <summary>
         /// PLC看门狗控制许可变化后，
         /// 立即刷新手动调试区域的启用状态。

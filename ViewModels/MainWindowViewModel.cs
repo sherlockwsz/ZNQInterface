@@ -6,10 +6,10 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using ZNQInterface.Infrastructure;
-using ZNQInterface.Models;
-using ZNQInterface.Communication.Ads;
+using ZNQInterface.Models.Navigation;
+using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Services.Axes;
-using ZNQInterface.Models.Axes;
+using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Communication;
 
 namespace ZNQInterface.ViewModels
@@ -45,7 +45,6 @@ namespace ZNQInterface.ViewModels
             IRegionManager regionManager,
             IAdsConnectionService adsConnection,
             IAxisCommandService axisCommandService,
-            IHmiHeartbeatService hmiHeartbeat,
             IHmiWatchdogService hmiWatchdogService)
         {
             _hmiWatchdogService = hmiWatchdogService
@@ -63,8 +62,6 @@ namespace ZNQInterface.ViewModels
                 ?? throw new ArgumentNullException(nameof(adsConnection));
             _axisCommandService = axisCommandService// 初始化轴命令服务
                 ?? throw new ArgumentNullException(nameof(axisCommandService));
-            HmiHeartbeat = hmiHeartbeat// 初始化HMI心跳服务
-                ?? throw new ArgumentNullException(nameof(hmiHeartbeat));
 
             // 初始化退出命令。
             ExitApplicationCommand =
@@ -107,14 +104,14 @@ namespace ZNQInterface.ViewModels
         ///
         /// 主动断开顺序：
         /// 1. 暂停产生新的心跳；
-        /// 2. 停止Axis1并撤销使能；
+        /// 2. 停止全部已接入轴并撤销使能；
         /// 3. 关闭ADS。
         ///
         /// 主动连接顺序：
         /// 1. 请求ADS连接；
         /// 2. 恢复心跳；
         /// 3. PLC确认命令已清零后重新开放控制。
-        // </summary>
+        /// </summary>
         private async void ExecuteToggleAdsConnection()
         {
             try
@@ -122,24 +119,26 @@ namespace ZNQInterface.ViewModels
                 if (_adsConnection.IsConnected)
                 {
                     AdsStatusText =
-                        "ADS通信：正在停止Axis1并撤销使能";
+                        "ADS通信：正在停止全部已映射轴并撤销使能";
 
                     /*
                      * 先暂停新的心跳写入，
                      * 防止主动断开过程中继续产生周期ADS写请求。
                      */
-                    HmiHeartbeat.Pause();
+                    _hmiWatchdogService.Pause();
 
                     try
                     {
-                        /*
-                         * ADS仍然连接时完成主动停止和掉使能。
-                         */
+                        /// <summary>
+                        /// 手动连接或断开ADS。
+                        ///
+                        /// 主动断开顺序：
+                        /// 1. 暂停产生新的心跳；
+                        /// 2. 停止全部已映射轴并撤销使能；
+                        /// 3. 关闭ADS。
+                        /// </summary>
                         await _axisCommandService
-                            .StopAndDisableAsync(
-                                AxisId.DamperX);
-
-                        /*
+                            .StopAndDisableAllMappedAxesAsync();                        /*
                          * 安全动作成功后关闭ADS。
                          */
                         await _adsConnection
@@ -153,7 +152,7 @@ namespace ZNQInterface.ViewModels
                          */
                         if (_adsConnection.IsConnected)
                         {
-                            HmiHeartbeat.Resume();
+                            _hmiWatchdogService.Resume();
                         }
 
                         throw;
@@ -173,7 +172,7 @@ namespace ZNQInterface.ViewModels
                      * ADS尚未连上时不会写PLC；
                      * 后续自动重连成功后会自动开始写入。
                      */
-                    HmiHeartbeat.Resume();
+                    _hmiWatchdogService.Resume();
                 }
             }
             catch (Exception exception)
@@ -340,6 +339,9 @@ namespace ZNQInterface.ViewModels
                 HmiWatchdogState.AdsDisconnected =>
                     "看门狗：ADS未连接",
 
+                HmiWatchdogState.Paused =>
+                    "看门狗：已暂停",
+
                 HmiWatchdogState.Disabled =>
                     "看门狗：未启用",
 
@@ -363,15 +365,5 @@ namespace ZNQInterface.ViewModels
         /// </summary>
         public DelegateCommand ExitApplicationCommand { get; }
         public DelegateCommand ToggleAdsConnectionCommand { get; }
-        /// <summary>
-        /// HMI心跳服务。
-        ///
-        /// MainWindow.xaml直接绑定该对象的状态，
-        /// 不需要在MainWindowViewModel中重复复制所有属性。
-        /// </summary>
-        public IHmiHeartbeatService HmiHeartbeat
-        {
-            get;
-        }
     }
 }

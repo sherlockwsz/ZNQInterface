@@ -1,7 +1,7 @@
 ﻿using Prism.Mvvm;
 using System.Windows.Media;
 
-namespace ZNQInterface.ViewModels.Components
+namespace ZNQInterface.ViewModels.Components.Detection
 {
     /// <summary>
     /// 螺钉角度实时检测区域。

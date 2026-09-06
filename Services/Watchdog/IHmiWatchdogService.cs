@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using ZNQInterface.Models.Communication;
 
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Watchdog
 {
     /// <summary>
     /// WPF侧HMI心跳和PLC看门狗状态读取入口。
@@ -29,6 +29,16 @@ namespace ZNQInterface.Communication.Ads
         /// 启动WPF心跳发送和PLC状态读取。
         /// </summary>
         Task StartAsync();
+
+        /// <summary>
+        /// 主动断开ADS前暂停心跳发送。
+        /// </summary>
+        void Pause();
+
+        /// <summary>
+        /// ADS重新连接或主动断开失败后恢复心跳。
+        /// </summary>
+        void Resume();
 
         /// <summary>
         /// 停止WPF心跳发送。

@@ -1,8 +1,11 @@
-﻿using Prism.Mvvm;
-using ZNQInterface.ViewModels.Components;
+﻿using System;
+using System.IO;
+using Prism.Mvvm;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
 using ZNQInterface.ViewModels.Components.Axes;
+using ZNQInterface.ViewModels.Components.Detection;
+using ZNQInterface.ViewModels.Components.Processes;
 
 namespace ZNQInterface.ViewModels.Pages
 {
@@ -20,11 +23,25 @@ namespace ZNQInterface.ViewModels.Pages
             所以这里不会重新创建14根轴。
             */
             AxisStatus = axisStatus;
+
+            /*
+             * 流程文本随程序一起发布，使用运行目录拼接路径。
+             * 不再依赖开发电脑的固定绝对路径。
+             */
+            string processDataDirectory = Path.Combine(
+                AppContext.BaseDirectory,
+                "Data",
+                "Processes");
+
             LoadingProcess.LoadFromFile(
-                @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\LoadingProcess.txt");
+                Path.Combine(
+                    processDataDirectory,
+                    "LoadingProcess.txt"));
 
             AdjustmentProcess.LoadFromFile(
-                @"C:\Users\Administrator\Desktop\TZD\TwinCAT_Project\ZNQInterface\ProcessData\AdjustmentProcess.txt");
+                Path.Combine(
+                    processDataDirectory,
+                    "AdjustmentProcess.txt"));
 
         }
         /// <summary>

@@ -1,4 +1,4 @@
-namespace ZNQInterface.Communication.Ads
+namespace ZNQInterface.Services.Communication.Ads
 {
     /// <summary>
     /// 上位机 ADS 客户端连接状态。

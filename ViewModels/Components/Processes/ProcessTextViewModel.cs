@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace ZNQInterface.ViewModels.Components
+namespace ZNQInterface.ViewModels.Components.Processes
 {
     public class ProcessTextViewModel : BindableBase
     {

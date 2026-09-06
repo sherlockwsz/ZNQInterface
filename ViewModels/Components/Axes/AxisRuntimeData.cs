@@ -16,7 +16,7 @@ namespace ZNQInterface.ViewModels.Components.Axes
         /*
          * 操作员设置的定位速度。
          * 对应PLC：
-         * GVL_AxisRuntime.Axis1.Set.Position.fVelocity
+         * GVL_AxisRuntime.Axes[i].Set.Position.fVelocity
          *
          * 注意：这不是NC实时SetVelo。
          */
@@ -25,7 +25,7 @@ namespace ZNQInterface.ViewModels.Components.Axes
         /*
          * 操作员设置的点动速度。
          * 对应PLC：
-         * GVL_AxisRuntime.Axis1.Set.Jog.fVelocity
+         * GVL_AxisRuntime.Axes[i].Set.Jog.fVelocity
          */
         private double _jogVelocitySetting;
         private double _actualAcceleration;
@@ -37,6 +37,13 @@ namespace ZNQInterface.ViewModels.Components.Axes
 
         private double _softwareLimitNegative;
         private double _softwareLimitPositive;
+        private double _minimumVelocity;
+        private double _maximumVelocity;
+        private double _minimumAcceleration;
+        private double _maximumAcceleration;
+        private double _minimumDeceleration;
+        private double _maximumDeceleration;
+        private double _softLimitMargin;
 
         private AxisMotionState _motionState;
         private AxisMotionDirection _motionDirection = AxisMotionDirection.None;// PLC反馈的轴当前坐标运动方向。
@@ -55,6 +62,9 @@ namespace ZNQInterface.ViewModels.Components.Axes
         private bool _commandDone;
         private bool _commandAborted;
         private bool _commandRejected;
+        private bool _isConfigurationKnown;
+        private bool _isConfigured;
+        private bool _requireHomed;
 
         private uint _errorCode;
         private uint _warningCode;
@@ -169,6 +179,52 @@ namespace ZNQInterface.ViewModels.Components.Axes
             set => SetProperty(ref _softwareLimitPositive, value);
         }
 
+        /// <summary>
+        /// PLC轴参数允许范围，来自GVL_AxisConfig.AxisLimits[i]。
+        /// PLC尚未配置有效最小/最大值时，界面采用兼容默认范围。
+        /// </summary>
+        public double MinimumVelocity
+        {
+            get => _minimumVelocity;
+            set => SetProperty(ref _minimumVelocity, value);
+        }
+
+        public double MaximumVelocity
+        {
+            get => _maximumVelocity;
+            set => SetProperty(ref _maximumVelocity, value);
+        }
+
+        public double MinimumAcceleration
+        {
+            get => _minimumAcceleration;
+            set => SetProperty(ref _minimumAcceleration, value);
+        }
+
+        public double MaximumAcceleration
+        {
+            get => _maximumAcceleration;
+            set => SetProperty(ref _maximumAcceleration, value);
+        }
+
+        public double MinimumDeceleration
+        {
+            get => _minimumDeceleration;
+            set => SetProperty(ref _minimumDeceleration, value);
+        }
+
+        public double MaximumDeceleration
+        {
+            get => _maximumDeceleration;
+            set => SetProperty(ref _maximumDeceleration, value);
+        }
+
+        public double SoftLimitMargin
+        {
+            get => _softLimitMargin;
+            set => SetProperty(ref _softLimitMargin, value);
+        }
+
         public AxisMotionState MotionState
         {
             get => _motionState;
@@ -219,6 +275,28 @@ namespace ZNQInterface.ViewModels.Components.Axes
         {
             get => _isCommunicationOk;
             set => SetProperty(ref _isCommunicationOk, value);
+        }
+
+        /// <summary>
+        /// 是否已经成功读取PLC的bConfigured。
+        /// 单独记录该状态，避免刚启动时把默认false误判为配置冲突。
+        /// </summary>
+        public bool IsConfigurationKnown
+        {
+            get => _isConfigurationKnown;
+            set => SetProperty(ref _isConfigurationKnown, value);
+        }
+
+        public bool IsConfigured
+        {
+            get => _isConfigured;
+            set => SetProperty(ref _isConfigured, value);
+        }
+
+        public bool RequireHomed
+        {
+            get => _requireHomed;
+            set => SetProperty(ref _requireHomed, value);
         }
 
         public bool PositiveLimit

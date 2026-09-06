@@ -5,14 +5,14 @@
     /// </summary>
     public enum AxisId
     {
-        DamperX = 1,
-        DamperY = 2,
-        DamperZ = 3,
-        DamperRotation = 4,
-        DamperGripper = 5,
+        TrayX = 1,
+        TrayZ = 2,
 
-        TrayX = 6,
-        TrayZ = 7,
+        DamperX = 3,
+        DamperY = 4,
+        DamperZ = 5,
+        DamperRotation = 6,
+        DamperGripper = 7,
 
         Turntable = 8,
         Clamping = 9,

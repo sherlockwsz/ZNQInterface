@@ -9,8 +9,9 @@ using ZNQInterface.ViewModels.Pages;
 using ZNQInterface.Views;
 using ZNQInterface.Views.Pages;
 using ZNQInterface.ViewModels.Components.Axes;
-using ZNQInterface.Communication.Ads;
+using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Services.Axes;
+using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Axes;
 
 namespace ZNQInterface
@@ -47,15 +48,6 @@ namespace ZNQInterface
              */
             containerRegistry.RegisterSingleton
                 <IHmiWatchdogService, HmiWatchdogService>();
-            /*
-             * HMI心跳服务必须为全应用单例。
-             *
-             * App负责启动和停止；
-             * MainWindowViewModel负责显示状态及主动断开时暂停；
-             * 两者使用同一个实例。
-             */
-            containerRegistry.RegisterSingleton
-                <IHmiHeartbeatService, HmiHeartbeatService>();
             // 注册各功能页面的导航映射。
             containerRegistry.RegisterForNavigation
                 <OverviewView, OverviewViewModel>(NavigationKeys.Overview); // 设备总览页面
@@ -102,15 +94,15 @@ namespace ZNQInterface
              * 启动顺序：
              * 1. 启动ADS连接循环；
              * 2. 启动HMI心跳；
-             * 3. 启动Axis1状态监控。
+             * 3. 启动全部已接入轴的状态监控。
              */
             await connection.StartAsync();
             await watchdog.StartAsync();
             await monitoring.StartAsync();
         }
         /// <summary>
-        /// 退出前先释放所有点动/脉冲命令，再停止轮询和 ADS 连接。
-        /// bEnable 不在此处强制修改，避免退出 HMI 意外改变设备使能策略。
+        /// 退出前停止心跳、停止全部已接入轴并撤销使能，
+        /// 然后释放运动信号、停止监控并关闭ADS连接。
         /// </summary>
         protected override void OnExit(ExitEventArgs eventArgs)
         {
@@ -124,21 +116,12 @@ namespace ZNQInterface
                  */
                 Container.Resolve<IHmiWatchdogService>()
                     .Stop();
-                /*
-                 * 首先停止产生新的心跳写入。
-                 *
-                 * 后面的StopAndDisableAsync仍然使用ADS完成受控停止；
-                 * PLC看门狗超时时间为2秒，正常受控停止约100ms即可送达。
-                 */
-                Container.Resolve<IHmiHeartbeatService>()
-                    .Stop();
-                /*
-                * 关闭软件与主动断开连接使用同一套受控停机时序。
-                * 如果ADS已经断开，StopAndDisableAsync会直接返回。
-                */
+                /// <summary>
+                /// 退出前停止心跳、停止全部已映射轴并撤销使能，
+                /// 然后清理运动信号、停止监控并关闭ADS连接。
+                /// </summary>
                 Container.Resolve<IAxisCommandService>()
-                    .StopAndDisableAsync(
-                        AxisId.DamperX)
+                    .StopAndDisableAllMappedAxesAsync()
                     .GetAwaiter()
                     .GetResult();
                 // 3.再次清除全部脉冲及点动位。
