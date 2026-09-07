@@ -1,154 +1,172 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:slotModels=
-    "clr-namespace:ZNQInterface.ViewModels.Components.MaterialSlots">
-    <!-- 料位状态公共颜色：料位指示灯和标题栏图例共同使用 -->
-    <SolidColorBrush x:Key="MaterialSlotUnknownBrush"
-                 Color="#FF6B7280"/>
+    xmlns:slotModels="clr-namespace:ZNQInterface.ViewModels.Components.MaterialSlots">
 
-    <SolidColorBrush x:Key="MaterialSlotEmptyBrush"
-                 Color="#FF9CA3AF"/>
+    <!-- 未知：ADS未连接、读取失败或PLC返回未知值 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotUnknownBrush"
+        Color="#808080"/>
 
-    <SolidColorBrush x:Key="MaterialSlotWaitingBrush"
-                 Color="#FFF59E0B"/>
+    <!-- 空料位 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotEmptyBrush"
+        Color="#B0BEC5"/>
 
-    <SolidColorBrush x:Key="MaterialSlotInspectingBrush"
-                 Color="#FF3B82F6"/>
+    <!-- 未调整 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotUnadjustedBrush"
+        Color="#FBC02D"/>
 
-    <SolidColorBrush x:Key="MaterialSlotQualifiedBrush"
-                 Color="#FF22C55E"/>
+    <!-- 待调整 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotPendingAdjustmentBrush"
+        Color="#FB8C00"/>
 
-    <SolidColorBrush x:Key="MaterialSlotUnqualifiedBrush"
-                 Color="#FFEF4444"/>
+    <!-- 调整中 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotAdjustingBrush"
+        Color="#1E88E5"/>
 
-    <SolidColorBrush x:Key="MaterialSlotManualAdjustingBrush"
-                 Color="#FF8B5CF6"/>
+    <!-- 合格 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotQualifiedBrush"
+        Color="#43A047"/>
 
-    <SolidColorBrush x:Key="MaterialSlotFaultBrush"
-                 Color="#FF991B1B"/>
-    <!--
-    料位状态指示灯样式。
+    <!-- 不合格 -->
+    <SolidColorBrush
+        x:Key="MaterialSlotUnqualifiedBrush"
+        Color="#E53935"/>
 
-    ViewModel负责提供State；
-    该样式负责将不同State显示为不同颜色。
-    -->
-    <Style x:Key="MaterialSlotIndicatorStyle"
+    <!-- 单个料位指示灯样式 -->
+    <Style
+        x:Key="MaterialSlotIndicatorStyle"
         TargetType="{x:Type Ellipse}">
 
-        <!-- 所有料位指示灯的公共外观 -->
         <Setter Property="Width"
-            Value="24"/>
+                Value="24"/>
 
         <Setter Property="Height"
-            Value="24"/>
+                Value="24"/>
 
         <Setter Property="StrokeThickness"
-            Value="2"/>
+                Value="2"/>
 
-        <!-- 未知状态时的默认颜色 -->
+        <!-- 没有匹配到任何状态时按Unknown显示 -->
         <Setter Property="Fill"
-            Value="#FF6B7280"/>
+                Value="{StaticResource MaterialSlotUnknownBrush}"/>
 
         <Setter Property="Stroke"
-            Value="#FF374151"/>
+                Value="#FF374151"/>
 
         <Style.Triggers>
 
-            <!-- 空料位：灰色 -->
-            <DataTrigger Binding="{Binding State}"
+            <!-- 空 -->
+            <DataTrigger
+                Binding="{Binding State}"
                 Value="{x:Static slotModels:MaterialSlotState.Empty}">
 
-                <Setter Property="Fill"
+                <Setter
+                    Property="Fill"
                     Value="{StaticResource MaterialSlotEmptyBrush}"/>
 
-                <Setter Property="Stroke"
+                <Setter
+                    Property="Stroke"
                     Value="#FF6B7280"/>
             </DataTrigger>
 
-            <!-- 等待检测：黄色 -->
-            <DataTrigger Binding="{Binding State}"
-                Value="{x:Static slotModels:MaterialSlotState.Waiting}">
+            <!-- 未调整 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Unadjusted}">
 
-                <Setter Property="Fill"
-                    Value="{StaticResource MaterialSlotWaitingBrush}"/>
+                <Setter
+                    Property="Fill"
+                    Value="{StaticResource MaterialSlotUnadjustedBrush}"/>
 
-                <Setter Property="Stroke"
+                <Setter
+                    Property="Stroke"
                     Value="#FFD97706"/>
             </DataTrigger>
 
-            <!-- 调整中：蓝色 -->
-            <DataTrigger Binding="{Binding State}"
-                Value="{x:Static slotModels:MaterialSlotState.Inspecting}">
+            <!-- 待调整 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.PendingAdjustment}">
 
-                <Setter Property="Fill"
-                    Value="{StaticResource MaterialSlotInspectingBrush}"/>
+                <Setter
+                    Property="Fill"
+                    Value="{StaticResource MaterialSlotPendingAdjustmentBrush}"/>
 
-                <Setter Property="Stroke"
+                <Setter
+                    Property="Stroke"
+                    Value="#FFC2410C"/>
+            </DataTrigger>
+
+            <!-- 调整中 -->
+            <DataTrigger
+                Binding="{Binding State}"
+                Value="{x:Static slotModels:MaterialSlotState.Adjusting}">
+
+                <Setter
+                    Property="Fill"
+                    Value="{StaticResource MaterialSlotAdjustingBrush}"/>
+
+                <Setter
+                    Property="Stroke"
                     Value="#FF1D4ED8"/>
             </DataTrigger>
 
-            <!-- 合格：绿色 -->
-            <DataTrigger Binding="{Binding State}"
+            <!-- 合格 -->
+            <DataTrigger
+                Binding="{Binding State}"
                 Value="{x:Static slotModels:MaterialSlotState.Qualified}">
 
-                <Setter Property="Fill"
+                <Setter
+                    Property="Fill"
                     Value="{StaticResource MaterialSlotQualifiedBrush}"/>
 
-                <Setter Property="Stroke"
+                <Setter
+                    Property="Stroke"
                     Value="#FF15803D"/>
             </DataTrigger>
 
-            <!-- 不合格：红色 -->
-            <DataTrigger Binding="{Binding State}"
+            <!-- 不合格 -->
+            <DataTrigger
+                Binding="{Binding State}"
                 Value="{x:Static slotModels:MaterialSlotState.Unqualified}">
 
-                <Setter Property="Fill"
+                <Setter
+                    Property="Fill"
                     Value="{StaticResource MaterialSlotUnqualifiedBrush}"/>
 
-                <Setter Property="Stroke"
+                <Setter
+                    Property="Stroke"
                     Value="#FFB91C1C"/>
-            </DataTrigger>
-
-            <!-- 人工调整：紫色 -->
-            <DataTrigger Binding="{Binding State}"
-                Value="{x:Static slotModels:MaterialSlotState.ManualAdjusting}">
-
-                <Setter Property="Fill"
-                    Value="{StaticResource MaterialSlotManualAdjustingBrush}"/>
-
-                <Setter Property="Stroke"
-                    Value="#FF6D28D9"/>
-            </DataTrigger>
-
-            <!-- 异常：深红色 -->
-            <DataTrigger Binding="{Binding State}"
-                Value="{x:Static slotModels:MaterialSlotState.Fault}">
-
-                <Setter Property="Fill"
-                    Value="{StaticResource MaterialSlotFaultBrush}"/>
-
-                <Setter Property="Stroke"
-                    Value="#FF7F1D1D"/>
             </DataTrigger>
 
         </Style.Triggers>
     </Style>
 
-    <!-- 料位状态文字的公共样式 -->
-    <Style x:Key="MaterialSlotStatusTextStyle"
+    <!-- 状态文字样式 -->
+    <Style
+        x:Key="MaterialSlotStatusTextStyle"
         TargetType="{x:Type TextBlock}">
 
-        <Setter Property="Margin"
+        <Setter
+            Property="Margin"
             Value="0,4,0,0"/>
 
-        <Setter Property="FontSize"
+        <Setter
+            Property="FontSize"
             Value="12"/>
 
-        <Setter Property="Foreground"
+        <Setter
+            Property="Foreground"
             Value="#FF374151"/>
 
-        <Setter Property="HorizontalAlignment"
+        <Setter
+            Property="HorizontalAlignment"
             Value="Center"/>
     </Style>
 

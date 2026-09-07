@@ -51,26 +51,14 @@ namespace ZNQInterface.ViewModels.Components.Warehouse
                 5 => "五层",
                 _ => $"{LevelNumber}层"
             };
-        public string StatusText =>
-        State switch
+        public string StatusText => State switch
         {
-            WarehouseLevelState.Empty =>
-                "空仓",
-
-            WarehouseLevelState.Unadjusted =>
-                "未调整",
-
-            WarehouseLevelState.Adjusting =>
-                "调整中",
-
-            WarehouseLevelState.Adjusted =>
-                "已调整",
-
-            WarehouseLevelState.Fault =>
-                "异常",
-
-            _ =>
-                "未知"
+            WarehouseLevelState.Unknown => "未知",
+            WarehouseLevelState.Empty => "无料盘",
+            WarehouseLevelState.WaitingInspection => "待检",
+            WarehouseLevelState.Inspecting => "检测中",
+            WarehouseLevelState.Inspected => "已检",
+            _ => "未知"
         };
         /// <summary>
         /// 完整料仓编号，例如1层。

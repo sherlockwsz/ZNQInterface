@@ -59,43 +59,34 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
             get;
         } = new ObservableCollection<MaterialSlotViewModel>();
         /// <summary>
-        /// 初始化两组料位。
+        /// 初始化各区域的显示状态。
         /// </summary>
         private void InitializeSlots()
         {
-            // 主料位预览：
-            // 暂时全部初始化为空。
+            // 主料盘24个位置需要等待PLC状态，因此先显示“未知”。
             foreach (MaterialSlotViewModel slot in MaterialSlots)
             {
-                slot.State = MaterialSlotState.Empty;
+                slot.State = MaterialSlotState.Unknown;
             }
-            // 不合格料盘预览：
-            // 暂时全部初始化为空。
+
+            // 不合格料盘目前尚未与PLC数据绑定，先全部显示为空。
             foreach (MaterialSlotViewModel slot in UnqualifiedMaterialSlots)
             {
                 slot.State = MaterialSlotState.Empty;
             }
-            // 缓冲料位全部初始化为空。
+
+            // 四个缓冲位都属于功能3。
+            // 目前只有第1个与PLC的位置3绑定，其余三个保持为空。
             foreach (MaterialSlotViewModel slot in BufferSlots)
             {
                 slot.State = MaterialSlotState.Empty;
             }
-            SetMaterialSlotState(
-                "A1",
-                MaterialSlotState.Waiting);
-            SetMaterialSlotState(
-                "A2",
-                MaterialSlotState.Inspecting);
 
-            SetUnqualifiedSlotState(
-                "A1",
-                MaterialSlotState.Unqualified);
-            // 缓冲料位预览。
-            // 正式连接PLC以后可以删除。
-            SetBufferSlotState(
-                1,
-                MaterialSlotState.Qualified);
-
+            if (BufferSlots.Count > 0)
+            {
+                // 第1缓冲位等待首次ADS数据。
+                BufferSlots[0].State = MaterialSlotState.Unknown;
+            }
         }
         private void CreateSlots()
         {
@@ -174,40 +165,21 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
             {
                 return;
             }
-
-            RaiseSlotStatisticsChanged();
+            // 料位状态变化后重新计算全部统计数据。
+            RaiseStatisticsChanged();
         }
         /// <summary>
         /// 通知界面重新读取全部料位统计数据。
         /// </summary>
-        private void RaiseSlotStatisticsChanged()
+        private void RaiseStatisticsChanged()
         {
-            RaisePropertyChanged(
-                nameof(TotalSlotCount));
-
-            RaisePropertyChanged(
-                nameof(EmptySlotCount));
-
-            RaisePropertyChanged(
-                nameof(WaitingSlotCount));
-
-            RaisePropertyChanged(
-                nameof(InspectingSlotCount));
-
-            RaisePropertyChanged(
-                nameof(QualifiedSlotCount));
-
-            RaisePropertyChanged(
-                nameof(UnqualifiedSlotCount));
-
-            RaisePropertyChanged(
-                nameof(ManualAdjustingSlotCount));
-
-            RaisePropertyChanged(
-                nameof(FaultSlotCount));
-
-            RaisePropertyChanged(
-                nameof(CurrentAdjustingSlotText));
+            RaisePropertyChanged(nameof(EmptySlotCount));// 空料位数量
+            RaisePropertyChanged(nameof(UnadjustedSlotCount));// 未调整阻尼器数量
+            RaisePropertyChanged(nameof(PendingAdjustmentSlotCount));// 待调整阻尼器数量
+            RaisePropertyChanged(nameof(AdjustingSlotCount));// 正在调整的阻尼器数量
+            RaisePropertyChanged(nameof(QualifiedSlotCount));// 合格阻尼器数量
+            RaisePropertyChanged(nameof(UnqualifiedSlotCount));// 不合格阻尼器数量
+            RaisePropertyChanged(nameof(CurrentAdjustingSlotText));// 当前正在调整的料位编号
         }
         /// <summary>
         /// 修改主料位状态。
@@ -304,54 +276,25 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                 slot =>
                     slot.State == MaterialSlotState.Empty);
 
-        /// <summary>
-        /// 等待检测的料位数量。
-        /// </summary>
-        public int WaitingSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State == MaterialSlotState.Waiting);
+        /// <summary>未调整阻尼器数量。</summary>
+        public int UnadjustedSlotCount =>
+            MaterialSlots.Count(x => x.State == MaterialSlotState.Unadjusted);
 
-        /// <summary>
-        /// 正在检测的料位数量。
-        /// </summary>
-        public int InspectingSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State == MaterialSlotState.Inspecting);
+        /// <summary>待调整阻尼器数量。</summary>
+        public int PendingAdjustmentSlotCount =>
+            MaterialSlots.Count(x => x.State == MaterialSlotState.PendingAdjustment);
 
-        /// <summary>
-        /// 合格料位数量。
-        /// </summary>
+        /// <summary>正在调整的阻尼器数量。</summary>
+        public int AdjustingSlotCount =>
+            MaterialSlots.Count(x => x.State == MaterialSlotState.Adjusting);
+
+        /// <summary>合格阻尼器数量。</summary>
         public int QualifiedSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State == MaterialSlotState.Qualified);
+            MaterialSlots.Count(x => x.State == MaterialSlotState.Qualified);
 
-        /// <summary>
-        /// 不合格料位数量。
-        /// </summary>
+        /// <summary>不合格阻尼器数量。</summary>
         public int UnqualifiedSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State == MaterialSlotState.Unqualified);
-
-        /// <summary>
-        /// 正在人工调整的料位数量。
-        /// </summary>
-        public int ManualAdjustingSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State ==
-                    MaterialSlotState.ManualAdjusting);
-
-        /// <summary>
-        /// 异常料位数量。
-        /// </summary>
-        public int FaultSlotCount =>
-            MaterialSlots.Count(
-                slot =>
-                    slot.State == MaterialSlotState.Fault);
+            MaterialSlots.Count(x => x.State == MaterialSlotState.Unqualified);
 
         /// <summary>
         /// 当前正在调整的料位编号。
@@ -366,7 +309,7 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
                         .Where(
                             slot =>
                                 slot.State ==
-                                MaterialSlotState.Inspecting)
+                                MaterialSlotState.Adjusting)
                         .Select(
                             slot =>
                                 slot.PositionCode)

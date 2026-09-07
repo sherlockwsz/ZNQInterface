@@ -1,44 +1,35 @@
 ﻿namespace ZNQInterface.ViewModels.Components.MaterialSlots
 {
     /// <summary>
-    /// 料位当前状态。
-    /// 后续可以与PLC传递的状态数值对应。
+    /// 阻尼器所在物理位置的内容状态。
+    ///
+    /// 除Unknown外，其余数值必须与PLC的
+    /// E_DamperSlotState枚举完全一致。
     /// </summary>
-    public enum MaterialSlotState
+    public enum MaterialSlotState : short
     {
         /// <summary>
-        /// 料位为空。
+        /// WPF专用状态：ADS未连接、读取失败或PLC返回未知值。
+        /// PLC不会写入该状态。
         /// </summary>
+        Unknown = -1,
+
+        /// <summary>该物理位置没有阻尼器。</summary>
         Empty = 0,
 
-        /// <summary>
-        /// 已放置产品，等待检测。
-        /// </summary>
-        Waiting = 1,
+        /// <summary>该位置放有尚未调整的阻尼器。</summary>
+        Unadjusted = 10,
 
-        /// <summary>
-        /// 产品正在检测。
-        /// </summary>
-        Inspecting = 2,
+        /// <summary>阻尼器位于转台备料位，等待调整。</summary>
+        PendingAdjustment = 20,
 
-        /// <summary>
-        /// 产品检测合格。
-        /// </summary>
-        Qualified = 3,
+        /// <summary>阻尼器位于调整位，正在调整。</summary>
+        Adjusting = 30,
 
-        /// <summary>
-        /// 产品检测不合格。
-        /// </summary>
-        Unqualified = 4,
+        /// <summary>调整结果合格。</summary>
+        Qualified = 40,
 
-        /// <summary>
-        /// 产品正在人工调整。
-        /// </summary>
-        ManualAdjusting = 5,
-
-        /// <summary>
-        /// 料位发生异常。
-        /// </summary>
-        Fault = 6
+        /// <summary>调整结果不合格。</summary>
+        Unqualified = 50
     }
 }

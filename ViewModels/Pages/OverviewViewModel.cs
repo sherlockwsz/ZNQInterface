@@ -15,7 +15,10 @@ namespace ZNQInterface.ViewModels.Pages
     /// </summary>
     public class OverviewViewModel : BindableBase
     {
-        public OverviewViewModel(AxisStatusViewModel axisStatus)
+        public OverviewViewModel(
+            AxisStatusViewModel axisStatus,
+            MaterialSlotStatusViewModel materialSlotStatus,
+            WarehouseStatusViewModel warehouseStatus)
         {
             /*
             该对象由Prism容器提供。
@@ -23,7 +26,8 @@ namespace ZNQInterface.ViewModels.Pages
             所以这里不会重新创建14根轴。
             */
             AxisStatus = axisStatus;
-
+            MaterialSlotStatus = materialSlotStatus;
+            WarehouseStatus = warehouseStatus;
             /*
              * 流程文本随程序一起发布，使用运行目录拼接路径。
              * 不再依赖开发电脑的固定绝对路径。
@@ -48,18 +52,11 @@ namespace ZNQInterface.ViewModels.Pages
         /// 设备总览页面的料位状态区域。
         /// 主料位、不合格料位以及后续料位统计均由该对象管理。
         /// </summary>
-        public MaterialSlotStatusViewModel MaterialSlotStatus
-        {
-            get;
-        } = new MaterialSlotStatusViewModel();
+        public MaterialSlotStatusViewModel MaterialSlotStatus { get; }
         /// <summary>
         /// 设备总览页面的五层料仓状态模块。
         /// </summary>
-        public WarehouseStatusViewModel WarehouseStatus
-        {
-            get;
-        } = new WarehouseStatusViewModel();
-
+        public WarehouseStatusViewModel WarehouseStatus { get; }
         /// <summary>
         /// 螺钉角度实时检测模块
         /// </summary>

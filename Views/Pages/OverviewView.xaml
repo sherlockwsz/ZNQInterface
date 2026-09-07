@@ -98,101 +98,117 @@
                    VerticalAlignment="Center">
 
                                 <!-- 空 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotEmptyBrush}"
-                         Stroke="#FF6B7280"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="空"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
+
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotEmptyBrush}"
+                                        Stroke="#FF6B7280"
+                                        StrokeThickness="1"/>
+
+                                    <TextBlock
+                                        Text="空"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
 
-                                <!-- 待检 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotWaitingBrush}"
-                         Stroke="#FFD97706"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="待检"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
+                                <!-- 未调整 -->
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
+
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotUnadjustedBrush}"
+                                        Stroke="#FFD97706"
+                                        StrokeThickness="1"/>
+
+                                    <TextBlock
+                                        Text="未调整"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- 待调整 -->
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
+
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotPendingAdjustmentBrush}"
+                                        Stroke="#FFC2410C"
+                                        StrokeThickness="1"/>
+
+                                    <TextBlock
+                                        Text="待调整"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- 调整中 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotInspectingBrush}"
-                         Stroke="#FF1D4ED8"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="调整中"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
+
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotAdjustingBrush}"
+                                        Stroke="#FF1D4ED8"
+                                        StrokeThickness="1"/>
+
+                                    <TextBlock
+                                        Text="调整中"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- 合格 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotQualifiedBrush}"
-                         Stroke="#FF15803D"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="合格"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
+
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotQualifiedBrush}"
+                                        Stroke="#FF15803D"
+                                        StrokeThickness="1"/>
+
+                                    <TextBlock
+                                        Text="合格"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
 
                                 <!-- 不合格 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotUnqualifiedBrush}"
-                         Stroke="#FFB91C1C"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="不合格"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <StackPanel
+                                    Margin="3,0"
+                                    Orientation="Horizontal">
 
-                                <!-- 人工调整 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotManualAdjustingBrush}"
-                         Stroke="#FF6D28D9"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="人工调整"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
-                                </StackPanel>
+                                    <Ellipse
+                                        Width="11"
+                                        Height="11"
+                                        Margin="0,0,3,0"
+                                        Fill="{StaticResource MaterialSlotUnqualifiedBrush}"
+                                        Stroke="#FFB91C1C"
+                                        StrokeThickness="1"/>
 
-                                <!-- 异常 -->
-                                <StackPanel Margin="3,0"
-                        Orientation="Horizontal">
-                                    <Ellipse Width="11"
-                         Height="11"
-                         Margin="0,0,3,0"
-                         Fill="{StaticResource MaterialSlotFaultBrush}"
-                         Stroke="#FF7F1D1D"
-                         StrokeThickness="1"/>
-                                    <TextBlock Text="异常"
-                           FontSize="11"
-                           VerticalAlignment="Center"/>
+                                    <TextBlock
+                                        Text="不合格"
+                                        FontSize="11"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
 
                             </WrapPanel>
@@ -372,16 +388,28 @@
                                     Mode=OneWay}"
                                     FontWeight="SemiBold"/>
                                 </TextBlock>
+                                <!-- 未调整 -->
+                                <TextBlock
+                                    Margin="0,2"
+                                    FontSize="14"
+                                    Foreground="#FFD97706">
 
-                                <!-- 待检 -->
+                                    <Run Text="未调整："/>
+
+                                    <Run
+                                        Text="{Binding MaterialSlotStatus.UnadjustedSlotCount,
+                                                       Mode=OneWay}"
+                                        FontWeight="SemiBold"/>
+                                </TextBlock>
+                                <!-- 待调整 -->
                                 <TextBlock Margin="0,2"
                                     FontSize="14"
                                     Foreground="#FFD97706">
 
-                                <Run Text="待检："/>
+                                <Run Text="待调整："/>
 
                                 <Run
-                                    Text="{Binding MaterialSlotStatus.WaitingSlotCount,
+                                    Text="{Binding MaterialSlotStatus.PendingAdjustmentSlotCount,
                                     Mode=OneWay}"
                                     FontWeight="SemiBold"/>
                                 </TextBlock>
@@ -394,7 +422,7 @@
                                 <Run Text="调整中："/>
 
                                 <Run
-                                    Text="{Binding MaterialSlotStatus.InspectingSlotCount,
+                                    Text="{Binding MaterialSlotStatus.AdjustingSlotCount,
                                     Mode=OneWay}"
                                     FontWeight="SemiBold"/>
                                 </TextBlock>
@@ -421,32 +449,6 @@
 
                                 <Run
                                     Text="{Binding MaterialSlotStatus.UnqualifiedSlotCount,
-                                    Mode=OneWay}"
-                                    FontWeight="SemiBold"/>
-                                </TextBlock>
-
-                                <!-- 人工调整 -->
-                                <TextBlock Margin="0,2"
-                                    FontSize="14"
-                                    Foreground="#FF7C3AED">
-
-                                <Run Text="人工调整："/>
-
-                                <Run
-                                    Text="{Binding MaterialSlotStatus.ManualAdjustingSlotCount,
-                                    Mode=OneWay}"
-                                    FontWeight="SemiBold"/>
-                                </TextBlock>
-
-                                <!-- 异常 -->
-                                <TextBlock Margin="0,2"
-                                    FontSize="14"
-                                    Foreground="#FF991B1B">
-
-                                <Run Text="异常："/>
-
-                                <Run
-                                    Text="{Binding MaterialSlotStatus.FaultSlotCount,
                                     Mode=OneWay}"
                                     FontWeight="SemiBold"/>
                                 </TextBlock>

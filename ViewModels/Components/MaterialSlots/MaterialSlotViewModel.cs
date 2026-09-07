@@ -69,33 +69,17 @@ namespace ZNQInterface.ViewModels.Components.MaterialSlots
         /// <summary>
         /// 料位状态显示文字。
         /// </summary>
-        public string StatusText =>
-            State switch
-            {
-                MaterialSlotState.Empty =>
-                    "空",
-
-                MaterialSlotState.Waiting =>
-                    "待检",
-
-                MaterialSlotState.Inspecting =>
-                    "调整中",
-
-                MaterialSlotState.Qualified =>
-                    "合格",
-
-                MaterialSlotState.Unqualified =>
-                    "不合格",
-
-                MaterialSlotState.ManualAdjusting =>
-                    "人工调整",
-
-                MaterialSlotState.Fault =>
-                    "异常",
-
-                _ =>
-                    "未知"
-            };
+        public string StatusText => State switch
+        {
+            MaterialSlotState.Unknown => "未知",
+            MaterialSlotState.Empty => "空",
+            MaterialSlotState.Unadjusted => "未调整",
+            MaterialSlotState.PendingAdjustment => "待调整",
+            MaterialSlotState.Adjusting => "调整中",
+            MaterialSlotState.Qualified => "合格",
+            MaterialSlotState.Unqualified => "不合格",
+            _ => "未知"
+        };
 
         /// <summary>
         /// 鼠标停留在指示灯上时显示的提示。

@@ -43,7 +43,7 @@ namespace ZNQInterface.ViewModels.Components.Warehouse
                         .Where(
                             level =>
                                 level.State ==
-                                WarehouseLevelState.Adjusting)
+                                WarehouseLevelState.Inspecting)
                         .Select(
                             level =>
                                 $"第{level.LevelNumber}层")
@@ -61,10 +61,11 @@ namespace ZNQInterface.ViewModels.Components.Warehouse
         }
 
         /// <summary>
-        /// 修改指定料仓层的状态。
+        /// 根据物理层号更新料盘状态。
+        /// 集合显示顺序是5到1，因此不能直接使用集合下标。
         /// </summary>
         public bool SetWarehouseLevelState(
-            int levelNumber,
+        int levelNumber,
             WarehouseLevelState state)
         {
             WarehouseLevelViewModel level =
@@ -98,16 +99,8 @@ namespace ZNQInterface.ViewModels.Components.Warehouse
                 WarehouseLevels.Add(
                     new WarehouseLevelViewModel(
                         levelNumber,
-                        WarehouseLevelState.Empty));
+                        WarehouseLevelState.Unknown));
             }
-            // 状态示例
-            SetWarehouseLevelState(
-                1,
-                WarehouseLevelState.Unadjusted);
-            SetWarehouseLevelState(
-                2,
-                WarehouseLevelState.Adjusting);
-
         }
 
         /// <summary>

@@ -64,7 +64,7 @@
             <!-- 未调整：黄色 -->
             <DataTrigger
                 Binding="{Binding State}"
-                Value="{x:Static warehouseModels:WarehouseLevelState.Unadjusted}">
+                Value="{x:Static warehouseModels:WarehouseLevelState.WaitingInspection}">
 
                 <Setter
                     Property="Fill"
@@ -79,7 +79,7 @@
             <!-- 调整中：蓝色 -->
             <DataTrigger
                 Binding="{Binding State}"
-                Value="{x:Static warehouseModels:WarehouseLevelState.Adjusting}">
+                Value="{x:Static warehouseModels:WarehouseLevelState.Inspecting}">
 
                 <Setter
                     Property="Fill"
@@ -94,7 +94,7 @@
             <!-- 已调整：绿色 -->
             <DataTrigger
                 Binding="{Binding State}"
-                Value="{x:Static warehouseModels:WarehouseLevelState.Adjusted}">
+                Value="{x:Static warehouseModels:WarehouseLevelState.Inspected}">
 
                 <Setter
                     Property="Fill"
@@ -105,22 +105,6 @@
                     Value="#FF15803D"/>
 
             </DataTrigger>
-
-            <!-- 异常：红色 -->
-            <DataTrigger
-                Binding="{Binding State}"
-                Value="{x:Static warehouseModels:WarehouseLevelState.Fault}">
-
-                <Setter
-                    Property="Fill"
-                    Value="#FFEF4444"/>
-
-                <Setter
-                    Property="Stroke"
-                    Value="#FFB91C1C"/>
-
-            </DataTrigger>
-
         </Style.Triggers>
     </Style>
 

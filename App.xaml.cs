@@ -13,6 +13,9 @@ using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Services.Axes;
 using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Axes;
+using ZNQInterface.Services.Processes;
+using ZNQInterface.ViewModels.Components.MaterialSlots;
+using ZNQInterface.ViewModels.Components.Warehouse;
 
 namespace ZNQInterface
 {
@@ -34,6 +37,13 @@ namespace ZNQInterface
            OverviewViewModel、ManualControlViewModel以及后续ADS通信服务
            注入的都是同一个对象，确保各页面轴数据同步。
            */
+            // 页面和ADS监控服务必须共享同一套状态ViewModel。
+            containerRegistry.RegisterSingleton<MaterialSlotStatusViewModel>();
+            containerRegistry.RegisterSingleton<WarehouseStatusViewModel>();
+
+            // 阻尼器料位及五层料盘ADS监控服务。
+            containerRegistry.RegisterSingleton<ProcessStatusMonitoringService>();
+            // 14根轴的状态ViewModel，整个应用只创建一个实例。
             containerRegistry.RegisterSingleton<AxisStatusViewModel>();
 
             // ADS 全应用单例：一个 AdsClient、一个轮询器、一个命令入口。
@@ -89,16 +99,21 @@ namespace ZNQInterface
 
             AxisMonitoringService monitoring =
                 Container.Resolve<AxisMonitoringService>();
+            ProcessStatusMonitoringService processStatusMonitoringService =
+                Container.Resolve<ProcessStatusMonitoringService>();
+
 
             /*
              * 启动顺序：
              * 1. 启动ADS连接循环；
              * 2. 启动HMI心跳；
              * 3. 启动全部已接入轴的状态监控。
+             * 4. 启动阻尼器料位及五层料盘监控。
              */
             await connection.StartAsync();
             await watchdog.StartAsync();
             await monitoring.StartAsync();
+            await processStatusMonitoringService.StartAsync();
         }
         /// <summary>
         /// 退出前停止心跳、停止全部已接入轴并撤销使能，
@@ -133,6 +148,9 @@ namespace ZNQInterface
                 // OnExit 位于 UI 线程，不同步等待轮询器投递 UI 更新，
                 // 避免退出阶段形成 Dispatcher 互等。
                 _ = Container.Resolve<AxisMonitoringService>()
+                    .StopAsync();
+                // 5. 停止阻尼器料位及五层料盘监控。
+                _ = Container.Resolve<ProcessStatusMonitoringService>()
                     .StopAsync();
                 // 最后关闭ADS连接。
                 Container.Resolve<IAdsConnectionService>()
