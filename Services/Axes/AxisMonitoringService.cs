@@ -266,16 +266,42 @@ namespace ZNQInterface.Services.Axes
                 Add<short>(result, axis,
                     AdsAxisSymbols.State(prefix, "eMotionState"),
                     ApplyMotionState);
-                Add<short>(result, axis,
-                    AdsAxisSymbols.State(prefix, "eMotionDirection"),
-                    ApplyMotionDirection);
-                Add<bool>(result, axis,
-                    AdsAxisSymbols.State(prefix, "bSoftLimitPositive"),
-                    (runtime, value) => runtime.PositiveLimit = value);
-                Add<bool>(result, axis,
-                    AdsAxisSymbols.State(prefix, "bSoftLimitNegative"),
-                    (runtime, value) => runtime.NegativeLimit = value);
+                Add<short>(
+                    result,
+                    axis,
+                    AdsAxisSymbols.State(
+                        prefix,
+                        "eMotionDirection"),
+                    (runtime, value) =>
+                        ApplyMotionDirection(
+                            axis.Definition,
+                            runtime,
+                            value));
+                Add<bool>(
+                    result,
+                    axis,
+                    AdsAxisSymbols.State(
+                        prefix,
+                        "bSoftLimitPositive"),
+                    (runtime, value) =>
+                        ApplySoftLimitState(
+                            axis.Definition,
+                            runtime,
+                            plcPositiveDirection: true,
+                            value));
 
+                Add<bool>(
+                    result,
+                    axis,
+                    AdsAxisSymbols.State(
+                        prefix,
+                        "bSoftLimitNegative"),
+                    (runtime, value) =>
+                        ApplySoftLimitState(
+                            axis.Definition,
+                            runtime,
+                            plcPositiveDirection: false,
+                            value));
                 Add<bool>(result, axis,
                     AdsAxisSymbols.Alarm(prefix, "bError"),
                     (runtime, value) => runtime.HasFault = value);
@@ -420,16 +446,22 @@ namespace ZNQInterface.Services.Axes
         }
 
         private static void ApplyMotionDirection(
+            AxisDefinition definition,
             AxisRuntimeData runtime,
             short value)
         {
-            runtime.MotionDirection = Enum.IsDefined(
+            AxisMotionDirection plcDirection =
+                Enum.IsDefined(
                     typeof(AxisMotionDirection),
                     (int)value)
                 ? (AxisMotionDirection)value
                 : AxisMotionDirection.None;
-        }
 
+            runtime.MotionDirection =
+                AxisDirectionMapper.FromPlcDirection(
+                    definition,
+                    plcDirection);
+        }
         private void ResetBatchHealth()
         {
             foreach (AxisId axisId in _fastHealthy.Keys.ToArray())
@@ -469,7 +501,26 @@ namespace ZNQInterface.Services.Axes
 
             return Application.Current.Dispatcher.InvokeAsync(action).Task;
         }
+        private static void ApplySoftLimitState(
+            AxisDefinition definition,
+            AxisRuntimeData runtime,
+            bool plcPositiveDirection,
+            bool value)
+        {
+            bool hmiPositiveDirection =
+                AxisDirectionMapper.FromPlcPositiveDirection(
+                    definition,
+                    plcPositiveDirection);
 
+            if (hmiPositiveDirection)
+            {
+                runtime.PositiveLimit = value;
+            }
+            else
+            {
+                runtime.NegativeLimit = value;
+            }
+        }
         private sealed class AxisReadBinding
         {
             public AxisReadBinding(

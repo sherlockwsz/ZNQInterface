@@ -123,43 +123,14 @@
                     <!-- 启动设备按钮 -->
                     <Grid Grid.Column="1"
                         Margin="10,0,10,0">
-                        <ToggleButton>
-                            <ToggleButton.Style>
-                                <Style TargetType="{x:Type ToggleButton}"
-                                    BasedOn="{StaticResource ToggleStateButtonStyle}">
-
-                                    <!-- 初始状态 -->
-                                    <Setter Property="Content"
-                                        Value="启动设备"/>
-
-                                    <Setter Property="Background"
-                                        Value="Green"/>
-
-                                    <Setter Property="BorderBrush"
-                                        Value="Green"/>
-
-                                    <!-- 切换状态 -->
-                                    <Style.Triggers>
-
-                                        <Trigger Property="IsChecked"
-                                            Value="True">
-
-                                            <Setter Property="Content"
-                                                Value="停止设备"/>
-
-                                            <Setter Property="Background"
-                                                Value="Red"/>
-
-                                            <Setter Property="BorderBrush"
-                                                Value="Red"/>
-
-                                        </Trigger>
-
-                                    </Style.Triggers>
-                                </Style>
-                            </ToggleButton.Style>
-
-                        </ToggleButton>
+                        <ToggleButton
+                            Command="{Binding ToggleDeviceControlCommand}"
+                            IsChecked="{Binding IsControlAuto, Mode=OneWay}"
+                            Content="{Binding DeviceButtonText}"
+                            Background="{Binding DeviceButtonBackground}"
+                            BorderBrush="{Binding DeviceButtonBorderBrush}"
+                            ToolTip="{Binding DeviceStatusText}"
+                            Style="{StaticResource ToggleStateButtonStyle}" />
                     </Grid>
                     <!-- 故障复位按钮 -->
                     <Grid Grid.Column="2"

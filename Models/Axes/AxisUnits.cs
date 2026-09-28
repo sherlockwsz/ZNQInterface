@@ -14,7 +14,7 @@
                 position: "mm",
                 velocity: "mm/s",
                 acceleration: "mm/s²",
-                torque: "N·m");
+                torque: "%");
 
         /// <summary>
         /// 旋转运动轴单位。
@@ -22,8 +22,8 @@
         public static AxisUnitSet Rotary { get; } =
             new AxisUnitSet(
                 position: "°",
-                velocity: "r/s",
-                acceleration: "r/s²",
-                torque: "N·m");
+                velocity: "°/s",
+                acceleration: "°/s²",
+                torque: "%");
     }
 }

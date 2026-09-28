@@ -13,6 +13,7 @@ using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Services.Axes;
 using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Axes;
+using ZNQInterface.Services.Device;
 using ZNQInterface.Services.Processes;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
@@ -49,8 +50,11 @@ namespace ZNQInterface
             // ADS 全应用单例：一个 AdsClient、一个轮询器、一个命令入口。
             containerRegistry.RegisterSingleton
                 <IAdsConnectionService, AdsConnectionService>();
+
             containerRegistry.RegisterSingleton
                 <IAxisCommandService, AxisCommandService>();
+            containerRegistry.RegisterSingleton
+                <IDeviceControlService, DeviceControlService>();
             containerRegistry.RegisterSingleton<AxisMonitoringService>();
             /*
              * HMI看门狗服务全应用只允许一个实例：

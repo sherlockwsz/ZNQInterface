@@ -5,13 +5,17 @@ using System;
 using System.Windows;
 using System.Collections.Generic;
 using System.Windows.Threading;
+using System.Windows.Media;
 using ZNQInterface.Infrastructure;
 using ZNQInterface.Models.Navigation;
 using ZNQInterface.Services.Communication.Ads;
 using ZNQInterface.Services.Axes;
 using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Communication;
-
+using System.Threading;
+using System.Threading.Tasks;
+using ZNQInterface.Models.Device;
+using ZNQInterface.Services.Device;
 namespace ZNQInterface.ViewModels
 {
     /// <summary>
@@ -29,6 +33,30 @@ namespace ZNQInterface.ViewModels
         // WPF心跳和PLC看门狗状态服务。
         private readonly IHmiWatchdogService _hmiWatchdogService;
 
+        private readonly IDeviceControlService _deviceControlService;
+
+        private readonly DispatcherTimer _deviceStateTimer;
+
+        private int _deviceStateCycleRunning;
+        private bool _deviceCommandExecuting;
+
+        private bool _isControlAuto;
+        private bool _isAutoStopping;
+        private bool _isAutoStopDone;
+        private bool _isAutoStopError;
+        private string _deviceStatusText =
+            "设备：等待连接";
+        //==============================================================
+        // 设备启停按钮外观
+        //==============================================================
+        private string _deviceButtonText =
+            "启动设备";
+
+        private Brush _deviceButtonBackground =
+            Brushes.Green;
+
+        private Brush _deviceButtonBorderBrush =
+            Brushes.Green;
         // 当前界面显示的看门狗综合状态。
         private HmiWatchdogState _watchdogState =
             HmiWatchdogState.AdsDisconnected;
@@ -45,8 +73,14 @@ namespace ZNQInterface.ViewModels
             IRegionManager regionManager,
             IAdsConnectionService adsConnection,
             IAxisCommandService axisCommandService,
-            IHmiWatchdogService hmiWatchdogService)
+            IHmiWatchdogService hmiWatchdogService,
+            IDeviceControlService deviceControlService)
         {
+            _deviceControlService =
+                deviceControlService ??
+                throw new ArgumentNullException(
+                    nameof(deviceControlService));
+
             _hmiWatchdogService = hmiWatchdogService
                 ?? throw new ArgumentNullException(
                     nameof(hmiWatchdogService));
@@ -69,6 +103,22 @@ namespace ZNQInterface.ViewModels
 
             ToggleAdsConnectionCommand =
                 new DelegateCommand(ExecuteToggleAdsConnection);
+
+
+            ToggleDeviceControlCommand =
+            new DelegateCommand(
+                ExecuteToggleDeviceControl,
+                CanToggleDeviceControl);
+
+            _deviceStateTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200)
+            };
+
+            _deviceStateTimer.Tick +=
+                OnDeviceStateTimerTick;
+
+            _deviceStateTimer.Start();
 
             _isAdsConnected = _adsConnection.IsConnected;
             _adsStatusText = _adsConnection.StateMessage;
@@ -98,7 +148,359 @@ namespace ZNQInterface.ViewModels
                 CurrentSystemTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _systemTimeTimer.Start();
         }
+        public string DeviceButtonText
+        {
+            get => _deviceButtonText;
+            private set =>
+                SetProperty(
+                    ref _deviceButtonText,
+                    value);
+        }
 
+        public Brush DeviceButtonBackground
+        {
+            get => _deviceButtonBackground;
+            private set =>
+                SetProperty(
+                    ref _deviceButtonBackground,
+                    value);
+        }
+
+        public Brush DeviceButtonBorderBrush
+        {
+            get => _deviceButtonBorderBrush;
+            private set =>
+                SetProperty(
+                    ref _deviceButtonBorderBrush,
+                    value);
+        }
+        public bool IsControlAuto
+        {
+            get => _isControlAuto;
+
+            private set
+            {
+                if (SetProperty(
+                        ref _isControlAuto,
+                        value))
+                {
+                    UpdateDeviceButtonAppearance();
+
+                    ToggleDeviceControlCommand
+                        .RaiseCanExecuteChanged();
+                }
+            }
+        }
+        public bool IsAutoStopping
+        {
+            get => _isAutoStopping;
+
+            private set
+            {
+                if (SetProperty(
+                        ref _isAutoStopping,
+                        value))
+                {
+                    UpdateDeviceButtonAppearance();
+
+                    ToggleDeviceControlCommand
+                        .RaiseCanExecuteChanged();
+                }
+            }
+        }
+        public bool IsAutoStopDone
+        {
+            get => _isAutoStopDone;
+            private set =>
+                SetProperty(ref _isAutoStopDone, value);
+        }
+
+        public bool IsAutoStopError
+        {
+            get => _isAutoStopError;
+
+            private set
+            {
+                if (SetProperty(
+                        ref _isAutoStopError,
+                        value))
+                {
+                    UpdateDeviceButtonAppearance();
+
+                    ToggleDeviceControlCommand
+                        .RaiseCanExecuteChanged();
+                }
+            }
+        }
+        public string DeviceStatusText
+        {
+            get => _deviceStatusText;
+            private set =>
+                SetProperty(ref _deviceStatusText, value);
+        }
+        public DelegateCommand ToggleDeviceControlCommand
+        {
+            get;
+        }
+        /// <summary>
+        /// 根据PLC实际状态更新设备启停按钮外观。
+        ///
+        /// 优先级：
+        /// 停止异常 > 正在停止 > 自动运行 > 等待启动。
+        /// </summary>
+        private void UpdateDeviceButtonAppearance()
+        {
+            //==========================================================
+            // 1. PLC停止异常
+            //==========================================================
+            if (IsAutoStopError)
+            {
+                DeviceButtonText =
+                    "停止异常";
+
+                DeviceButtonBackground =
+                    Brushes.OrangeRed;
+
+                DeviceButtonBorderBrush =
+                    Brushes.OrangeRed;
+
+                return;
+            }
+
+            //==========================================================
+            // 2. PLC正在执行全轴停止
+            //==========================================================
+            if (IsAutoStopping)
+            {
+                DeviceButtonText =
+                    "停止中";
+
+                DeviceButtonBackground =
+                    Brushes.Gray;
+
+                DeviceButtonBorderBrush =
+                    Brushes.Gray;
+
+                return;
+            }
+
+            //==========================================================
+            // 3. WPF正在发送启停命令
+            //==========================================================
+            if (_deviceCommandExecuting)
+            {
+                DeviceButtonText =
+                    IsControlAuto
+                        ? "正在停止"
+                        : "正在启动";
+
+                DeviceButtonBackground =
+                    Brushes.Gray;
+
+                DeviceButtonBorderBrush =
+                    Brushes.Gray;
+
+                return;
+            }
+
+            //==========================================================
+            // 4. PLC实际处于自动运行状态
+            //==========================================================
+            if (IsControlAuto)
+            {
+                DeviceButtonText =
+                    "停止设备";
+
+                DeviceButtonBackground =
+                    Brushes.Red;
+
+                DeviceButtonBorderBrush =
+                    Brushes.Red;
+
+                return;
+            }
+
+            //==========================================================
+            // 5. 等待启动
+            //==========================================================
+            DeviceButtonText =
+                "启动设备";
+
+            DeviceButtonBackground =
+                Brushes.Green;
+
+            DeviceButtonBorderBrush =
+                Brushes.Green;
+        }
+        private async void ExecuteToggleDeviceControl()
+        {
+            if (_deviceCommandExecuting)
+            {
+                return;
+            }
+
+            _deviceCommandExecuting = true;
+
+            UpdateDeviceButtonAppearance();
+
+            ToggleDeviceControlCommand
+                .RaiseCanExecuteChanged();
+
+            try
+            {
+                if (IsControlAuto)
+                {
+                    DeviceStatusText =
+                        "设备：正在请求停止";
+
+                    await _deviceControlService
+                        .RequestStopAsync();
+
+                    DeviceStatusText =
+                        "设备：正在停止";
+                }
+                else
+                {
+                    DeviceStatusText =
+                        "设备：正在启动";
+
+                    await _deviceControlService
+                        .StartAutoAsync();
+
+                    DeviceStatusText =
+                        "设备：启动请求已发送";
+                }
+
+                await RefreshDeviceStateAsync();
+            }
+            catch (Exception exception)
+            {
+                DeviceStatusText =
+                    $"设备控制失败：{exception.Message}";
+            }
+            finally
+            {
+                _deviceCommandExecuting = false;
+
+                UpdateDeviceButtonAppearance();
+
+                ToggleDeviceControlCommand
+                    .RaiseCanExecuteChanged();
+            }
+        }
+        private bool CanToggleDeviceControl()
+        {
+            if (_deviceCommandExecuting ||
+                !_adsConnection.IsConnected ||
+                IsAutoStopping)
+            {
+                return false;
+            }
+
+            // 自动运行期间始终优先允许人工停止。
+            if (IsControlAuto)
+            {
+                return true;
+            }
+
+            // 停止异常后禁止直接重新启动。
+            // 应先执行故障复位并确认现场状态。
+            if (IsAutoStopError)
+            {
+                return false;
+            }
+
+            return _hmiWatchdogService.IsControlAllowed;
+        }
+        private async void OnDeviceStateTimerTick(
+            object sender,
+            EventArgs eventArgs)
+        {
+            if (_deviceCommandExecuting ||
+                !_adsConnection.IsConnected)
+            {
+                return;
+            }
+
+            if (Interlocked.Exchange(
+                    ref _deviceStateCycleRunning,
+                    1) != 0)
+            {
+                return;
+            }
+
+            try
+            {
+                await RefreshDeviceStateAsync();
+            }
+            catch
+            {
+                IsControlAuto = false;
+                IsAutoStopping = false;
+                DeviceStatusText = "设备：状态读取失败";
+            }
+            finally
+            {
+                Interlocked.Exchange(
+                    ref _deviceStateCycleRunning,
+                    0);
+            }
+        }
+
+        private async Task RefreshDeviceStateAsync()
+        {
+            if (!_adsConnection.IsConnected)
+            {
+                IsControlAuto = false;
+                IsAutoStopping = false;
+                DeviceStatusText = "设备：ADS未连接";
+                return;
+            }
+
+            DeviceControlState state =
+                await _deviceControlService.ReadStateAsync();
+
+            IsControlAuto =
+                state.IsControlAuto;
+
+            IsAutoStopping =
+                state.IsAutoStopping;
+
+            IsAutoStopDone =
+                state.IsAutoStopDone;
+
+            IsAutoStopError =
+                state.IsAutoStopError;
+
+            if (state.IsAutoStopping)
+            {
+                DeviceStatusText =
+                    "设备：正在停止";
+            }
+            else if (state.IsAutoStopError)
+            {
+                DeviceStatusText =
+                    state.IsAutoStopTimeout
+                        ? "设备：停止超时"
+                        : $"设备：停止异常，轴号{state.AutoStopErrorAxis}，" +
+                          $"错误0x{state.AutoStopErrorId:X8}";
+            }
+            else if (state.IsControlAuto)
+            {
+                DeviceStatusText =
+                    "设备：自动运行中";
+            }
+            else if (state.IsAutoStopDone)
+            {
+                DeviceStatusText =
+                    "设备：已停止，全部轴已撤销使能";
+            }
+            else
+            {
+                DeviceStatusText =
+                    "设备：等待启动";
+            }
+        }
         /// <summary>
         /// 手动连接或断开ADS。
         ///
@@ -214,14 +616,13 @@ namespace ZNQInterface.ViewModels
         {
             void UpdateState()
             {
-                WatchdogState = eventArgs.State;
+                WatchdogState =
+                    eventArgs.State;
+
+                ToggleDeviceControlCommand
+                    .RaiseCanExecuteChanged();
             }
 
-            /*
-             * 当前看门狗服务通常在UI线程触发事件，
-             * 这里仍保留Dispatcher保护，避免以后改为后台轮询后
-             * 出现跨线程更新ViewModel的问题。
-             */
             if (Application.Current?.Dispatcher.CheckAccess() != false)
             {
                 UpdateState();
@@ -249,7 +650,7 @@ namespace ZNQInterface.ViewModels
 
             // 停止系统时间定时器
             _systemTimeTimer.Stop();
-
+            _deviceStateTimer.Stop();
             // 退出整个应用程序
             Application.Current.Shutdown();
         }

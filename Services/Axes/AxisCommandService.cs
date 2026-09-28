@@ -534,10 +534,31 @@ namespace ZNQInterface.Services.Axes
             CancellationToken cancellationToken = default)
         {
             ValidateFinite(distance, "相对距离");
-            AxisItemViewModel axis = GetMappedAxis(axisId);
+
+            AxisItemViewModel axis =
+                GetMappedAxis(axisId);
+
+            /*
+             * distance是界面机械方向距离。
+             *
+             * 正常轴：
+             * HMI +10 -> PLC +10
+             *
+             * 反向轴：
+             * HMI +10 -> PLC -10
+             */
+            double plcDistance =
+                AxisDirectionMapper.ToPlcRelativeDistance(
+                    axis.Definition,
+                    distance);
+
+            /*
+             * Runtime.ActualPosition和软件限位仍然采用PLC原始坐标，
+             * 因此安全校验必须使用转换后的plcDistance。
+             */
             ValidatePosition(
                 axis,
-                axis.Runtime.ActualPosition + distance,
+                axis.Runtime.ActualPosition + plcDistance,
                 "相对运动目标位置");
 
             await _commandGate
@@ -546,19 +567,17 @@ namespace ZNQInterface.Services.Axes
 
             try
             {
-                string prefix = axis.Definition.AdsSymbolPrefix;
+                string prefix =
+                    axis.Definition.AdsSymbolPrefix;
 
-                // 相对距离属于本次运动命令，点击相对运动时写入。
                 await _ads.WriteAsync(
                     AdsAxisSymbols.Setting(
                         prefix,
                         "Position",
                         "fRelativeDistance"),
-                    distance,
+                    plcDistance,
                     cancellationToken).ConfigureAwait(false);
 
-                // 这里不再写入fVelocity。
-                // 相对运动使用之前通过按钮写入的定位速度。
                 await PulseCommandUnsafeAsync(
                     prefix,
                     "bMoveRel",
@@ -575,7 +594,18 @@ namespace ZNQInterface.Services.Axes
             bool positiveDirection,
             CancellationToken cancellationToken = default)
         {
-            AxisItemViewModel axis = GetMappedAxis(axisId);
+            AxisItemViewModel axis =
+                GetMappedAxis(axisId);
+
+            /*
+             * positiveDirection表达界面机械方向：
+             * true  = 前移、左移、上移、顺时针或夹紧；
+             * false = 后移、右移、下移、逆时针或松开。
+             */
+            bool plcPositiveDirection =
+                AxisDirectionMapper.ToPlcPositiveDirection(
+                    axis.Definition,
+                    positiveDirection);
 
             await _commandGate
                 .WaitAsync(cancellationToken)
@@ -583,25 +613,30 @@ namespace ZNQInterface.Services.Axes
 
             try
             {
-                string prefix = axis.Definition.AdsSymbolPrefix;
+                string prefix =
+                    axis.Definition.AdsSymbolPrefix;
 
-                // 开始点动前，先保证两个方向信号均为FALSE。
-                await _ads.WriteAsync(
-                    AdsAxisSymbols.Command(prefix, "bJogPos"),
-                    false,
-                    cancellationToken).ConfigureAwait(false);
-
-                await _ads.WriteAsync(
-                    AdsAxisSymbols.Command(prefix, "bJogNeg"),
-                    false,
-                    cancellationToken).ConfigureAwait(false);
-
-                // 这里不再写入Set.Jog.fVelocity。
-                // 点动使用之前通过“写入参数”按钮写入的速度。
+                // 启动前先释放两个方向，防止方向命令同时有效。
                 await _ads.WriteAsync(
                     AdsAxisSymbols.Command(
                         prefix,
-                        positiveDirection ? "bJogPos" : "bJogNeg"),
+                        "bJogPos"),
+                    false,
+                    cancellationToken).ConfigureAwait(false);
+
+                await _ads.WriteAsync(
+                    AdsAxisSymbols.Command(
+                        prefix,
+                        "bJogNeg"),
+                    false,
+                    cancellationToken).ConfigureAwait(false);
+
+                await _ads.WriteAsync(
+                    AdsAxisSymbols.Command(
+                        prefix,
+                        plcPositiveDirection
+                            ? "bJogPos"
+                            : "bJogNeg"),
                     true,
                     cancellationToken).ConfigureAwait(false);
             }

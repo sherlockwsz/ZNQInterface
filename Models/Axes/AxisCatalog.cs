@@ -28,7 +28,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Linear,
                     "前移",
                     "后移",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.TrayZ,
@@ -47,7 +49,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Linear,
                     "前移",
                     "后移",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.DamperY,
@@ -103,7 +107,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Gripper,
                     "夹紧",
                     "松开",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 // 同轴度调整机构。
                 Create(
@@ -113,7 +119,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Linear,
                     "前移",
                     "后移",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.AdjustmentY,
@@ -122,7 +130,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Linear,
                     "左移",
                     "右移",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.AdjustmentZ,
@@ -141,7 +151,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Linear,
                     "左移",
                     "右移",
-                    AxisUnits.Linear),
+                    AxisUnits.Linear,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.ScrewdriverZ,
@@ -161,7 +173,9 @@ namespace ZNQInterface.Models.Axes
             string positiveDirectionText,
             string negativeDirectionText,
             AxisUnitSet units,
-            bool isExpectedConfigured = true)
+            bool isExpectedConfigured = true,
+            AxisDirectionPolarity directionPolarity =
+                AxisDirectionPolarity.Normal)
         {
             int plcAxisNumber = (int)axisId;
 
@@ -173,11 +187,16 @@ namespace ZNQInterface.Models.Axes
                 GroupId = groupId,
                 DisplayName = displayName,
                 AxisType = axisType,
+
+                DirectionPolarity = directionPolarity,
+
                 PositiveDirectionText = positiveDirectionText,
                 NegativeDirectionText = negativeDirectionText,
                 Units = units,
+
                 AdsSymbolPrefix =
                     $"GVL_AxisRuntime.Axes[{plcAxisNumber}]",
+
                 AdsLimitSymbolPrefix =
                     $"GVL_AxisConfig.AxisLimits[{plcAxisNumber}]"
             };

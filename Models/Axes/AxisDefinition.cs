@@ -38,12 +38,33 @@
         public AxisType AxisType { get; init; }
 
         /// <summary>
-        /// 正向运动时显示的文字。
+        /// PLC坐标正负方向与界面机械方向的对应关系。
+        /// 默认不反向。
         /// </summary>
+        public AxisDirectionPolarity DirectionPolarity
+        {
+            get;
+            init;
+        } = AxisDirectionPolarity.Normal;
+
+        /// <summary>
+        /// 当前轴是否需要进行机械方向反映射。
+        /// </summary>
+        public bool IsMotionDirectionReversed =>
+            DirectionPolarity ==
+            AxisDirectionPolarity.Reversed;
+
+
+        /// <summary>
+        /// 界面定义的正机械方向文字。
+        /// 该方向不一定等于PLC坐标正方向。
+        /// </summary>
+
         public string PositiveDirectionText { get; init; }
 
         /// <summary>
-        /// 负向运动时显示的文字。
+        /// 界面定义的负机械方向文字。
+        /// 该方向不一定等于PLC坐标负方向。
         /// </summary>
         public string NegativeDirectionText { get; init; }
 
