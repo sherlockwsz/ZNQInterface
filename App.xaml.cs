@@ -17,6 +17,8 @@ using ZNQInterface.Services.Device;
 using ZNQInterface.Services.Processes;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
+using ZNQInterface.ViewModels.Components.Detection;
+using ZNQInterface.Services.Vision;
 
 namespace ZNQInterface
 {
@@ -41,6 +43,15 @@ namespace ZNQInterface
             // 页面和ADS监控服务必须共享同一套状态ViewModel。
             containerRegistry.RegisterSingleton<MaterialSlotStatusViewModel>();
             containerRegistry.RegisterSingleton<WarehouseStatusViewModel>();
+            containerRegistry.RegisterSingleton<ScrewAngleMonitorViewModel>();
+            containerRegistry.RegisterSingleton<CoaxialityMonitorViewModel>();
+
+            containerRegistry.RegisterInstance(
+                VisionMonitoringOptions.Load(
+                    Path.Combine(
+                        AppContext.BaseDirectory,
+                        "vision-monitoring.json")));
+            containerRegistry.RegisterSingleton<VisionMonitoringService>();
 
             // 阻尼器料位及五层料盘ADS监控服务。
             containerRegistry.RegisterSingleton<ProcessStatusMonitoringService>();
@@ -105,6 +116,8 @@ namespace ZNQInterface
                 Container.Resolve<AxisMonitoringService>();
             ProcessStatusMonitoringService processStatusMonitoringService =
                 Container.Resolve<ProcessStatusMonitoringService>();
+            VisionMonitoringService visionMonitoringService =
+                Container.Resolve<VisionMonitoringService>();
 
 
             /*
@@ -118,6 +131,7 @@ namespace ZNQInterface
             await watchdog.StartAsync();
             await monitoring.StartAsync();
             await processStatusMonitoringService.StartAsync();
+            await visionMonitoringService.StartAsync();
         }
         /// <summary>
         /// 退出前停止心跳、停止全部已接入轴并撤销使能，
@@ -134,6 +148,9 @@ namespace ZNQInterface
                  * 如果退出流程卡住或失败，PLC心跳超时后仍能接管。
                  */
                 Container.Resolve<IHmiWatchdogService>()
+                    .Stop();
+                // 立即取消图像和视觉ADS轮询，不等待UI Dispatcher回调。
+                Container.Resolve<VisionMonitoringService>()
                     .Stop();
                 /// <summary>
                 /// 退出前停止心跳、停止全部已映射轴并撤销使能，
