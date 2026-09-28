@@ -10,6 +10,9 @@ namespace ZNQInterface.ViewModels.Components.Detection
     {
         private ImageSource _image;
         private double? _currentAngle;
+        private string _imageSourceText = "等待图像";
+        private string _imageStatusText = "图像未连接";
+        private string _detectionStatusText = "未检测";
 
         /// <summary>
         /// 实时检测图像。
@@ -30,14 +33,30 @@ namespace ZNQInterface.ViewModels.Components.Detection
             set => SetProperty(ref _currentAngle, value);
         }
 
+        public string ImageSourceText
+        {
+            get => _imageSourceText;
+            set => SetProperty(ref _imageSourceText, value);
+        }
+
+        public string ImageStatusText
+        {
+            get => _imageStatusText;
+            set => SetProperty(ref _imageStatusText, value);
+        }
+
+        public string DetectionStatusText
+        {
+            get => _detectionStatusText;
+            set => SetProperty(ref _detectionStatusText, value);
+        }
+
         /// <summary>
         /// 更新检测结果。
         /// </summary>
         public void UpdateResult(
-            ImageSource image,
             double angle)
         {
-            Image = image;
             CurrentAngle = angle;
         }
 
@@ -48,6 +67,9 @@ namespace ZNQInterface.ViewModels.Components.Detection
         {
             Image = null;
             CurrentAngle = null;
+            ImageSourceText = "等待图像";
+            ImageStatusText = "图像未连接";
+            DetectionStatusText = "未检测";
         }
 
         /// <summary>
@@ -55,10 +77,7 @@ namespace ZNQInterface.ViewModels.Components.Detection
         /// </summary>
         public static ScrewAngleMonitorViewModel CreatePreview()
         {
-            return new ScrewAngleMonitorViewModel
-            {
-                CurrentAngle = 47.68
-            };
+            return new ScrewAngleMonitorViewModel();
         }
     }
 }

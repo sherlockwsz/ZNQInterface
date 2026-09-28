@@ -13,6 +13,9 @@ namespace ZNQInterface.ViewModels.Components.Detection
         private double? _yDeviation;
         private double? _coaxiality;
         private bool? _isQualified;
+        private string _imageSourceText = "等待图像";
+        private string _imageStatusText = "图像未连接";
+        private string _detectionStatusText = "未检测";
 
         // 同轴度检测结果属性
         /// <summary>
@@ -61,17 +64,33 @@ namespace ZNQInterface.ViewModels.Components.Detection
             set => SetProperty(ref _isQualified, value);
         }
 
+        public string ImageSourceText
+        {
+            get => _imageSourceText;
+            set => SetProperty(ref _imageSourceText, value);
+        }
+
+        public string ImageStatusText
+        {
+            get => _imageStatusText;
+            set => SetProperty(ref _imageStatusText, value);
+        }
+
+        public string DetectionStatusText
+        {
+            get => _detectionStatusText;
+            set => SetProperty(ref _detectionStatusText, value);
+        }
+
         /// <summary>
         /// 更新检测结果。
         /// </summary>
         public void UpdateResult(
-            ImageSource image,
             double xDeviation,
             double yDeviation,
             double coaxiality,
             bool? isQualified)
         {
-            Image = image;
             XDeviation = xDeviation;
             YDeviation = yDeviation;
             Coaxiality = coaxiality;
@@ -88,6 +107,9 @@ namespace ZNQInterface.ViewModels.Components.Detection
             YDeviation = null;
             Coaxiality = null;
             IsQualified = null;
+            ImageSourceText = "等待图像";
+            ImageStatusText = "图像未连接";
+            DetectionStatusText = "未检测";
         }
 
         /// <summary>
@@ -95,13 +117,7 @@ namespace ZNQInterface.ViewModels.Components.Detection
         /// </summary>
         public static CoaxialityMonitorViewModel CreatePreview()
         {
-            return new CoaxialityMonitorViewModel
-            {
-                XDeviation = 0.058,
-                YDeviation = -0.036,
-                Coaxiality = 0.026,
-                IsQualified = true
-            };
+            return new CoaxialityMonitorViewModel();
         }
     }
 }

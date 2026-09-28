@@ -1,0 +1,11 @@
+{
+  "Host": "127.0.0.1",
+  "Port": 50010,
+  "PreviewIntervalMs": 200,
+  "AdsPollIntervalMs": 100,
+  "DetectionDisplayDurationMs": 2000,
+  "PreviewStaleTimeoutMs": 1000,
+  "DetectionRetryCount": 10,
+  "DetectionRetryDelayMs": 100,
+  "ReconnectBackoffMs": [500, 1000, 2000, 5000]
+}

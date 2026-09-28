@@ -18,7 +18,9 @@ namespace ZNQInterface.ViewModels.Pages
         public OverviewViewModel(
             AxisStatusViewModel axisStatus,
             MaterialSlotStatusViewModel materialSlotStatus,
-            WarehouseStatusViewModel warehouseStatus)
+            WarehouseStatusViewModel warehouseStatus,
+            ScrewAngleMonitorViewModel screwAngleMonitor,
+            CoaxialityMonitorViewModel coaxialityMonitor)
         {
             /*
             该对象由Prism容器提供。
@@ -28,6 +30,8 @@ namespace ZNQInterface.ViewModels.Pages
             AxisStatus = axisStatus;
             MaterialSlotStatus = materialSlotStatus;
             WarehouseStatus = warehouseStatus;
+            ScrewAngleMonitor = screwAngleMonitor;
+            CoaxialityMonitor = coaxialityMonitor;
             /*
              * 流程文本随程序一起发布，使用运行目录拼接路径。
              * 不再依赖开发电脑的固定绝对路径。
@@ -60,14 +64,12 @@ namespace ZNQInterface.ViewModels.Pages
         /// <summary>
         /// 螺钉角度实时检测模块
         /// </summary>
-        public ScrewAngleMonitorViewModel ScrewAngleMonitor { get; } =
-            ScrewAngleMonitorViewModel.CreatePreview();
+        public ScrewAngleMonitorViewModel ScrewAngleMonitor { get; }
 
         /// <summary>
         /// 同轴度实时检测模块
         /// </summary>
-        public CoaxialityMonitorViewModel CoaxialityMonitor { get; } =
-            CoaxialityMonitorViewModel.CreatePreview();
+        public CoaxialityMonitorViewModel CoaxialityMonitor { get; }
 
         /// <summary>
         /// 上下料流程显示内容。

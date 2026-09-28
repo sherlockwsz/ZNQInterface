@@ -300,193 +300,313 @@ namespace ZNQInterface.Services.Vision
                     if (frame.Ok && frame.Image != null)
                     {
                         DateTime now = DateTime.UtcNow;
-                        if (frame.t reconn MonitonStatusText = "ADSÊú™ËøûÊé•";
-           {
-             L {
-            if (_tasks != null)
-   ú†¢} Async(() =>
-        {
-          *alid
-      ;ÊdsLo]  r    L {
-   tÄÂ         tatu®  tÄÂ         tatu® && 6onfigureAwncelic(tatusText = resultInvalid
-                        ? "Ê£ÄÊµãÊó†Êïà / ËßÜËßâÂºÇÂ∏∏"
-                        : "Ê£ÄÊµãÂÆåÊàê";
+                        if (frame.FrameId != lastFrameId)
+                        {
+                            lastFrameId = frame.FrameId;
+                            lastFreshUtc = now;
+                        }
+
+                        bool showPreview = runtime.UpdatePreview(frame);
+                        bool stale = lastFreshUtc != DateTime.MinValue &&
+                            now - lastFreshUtc > TimeSpan.FromMilliseconds(
+                                _options.PreviewStaleTimeoutMs);
+                        string status = frame.ImageStatus == "error"
+                            ? "ÂõæÂÉèÂºÇÂ∏∏"
+                            : stale ? "ÂõæÂÉèÂª∂Ëøü" : "ÂõæÂÉèÊ≠£Â∏∏";
+                        await ApplyPreviewAsync(
+                            screw,
+                            frame,
+                            showPreview,
+                            status).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await SetImageStatusAsync(screw, "Á≠âÂæÖÂõæÂÉè")
+                            .ConfigureAwait(false);
+                    }
+
+                    await Task.Delay(
+                        _options.PreviewIntervalMs,
+                        cancellationToken).ConfigureAwait(false);
                 }
-                else if (screwMeasuring)
+                catch (OperationCanceledException)
+                    when (cancellationToken.IsCancellationRequested)
                 {
-                    _screwMonitor.Detect cancellati2ReadExactAsync(
-                    strem      ;ÊdsLo]  r    L {
-   tÄÂ         tatu®  tÄÂ         tatu® && 6onfigureAwncelic(tatusText = resultIn∂onfigureAwait(false);
-                  =                     tat             strem         0; indatu®  tÄÂ  e)
-       i1ux5         bool screancel∞Convert.ToBoolean(values[5]);
-            booÄ    tat             strem         0; inda          t             {
- „"ÂAP1Ô0; ∫ïa3A0üÁ "Êú™Ê£ÄÊµã";
+                    break;
                 }
-
-       celic(tatusText = resultInvalid
-       0 t SetAdsUnlic(tatusText = resultIn∂onfigureAwait(false);
-                  =                     tatÂuúoaxRequese
-  Dd djustmentQualified;
-                       Urivate static loºd djus";
-    CÁ†o       tatÂuúoaxRequese
-  Dd djustmentQualified;
-                       Urivate static loºd djus";
-    CÁ†o       tatÂuúoaxRequese
-  Dd dj    int length,
-            CancellationToken cancΩllati2ReadExactAsync(
-                   Ö length,
-            CancellationToken cancΩllati2ReadExactAsync(
-                   Ö length,
-            CancellationToken cancΩl CÁ†o       tatÂuúoaxRequese
-  D∏  booÄ    tatdjustrewCom[5]);cancΩllati2ReadExactAsync(
-        ÜdjustrewCom[5]);cancΩllati2RcrTÁtrlonvert.ToUInt32(values[3]);
-            dÁtrlonvert.ToUInt32ngt   ux      dÁtrlonvert.ToUInt32ngt   ux      dÁtrlonvert.ToUInt32ngt   ux nt32ngt Ê£ÄÊµã";
-                }
-
-                if (coaxCommitted)
+                catch
                 {
-                 xt = resultInvalid
-       0 t SetAdsUnlloºd djus";
-    CÁ†o       tatÂuúoaxRequese
-  Dd dj    int length,
-            CancellationToken cancΩllatinlloºd djus"{àõ(
-  Token cancΩllat a0edException)
-                    when (cancellationToken.IsCancellaÈãû    ptio        1cË∂±â∞ËáxË∏    if (coaxCommit?.rtÄlIntervalMs,
-         
-                         iY ï(CancellationToken cancΩllatinlloºd djus"{àõ(
-  Token cancΩllat a0edException)
-                    when (cancellationToken.IsCancellaÈãû    ptio        1cË∂±â∞ËáxË§eR°    double screwAngle rn rn rn rn sÂN           {
-                 xt = reä        {
-(òEHlatio    {
-                 xt = reä       m86+<           {
-                 xt = reä        {
-(òEHlatio    {
-                 xt = reä       m86+<           {
-       celÜWy[TTTTTTTTTTTTTTTTTTTT,// <summary>
-    /// Âçehen (cancell() => RunOnUiAsync(() =>
-        {
-            nda         MonitorinÑ/ ËßÜËßâÂºÇÂ∏∏"
-                        : "Ê£ÄÊµãÂÆåÊàê";
+                    await SetImageStatusAsync(screw, "ÂõæÂÉèËøûÊé•ÂºÇÂ∏∏")
+                        .ConfigureAwait(false);
+                    int delay = _options.ReconnectBackoffMs[Math.Min(
+                        reconnectIndex,
+                        _options.ReconnectBackoffMs.Length - 1)];
+                    reconnectIndex++;
+                    await Task.Delay(delay, cancellationToken)
+                        .ConfigureAwait(false);
                 }
-    c2§{ reä       m86+<           {
-       celÜWy[TTtatÂuúop∏èËÆÆ„ÄÅËøûÊé•ÈáçÂª∫ÂíåJPEGËß£Á†J   ; eÆÆoken)
-        {
-            byte[] data ª£öò      <r                                                                                                                          59Æ6/      tatÂuúoaxRequese
-  Dd djustmeËßâÂºÇÂ∏∏";
-                                                                          59Æ                                             59Æ                                             59Æ                     0 t SetAdsUnlloºd djus";
-    CÁ†o       tatÂuúoaxRequese
-  Dd dj    int length,
-            CancellationToken cancength,
-            CancelAÅ"j    int length,
-"                      Uri1ync(() •C2_iait(faviation =nitor.YDeviation = deltaY;
-                            µancellationToken cancength,
-            CancelAÅ"j    int Æ:    ken cancπ°orÂviaÁaeoool>(VisionSymbolsuncπ°orÂ                                                                                                                                                                  using System;
-using System.Collections.Generic;
-using System.Thr†p     tatÂIsCa            }
+            }
+        }
 
-                if (coax2tåÄnSymbolsuæ0là    tatÂuúoaxRequese
-6 dCo     : "r              ueÊÂception)
-                    when (cancellationToken.IsCancellaÈãû    ptio        1cË∂±â∞ËáxË∏    if (coaxCommit?.rtÄlIntervalMs,
-         
-                         iY ï(CancellationToken cancΩllatinlloºd djus"{àõ(
-  Token cancΩllat a0edException)
-          ultInvalid
-           r° ons.Host,  ee     ∑                         using System;
-using System.              erty(nafreview", false, _coaxing System.<System.<         bool coaxTimeout = Convert.ToBoolean(values[18]bject>°7rt2   Urivate static loºd djus";
-    CÁ†o       tatª { get; set; } = 2000;
-        public in     ‰s";
-    CÁ†o     D∏  booÄT=.2Name,
-        string ImageStatus,
-        BitmapImage? Ima          rÂ                                                                                                                                                                  using ion                                                                    aitác.sctAsync(
- oring ationToken cancΩllatû         ∫                          aitác.sctAsync(
-‰t = resultInvalid
-       0 t SetAdsUnlloºd djus";
-    CÁ†o       tatÂuúoaxRequese
-  Dd dj    ing.WindoMl<System.<         bool coaxTimeout = Convert.ToBoolean(values[18]bject>°7rt2   UriÈôaÈãû      long coaxRequesoñllatû         ∫                      mptionRetryDelayMs { get; set; } = 100;
-        public inet; se°set;                      mptionRetryDelayMs { get; set; } = 100;
-        public inet; se°set;                      mptionRetriÈô      sync((™privaÄaoaxTimeou         bool coaxTimeout = Convert.ToBooo          meou mfalse);
-                  =                     tat             strem  ºú}
-
-        public tatt; se°set;                      mptionRtat             strem  ºú}
-
-
-using System.   {àõ(
-  TokiÆ GõÁ„
-
-usin    sync((™privaÄaoaxTimeou         bool coaC∑           _screwMonitor.DetectionStatusText = "ADSÊú™ËøûÊé•";
-            _coaxMonitor.De∫´±è     xt = reä        {
-(òEHlatio    {
-         y     itor0âeAwait(false);
-                         gnvert.ToUInt32(values[3]);
-            double screwAngle = Conver"ADSÊú™ËøûÊé•";
-            _coaxMoni"xÂ      wCÊé•";
-            _coaxMoni";
-  pcrewMonitor.DtInvalid
-        {
-         y     bool coaxTimeout = Convert.(values[19]);
- ewMon   õ     lΩ  if (01ÖÁ l   nvalé:Sta          mptipriv                 gn   {                                    l    Q");]);
-            double deltaX = Convert.ToDouble(values[14]);
-            double deltaY = Convert.ToDouble
-        nito oBooo          meou mfalse);
-                  =        éble
-      ¥d"loo     Ñ2 ¥d"loo     Ñ2 ¥d"loo     Ñ2 ¥    bool ô) NC        mpúú             =        éble
-      ¥d"loo     Ñ2 e/ éble
- ooo      "∂p1(ol coaxTimeout = ón‰wpewMon   õòEHlatisText = resultIn∂onfigureAwait(faoo     Ñ2 oïÉçp se°set;             •";
-            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coa.
-            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS     u=ject>°7rt2  aËs  _coaxMpnvert.ToUInt32(values[3]ese
-6 dCo     : "r              ueÊÂc2rt      ¥d"loo     Ñ2 ¥d"loo     Ñ2 ¥d"loo     Ñ2 ¥  mZni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewM0.ToUInt3]rDo _coaxMpewM0.ToUInt3]rDo _coaxMpewlßá(CancellationToken cancellatioäc MemorySt                    uèÁ         •";
-            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê /Êtemory(eÉÊï¥  _coaxMpewMoonfig         eÖ      });
-
-        private async π5, writable: false)rySt                    uèÁ         •";
-            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _cê / Ë∞ÉÊï¥  _coaxMpewMoonYo≥2oôuŒ≥2oôuoª.De∫´±è     xt = reä        {
-(òEHlatio    {
-         y  ai      [coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _cê / Ë∞ÉÊï¥  _coaxMpewMoonYo≥2oôuŒ≥2oôuoª.De∫Hlatio    {
-6yT5oôuŒ≥2Uæ xt = reä       m86+<           {
-                 xt = reä        {
-(òEHlatio    {
-                 xt = reä       m86+<           {
-       celÜWy[TTTTTTTTTTTTTTTTTTTT,// <summary>
-    /// Âçehen (canÈòªÊ≠¢HMIÂíåADSÂêØÂä®„ÄÇ
-          Ö}(òEHlatio    {
-                 xt = reä       m86+<           {
-       celÜWy[TTTTTTTTTTTTTTTTTTTT,// <summary>
-    /// Âçehen (canÈòªÊ≠¢HMIÂíåADSÂêØÂäxs { get; set; } = 100;
-        public inet" = reä       m86+<           {
-       celÜ (canÈòªÊ≠¢HMIÂíåADSÂêØÂäxs { get; set; } =it ApplyAdsSnapshotAsync(values    {
-       celÜ (canÈòªÊ≠¢HMIÂíåADSÂêØÂäüPR  celÜWy[TTTTTTTTTTTTTTTTTTTT,//d†ËTTTT,//d†ËTTTT,/TTTTt                                                           6         ºúo       tatÂuúoaxRequese
-  Dd dj    int length,
-            CancellationToken cancΩllatinlloºd djus"{àõ(
-  Token cancΩllat a0edException)
-                    when (cancellationToken.IsapewMoonfiguSdsSnapshotAsync(valuesí   aitáÂâ;oïÉçp se°set;     Ö      _coaxMoni";
-  pcrewMonitoàê / Ë∞ÉÊï¥  _coaxMpewMoonfiguS            _cê / Ë∞ÉÊï¥  _coaxMpewMoonYo≥2oôuŒ≥2oôuoª.De∞(oaxMpewMoonYo≥2oôuŒ≥2oôuoª.De∫´±è     xt = reä        {
-(òEHlatio    {
-         y  ai      [coaxMpewMoonfiguS        psultIn∂oŒ≥2oôuoª.De∫´±è     xt‰"{àuoª.DÊï¥  _coaxMpewMoonfiguS            _coaxMoni";
-  pcrewMocôuoª {
-(òEHlatio    {
-                 xt = reä          {7xMonõÄ}   xt = r               xt = reä       m86+< .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMooSçs8    .ewMoo,;æâtionToken.IsapewMt bool screw,
+        private async Task RunDetectionLoopAsync(
+            string channel,
+            bool screw,
             ChannelRuntime runtime,
             CancellationToken cancellationToken)
         {
             await using VisionImageClient client =
-                new VisionImageClient(_options.Host, _options.Po•       ¥  _coaxMpewpº∑
-æ       ChannelRuntime runtime,
-            Cancellation° ons.Host.ª       Uri1ync(() •C2_iait(faviation =nitor.YDeviation = deltaY;
-                            µancellationToken cancength,
-            CancelAÅ"j    int Æ:    ken cancπ°orÂviaÁaeoool>(VisionSymbolsuncπ°orÂ                                                     n caçt Æ:    ken cancπ°orÂviaÁaeoool>(VisionSymbolsuncπ°orÂ   ™2°É                                     
+                new VisionImageClient(_options.Host, _options.Port);
+            long attemptedResultId = -1;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                long target = runtime.DetectionTarget;
+                if (target >= 0 && target != attemptedResultId)
+                {
+                    bool completed = await TryShowDetectionAsync(
+                        client,
+                        channel,
+                        screw,
+                        runtime,
+                        target,
+                        cancellationToken).ConfigureAwait(false);
+                    if (completed || runtime.DetectionTarget == target)
+                    {
+                        attemptedResultId = target;
+                    }
+                    continue;
+                }
+
+                if (runtime.TryExpireDetection(out VisionImageFrame? preview) &&
+                    preview?.Image != null)
+                {
+                    await RestorePreviewAsync(screw, preview)
+                        .ConfigureAwait(false);
+                }
+
+                await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<bool> TryShowDetectionAsync(
+            VisionImageClient client,
+            string channel,
+            bool screw,
+            ChannelRuntime runtime,
+            long targetResultId,
+            CancellationToken cancellationToken)
+        {
+            for (int attempt = 0;
+                 attempt < _options.DetectionRetryCount;
+                 attempt++)
+            {
+                if (runtime.DetectionTarget != targetResultId)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    VisionImageFrame frame = await client.GetLatestAsync(
+                        channel,
+                        cancellationToken).ConfigureAwait(false);
+                    if (frame.Ok && frame.Image != null &&
+                        frame.RequestId == targetResultId &&
+                        runtime.TryBeginDetectionHold(targetResultId))
+                    {
+                        bool displayed = false;
+                        await RunOnUiAsync(() =>
+                        {
+                            if (runtime.DetectionTarget != targetResultId)
+                            {
+                                return;
+                            }
+                            if (screw)
+                            {
+                                _screwMonitor.Image = frame.Image;
+                                _screwMonitor.ImageSourceText = "Ê£ÄÊµãÁªìÊûú";
+                            }
+                            else
+                            {
+                                _coaxMonitor.Image = frame.Image;
+                                _coaxMonitor.ImageSourceText = "Ê£ÄÊµãÁªìÊûú";
+                            }
+                            displayed = true;
+                        }).ConfigureAwait(false);
+                        if (displayed &&
+                            runtime.DetectionTarget == targetResultId)
+                        {
+                            // ÂÅúÁïôÊó∂Èó¥‰ªéÊ≠£Á°ÆÂõæÂÉèÁúüÊ≠£ÂÆåÊàêUIËµãÂÄºÂêéÂºÄÂßã„ÄÇ
+                            runtime.ShowDetection(
+                                TimeSpan.FromMilliseconds(
+                                    _options.DetectionDisplayDurationMs));
+                            return true;
+                        }
+                        runtime.CancelDetectionHold();
+                        return false;
+                    }
+                }
+                catch (OperationCanceledException)
+                    when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch
+                {
+                    // DetectionÂõæÂÉèÈìæË∑ØÂ§±Ë¥•‰∏çÂΩ±ÂìçÂ∑≤Êèê‰∫§ÁöÑADSÊ≠£ÂºèÁªìÊûú„ÄÇ
+                }
+
+                await Task.Delay(
+                    _options.DetectionRetryDelayMs,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            return true;
+        }
+
+        private Task ApplyPreviewAsync(
+            bool screw,
+            VisionImageFrame frame,
+            bool showPreview,
+            string status)
+        {
+            string source = frame.SourceMode == "file"
+                ? "Êú¨Âú∞ÂõæÁâá"
+                : "ÂÆûÊó∂Áõ∏Êú∫";
+            return RunOnUiAsync(() =>
+            {
+                if (screw)
+                {
+                    if (showPreview)
+                    {
+                        _screwMonitor.Image = frame.Image;
+                        _screwMonitor.ImageSourceText = source;
+                    }
+                    _screwMonitor.ImageStatusText = status;
+                }
+                else
+                {
+                    if (showPreview)
+                    {
+                        _coaxMonitor.Image = frame.Image;
+                        _coaxMonitor.ImageSourceText = source;
+                    }
+                    _coaxMonitor.ImageStatusText = status;
+                }
+            });
+        }
+
+        private Task SetImageStatusAsync(bool screw, string status) =>
+            RunOnUiAsync(() =>
+            {
+                if (screw)
+                {
+                    _screwMonitor.ImageStatusText = status;
+                }
+                else
+                {
+                    _coaxMonitor.ImageStatusText = status;
+                }
+            });
+
+        private Task RestorePreviewAsync(
+            bool screw,
+            VisionImageFrame frame)
+        {
+            string source = frame.SourceMode == "file"
+                ? "Êú¨Âú∞ÂõæÁâá"
+                : "ÂÆûÊó∂Áõ∏Êú∫";
+            return RunOnUiAsync(() =>
+            {
+                if (screw)
+                {
+                    _screwMonitor.Image = frame.Image;
+                    _screwMonitor.ImageSourceText = source;
+                }
+                else
+                {
+                    _coaxMonitor.Image = frame.Image;
+                    _coaxMonitor.ImageSourceText = source;
+                }
+            });
+        }
+
+        private static Task RunOnUiAsync(Action action)
+        {
+            Application? application = Application.Current;
+            if (application == null || application.Dispatcher.HasShutdownStarted)
+            {
+                return Task.CompletedTask;
+            }
+            return application.Dispatcher.InvokeAsync(action).Task;
+        }
+
+        private sealed class ChannelRuntime
+        {
+            private readonly object _sync = new object();
+            private long _detectionTarget = -1;
+            private DateTime _detectionVisibleUntilUtc = DateTime.MinValue;
+            private VisionImageFrame? _latestPreview;
+
+            public long DetectionTarget =>
+                Interlocked.Read(ref _detectionTarget);
+
+            public void SetDetectionTarget(long resultId) =>
+                Interlocked.Exchange(ref _detectionTarget, resultId);
+
+            public bool UpdatePreview(VisionImageFrame frame)
+            {
+                lock (_sync)
+                {
+                    _latestPreview = frame;
+                    return DateTime.UtcNow >= _detectionVisibleUntilUtc;
+                }
+            }
+
+            public void ShowDetection(TimeSpan duration)
+            {
+                lock (_sync)
+                {
+                    _detectionVisibleUntilUtc = DateTime.UtcNow + duration;
+                }
+            }
+
+            public bool TryBeginDetectionHold(long resultId)
+            {
+                lock (_sync)
+                {
+                    if (Interlocked.Read(ref _detectionTarget) != resultId)
+                    {
+                        return false;
+                    }
+                    _detectionVisibleUntilUtc = DateTime.MaxValue;
+                    return true;
+                }
+            }
+
+            public void CancelDetectionHold()
+            {
+                lock (_sync)
+                {
+                    _detectionVisibleUntilUtc = DateTime.MinValue;
+                }
+            }
+
+            public bool TryExpireDetection(out VisionImageFrame? preview)
+            {
+                lock (_sync)
+                {
+                    if (_detectionVisibleUntilUtc == DateTime.MinValue ||
+                        DateTime.UtcNow < _detectionVisibleUntilUtc)
+                    {
+                        preview = null;
+                        return false;
+                    }
+
+                    _detectionVisibleUntilUtc = DateTime.MinValue;
+                    preview = _latestPreview;
+                    return true;
+                }
+            }
+        }
+    }
+}

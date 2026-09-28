@@ -1017,6 +1017,29 @@
                             </TextBlock.Style>
                         </TextBlock>
 
+                        <!-- 图像来源与链路状态：File模式不会被误认为相机卡帧。 -->
+                        <Border Panel.ZIndex="10"
+                            Margin="10"
+                            Padding="8,5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="#CC111827"
+                            BorderBrush="#FF6B7280"
+                            BorderThickness="1"
+                            CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="{Binding ScrewAngleMonitor.ImageSourceText}"
+                                    Foreground="#FF22D3EE"
+                                    FontSize="13"/>
+                                <TextBlock Text="{Binding ScrewAngleMonitor.ImageStatusText}"
+                                    Foreground="#FFD1D5DB"
+                                    FontSize="12"/>
+                                <TextBlock Text="{Binding ScrewAngleMonitor.DetectionStatusText}"
+                                    Foreground="White"
+                                    FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
                         <!-- 第二层：左下角角度信息 -->
                         <Border Panel.ZIndex="10"
                             Margin="10"
@@ -1138,6 +1161,25 @@
                             </TextBlock.Style>
                         </TextBlock>
 
+                        <Border Panel.ZIndex="10"
+                            Margin="10"
+                            Padding="8,5"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="#CC111827"
+                            BorderBrush="#FF6B7280"
+                            BorderThickness="1"
+                            CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="{Binding CoaxialityMonitor.ImageSourceText}"
+                                    Foreground="#FF22D3EE"
+                                    FontSize="13"/>
+                                <TextBlock Text="{Binding CoaxialityMonitor.ImageStatusText}"
+                                    Foreground="#FFD1D5DB"
+                                    FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
                         <!-- 第二层：底部同轴度数据 -->
                         <Border Panel.ZIndex="10"
                             Margin="10"
@@ -1223,14 +1265,16 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center">
 
-                                    <TextBlock Text="是否合格："
+                                    <TextBlock Text="检测状态："
                                         FontSize="15"
                                         Foreground="#FFD1D5DB"
                                         VerticalAlignment="Center"/>
 
                                     <TextBlock
-                                        DataContext="{Binding CoaxialityMonitor}"
-                                        Style="{StaticResource QualificationResultTextStyle}"/>
+                                        Text="{Binding CoaxialityMonitor.DetectionStatusText}"
+                                        FontSize="15"
+                                        Foreground="White"
+                                        VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
