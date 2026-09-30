@@ -78,7 +78,9 @@ namespace ZNQInterface.Models.Axes
                     AxisType.Rotary,
                     "顺时针",
                     "逆时针",
-                    AxisUnits.Rotary),
+                    AxisUnits.Rotary,
+                    directionPolarity:
+                        AxisDirectionPolarity.Reversed),
 
                 Create(
                     AxisId.DamperGripper,
