@@ -12,6 +12,12 @@ namespace ZNQInterface.Services.Device
         Task RequestStopAsync(
             CancellationToken cancellationToken = default);
 
+        Task RequestPrepareAsync(
+            CancellationToken cancellationToken = default);
+
+        Task RequestMachineFaultResetAsync(
+            CancellationToken cancellationToken = default);
+
         Task<DeviceControlState> ReadStateAsync(
             CancellationToken cancellationToken = default);
     }
