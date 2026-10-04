@@ -25,5 +25,32 @@
 
         public const string AutoStopErrorId =
             "MAIN.nAutoStopErrorID";
+        public const string ControlPrepare = "MAIN.bControlPrepare";
+
+        public const string MachinePreparationBusy = "MAIN.bMachinePreparationBusy";
+
+        public const string MachinePreparationDone = "MAIN.bMachinePreparationDone";
+
+        public const string MachinePreparationError = "MAIN.bMachinePreparationError";
+
+        public const string MachinePreparationTimeout = "MAIN.bMachinePreparationTimeout";
+
+        public const string MachinePreparationErrorAxis = "MAIN.uiMachinePreparationErrorAxis";
+
+        public const string MachinePreparationErrorCode = "MAIN.udiMachinePreparationError";
+
+        public const string MachineMode = "MAIN.eMachineMode";
+
+        public const string MachineFault = "MAIN.bMachineFault";
+
+        public const string MachineFaultResetBlocked = "MAIN.bMachineFaultResetBlocked";
+
+        public const string MachineFaultSource = "MAIN.eMachineFaultSource";
+
+        public const string MachineFaultAxis = "MAIN.uiMachineFaultAxis";
+
+        public const string MachineFaultCode = "MAIN.udiMachineFaultCode";
+
+        public const string ResetMachineFault = "MAIN.bResetMachineFault";
     }
 }
