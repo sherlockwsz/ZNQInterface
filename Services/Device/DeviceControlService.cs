@@ -52,7 +52,20 @@ namespace ZNQInterface.Services.Device
                         DeviceControlSymbols.AutoStopErrorAxis),
 
                     AdsReadRequest.Create<uint>(
-                        DeviceControlSymbols.AutoStopErrorId)
+                        DeviceControlSymbols.AutoStopErrorId),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.ControlPrepare),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachinePreparationBusy),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachinePreparationDone),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachinePreparationError),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachinePreparationTimeout),
+                    AdsReadRequest.Create<ushort>(DeviceControlSymbols.MachinePreparationErrorAxis),
+                    AdsReadRequest.Create<uint>(DeviceControlSymbols.MachinePreparationErrorCode),
+                    AdsReadRequest.Create<short>(DeviceControlSymbols.MachineMode),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachineFault),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.MachineFaultResetBlocked),
+                    AdsReadRequest.Create<short>(DeviceControlSymbols.MachineFaultSource),
+                    AdsReadRequest.Create<ushort>(DeviceControlSymbols.MachineFaultAxis),
+                    AdsReadRequest.Create<uint>(DeviceControlSymbols.MachineFaultCode)
                 };
         }
 
@@ -204,8 +217,70 @@ namespace ZNQInterface.Services.Device
                     Convert.ToUInt16(values[5]),
 
                 AutoStopErrorId =
-                    Convert.ToUInt32(values[6])
+                    Convert.ToUInt32(values[6]),
+                IsControlPrepare = Convert.ToBoolean(values[7]),
+                IsPreparationBusy = Convert.ToBoolean(values[8]),
+                IsPreparationDone = Convert.ToBoolean(values[9]),
+                IsPreparationError = Convert.ToBoolean(values[10]),
+                IsPreparationTimeout = Convert.ToBoolean(values[11]),
+                PreparationErrorAxis = Convert.ToUInt16(values[12]),
+                PreparationErrorCode = Convert.ToUInt32(values[13]),
+                MachineMode = (MachineMode)Convert.ToInt16(values[14]),
+                IsMachineFault = Convert.ToBoolean(values[15]),
+                IsMachineFaultResetBlocked = Convert.ToBoolean(values[16]),
+                MachineFaultSource = (MachineFaultSource)Convert.ToInt16(values[17]),
+                MachineFaultAxis = Convert.ToUInt16(values[18]),
+                MachineFaultCode = Convert.ToUInt32(values[19])
             };
+        }
+
+        public async Task RequestPrepareAsync(
+            CancellationToken cancellationToken = default)
+        {
+            EnsureConnected();
+            // 请求由PLC完成、拒绝或异常分支消费；WPF不定时清零。
+            await _ads.WriteAsync(DeviceControlSymbols.ControlPrepare,
+                true, cancellationToken).ConfigureAwait(false);
+        }
+
+        private readonly SemaphoreSlim _resetRequestGate = new SemaphoreSlim(1, 1);
+
+        public async Task RequestMachineFaultResetAsync(
+            CancellationToken cancellationToken = default)
+        {
+            await _resetRequestGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                EnsureConnected();
+                await _ads.WriteAsync(DeviceControlSymbols.ResetMachineFault,
+                    false, cancellationToken).ConfigureAwait(false);
+                // 让PLC扫描到低电平，保证下一次R_TRIG产生边沿。
+                await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+                await _ads.WriteAsync(DeviceControlSymbols.ResetMachineFault,
+                    true, cancellationToken).ConfigureAwait(false);
+                // 配套PLC在消费边沿后清零；这里只确认请求已消费，不推断恢复成功。
+                DateTime deadline = DateTime.UtcNow + StopAcceptTimeout;
+                while (await _ads.ReadAsync<bool>(DeviceControlSymbols.ResetMachineFault,
+                    cancellationToken).ConfigureAwait(false))
+                {
+                    if (DateTime.UtcNow >= deadline)
+                        throw new TimeoutException("PLC未在规定时间内消费故障恢复请求。");
+                    await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (_ads.IsConnected)
+                        await _ads.WriteAsync(DeviceControlSymbols.ResetMachineFault,
+                            false, CancellationToken.None).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _resetRequestGate.Release();
+                }
+            }
         }
 
         private async Task WaitForStopAcceptedAsync(

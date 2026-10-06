@@ -40,6 +40,129 @@ namespace ZNQInterface.ViewModels
         private int _deviceStateCycleRunning;
         private bool _deviceCommandExecuting;
 
+        private DeviceControlState _machineState;
+        private bool _hasMachineSnapshot;
+        private bool _prepareRequestPending;
+        private bool _machineRequestExecuting;
+        private int _adsStateEpoch;
+
+        public DelegateCommand PrepareMachineCommand { get; }
+        public DelegateCommand ResetMachineFaultCommand { get; }
+        public MachineMode? CurrentMachineMode =>
+            _hasMachineSnapshot ? _machineState.MachineMode : null;
+        public bool IsMachineFault => _hasMachineSnapshot && _machineState.IsMachineFault;
+        public string PrepareButtonText => _hasMachineSnapshot &&
+            (_machineState.MachineMode == MachineMode.Preparing || _machineState.IsPreparationBusy)
+                ? "准备中" : "整机准备";
+        public string PreparationStatusText => !_hasMachineSnapshot ? "准备状态未知" :
+            _machineState.IsPreparationError || _machineState.IsPreparationTimeout
+                ? $"整机准备{(_machineState.IsPreparationTimeout ? "超时" : "失败")}，轴{_machineState.PreparationErrorAxis}，0x{_machineState.PreparationErrorCode:X8}"
+                : _machineState.IsPreparationBusy ? "整机准备中" :
+                  _machineState.IsPreparationDone ? "PLC准备完成" : "整机准备";
+        public string MachineRunStatusText => !_hasMachineSnapshot
+            ? (IsAdsConnected ? "设备运行状态：未知（等待PLC状态）" : "设备运行状态：未知（ADS未连接）")
+            : "设备运行状态：" + (_machineState.MachineMode switch
+            {
+                MachineMode.Disabled => "未使能",
+                MachineMode.Manual => "待机",
+                MachineMode.AutoStarting => "自动启动中",
+                MachineMode.Preparing => "整机准备中",
+                MachineMode.Automatic => "自动运行中",
+                MachineMode.Homing => "回零中",
+                MachineMode.Stopping => "停止中",
+                MachineMode.Fault => "故障停止",
+                _ => $"未知（PLC模式{(short)_machineState.MachineMode}）"
+            });
+        public string MachineModeText => !_hasMachineSnapshot ? "运行模式：未知"
+            : "运行模式：" + (_machineState.MachineMode switch
+            {
+                MachineMode.Disabled => "禁用",
+                MachineMode.Manual => "手动",
+                MachineMode.AutoStarting => "自动启动",
+                MachineMode.Preparing => "整机准备",
+                MachineMode.Automatic => "自动",
+                MachineMode.Homing => "回零",
+                MachineMode.Stopping => "停止",
+                MachineMode.Fault => "故障",
+                _ => $"未知（{(short)_machineState.MachineMode}）"
+            });
+        public string FaultStatusText => !_hasMachineSnapshot ? "当前报警：状态未知"
+            : !_machineState.IsMachineFault ? "当前报警：无"
+            : "当前报警：" + MachineFaultTextResolver.Resolve(
+                _machineState.MachineFaultSource, _machineState.MachineFaultAxis,
+                _machineState.MachineFaultCode) +
+                (_machineState.IsMachineFaultResetBlocked ? "（源故障仍存在）" : "（故障源已解除，可复位）");
+
+        private void NotifyMachineState()
+        {
+            RaisePropertyChanged(nameof(CurrentMachineMode));
+            RaisePropertyChanged(nameof(IsMachineFault));
+            RaisePropertyChanged(nameof(PrepareButtonText));
+            RaisePropertyChanged(nameof(PreparationStatusText));
+            RaisePropertyChanged(nameof(MachineRunStatusText));
+            RaisePropertyChanged(nameof(MachineModeText));
+            RaisePropertyChanged(nameof(FaultStatusText));
+            PrepareMachineCommand.RaiseCanExecuteChanged();
+            ResetMachineFaultCommand.RaiseCanExecuteChanged();
+            ToggleDeviceControlCommand.RaiseCanExecuteChanged();
+        }
+
+        // 仅用于UI防重复；PLC保留所有准入及恢复判断。
+        private bool CanPrepareMachine() => _hasMachineSnapshot &&
+            _adsConnection.IsConnected && !_deviceCommandExecuting && !_machineRequestExecuting &&
+            !_prepareRequestPending && !_machineState.IsControlPrepare &&
+            !_machineState.IsPreparationBusy &&
+            _machineState.MachineMode == MachineMode.Manual;
+        private bool CanResetMachineFault() => _hasMachineSnapshot &&
+            _adsConnection.IsConnected && !_deviceCommandExecuting && !_machineRequestExecuting &&
+            (_machineState.MachineMode == MachineMode.Manual ||
+             _machineState.MachineMode == MachineMode.Fault);
+
+        private async void ExecutePrepareMachine()
+        {
+            if (!CanPrepareMachine()) return;
+            _machineRequestExecuting = true;
+            NotifyMachineState();
+            try
+            {
+                await _deviceControlService.RequestPrepareAsync();
+                _prepareRequestPending = true;
+                DeviceStatusText = "设备：整机准备请求已发送";
+                await RefreshDeviceStateAsync();
+            }
+            catch (Exception exception)
+            {
+                DeviceStatusText = $"整机准备请求失败：{exception.Message}";
+            }
+            finally
+            {
+                _machineRequestExecuting = false;
+                NotifyMachineState();
+            }
+        }
+
+        private async void ExecuteResetMachineFault()
+        {
+            if (!CanResetMachineFault()) return;
+            _machineRequestExecuting = true;
+            NotifyMachineState();
+            try
+            {
+                await _deviceControlService.RequestMachineFaultResetAsync();
+                DeviceStatusText = "设备：故障恢复请求已消费，等待PLC结果";
+                await RefreshDeviceStateAsync();
+            }
+            catch (Exception exception)
+            {
+                DeviceStatusText = $"故障恢复请求失败：{exception.Message}";
+            }
+            finally
+            {
+                _machineRequestExecuting = false;
+                NotifyMachineState();
+            }
+        }
+
         private bool _isControlAuto;
         private bool _isAutoStopping;
         private bool _isAutoStopDone;
@@ -109,6 +232,9 @@ namespace ZNQInterface.ViewModels
             new DelegateCommand(
                 ExecuteToggleDeviceControl,
                 CanToggleDeviceControl);
+
+            PrepareMachineCommand = new DelegateCommand(ExecutePrepareMachine, CanPrepareMachine);
+            ResetMachineFaultCommand = new DelegateCommand(ExecuteResetMachineFault, CanResetMachineFault);
 
             _deviceStateTimer = new DispatcherTimer
             {
@@ -345,6 +471,7 @@ namespace ZNQInterface.ViewModels
 
             ToggleDeviceControlCommand
                 .RaiseCanExecuteChanged();
+            NotifyMachineState();
 
             try
             {
@@ -386,6 +513,7 @@ namespace ZNQInterface.ViewModels
 
                 ToggleDeviceControlCommand
                     .RaiseCanExecuteChanged();
+                NotifyMachineState();
             }
         }
         private bool CanToggleDeviceControl()
@@ -396,6 +524,9 @@ namespace ZNQInterface.ViewModels
             {
                 return false;
             }
+
+            // 重连后先等待有效快照，不能用缓存的自动位发送命令。
+            if (!_hasMachineSnapshot) return false;
 
             // 自动运行期间始终优先允许人工停止。
             if (IsControlAuto)
@@ -409,6 +540,14 @@ namespace ZNQInterface.ViewModels
             {
                 return false;
             }
+
+            if (_machineRequestExecuting || !_hasMachineSnapshot ||
+                _prepareRequestPending || _machineState.IsControlPrepare ||
+                _machineState.IsPreparationBusy ||
+                _machineState.MachineMode == MachineMode.Preparing ||
+                _machineState.MachineMode == MachineMode.Stopping ||
+                _machineState.MachineMode == MachineMode.Fault)
+                return false;
 
             return _hmiWatchdogService.IsControlAllowed;
         }
@@ -437,6 +576,8 @@ namespace ZNQInterface.ViewModels
             {
                 IsControlAuto = false;
                 IsAutoStopping = false;
+                _hasMachineSnapshot = false;
+                NotifyMachineState();
                 DeviceStatusText = "设备：状态读取失败";
             }
             finally
@@ -453,12 +594,22 @@ namespace ZNQInterface.ViewModels
             {
                 IsControlAuto = false;
                 IsAutoStopping = false;
+                _hasMachineSnapshot = false;
+                NotifyMachineState();
                 DeviceStatusText = "设备：ADS未连接";
                 return;
             }
 
+            int readEpoch = Volatile.Read(ref _adsStateEpoch);
             DeviceControlState state =
                 await _deviceControlService.ReadStateAsync();
+            // 丢弃断线/重连前发起的读取，避免旧快照重新覆盖未知状态。
+            if (!_adsConnection.IsConnected || readEpoch != Volatile.Read(ref _adsStateEpoch))
+                return;
+            _machineState = state;
+            _hasMachineSnapshot = true;
+            if (!state.IsControlPrepare) _prepareRequestPending = false;
+            NotifyMachineState();
 
             IsControlAuto =
                 state.IsControlAuto;
@@ -587,14 +738,18 @@ namespace ZNQInterface.ViewModels
             object sender,
             AdsConnectionStateChangedEventArgs eventArgs)
         {
+            Interlocked.Increment(ref _adsStateEpoch);
             void UpdateState()
             {
+                _hasMachineSnapshot = false;
+                _prepareRequestPending = false;
                 IsAdsConnected =
                     eventArgs.State == AdsConnectionState.Connected;
                 // 即使仍为 FALSE，也强制刷新 ToggleButton，
                 // 覆盖用户点击造成的临时本地 IsChecked 值。
                 RaisePropertyChanged(nameof(IsAdsConnected));
                 AdsStatusText = eventArgs.Message;
+                NotifyMachineState();
             }
 
             if (Application.Current?.Dispatcher.CheckAccess() != false)
