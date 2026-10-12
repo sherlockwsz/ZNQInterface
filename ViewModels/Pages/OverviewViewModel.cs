@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Prism.Mvvm;
+using ZNQInterface.ViewModels.Components.Workpieces;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
 using ZNQInterface.ViewModels.Components.Axes;
@@ -20,7 +21,8 @@ namespace ZNQInterface.ViewModels.Pages
             MaterialSlotStatusViewModel materialSlotStatus,
             WarehouseStatusViewModel warehouseStatus,
             ScrewAngleMonitorViewModel screwAngleMonitor,
-            CoaxialityMonitorViewModel coaxialityMonitor)
+            CoaxialityMonitorViewModel coaxialityMonitor,
+            WorkpieceStationViewModel workpieceStations)
         {
             /*
             该对象由Prism容器提供。
@@ -32,6 +34,7 @@ namespace ZNQInterface.ViewModels.Pages
             WarehouseStatus = warehouseStatus;
             ScrewAngleMonitor = screwAngleMonitor;
             CoaxialityMonitor = coaxialityMonitor;
+            WorkpieceStations = workpieceStations;
             /*
              * 流程文本随程序一起发布，使用运行目录拼接路径。
              * 不再依赖开发电脑的固定绝对路径。
@@ -91,5 +94,6 @@ namespace ZNQInterface.ViewModels.Pages
         /// 设备总览只负责读取和显示，不负责创建轴。
         /// </summary>
         public AxisStatusViewModel AxisStatus { get; }
+        public WorkpieceStationViewModel WorkpieceStations { get; }
     }
 }

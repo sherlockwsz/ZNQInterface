@@ -15,6 +15,7 @@ using ZNQInterface.Services.Watchdog;
 using ZNQInterface.Models.Axes;
 using ZNQInterface.Services.Device;
 using ZNQInterface.Services.Processes;
+using ZNQInterface.ViewModels.Components.Workpieces;
 using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
 using ZNQInterface.ViewModels.Components.Detection;
@@ -55,6 +56,12 @@ namespace ZNQInterface
 
             // 阻尼器料位及五层料盘ADS监控服务。
             containerRegistry.RegisterSingleton<ProcessStatusMonitoringService>();
+            containerRegistry.RegisterInstance(WorkpieceTrackingOptions.Load(
+                Path.Combine(AppContext.BaseDirectory, "workpiece-tracking.json")));
+            containerRegistry.RegisterSingleton<WorkpieceStationViewModel>();
+            containerRegistry.RegisterSingleton<WorkpieceAdsReader>();
+            containerRegistry.RegisterSingleton<WorkpieceMonitoringService>();
+            containerRegistry.RegisterSingleton<ScannerResultConsumerService>();
             // 14根轴的状态ViewModel，整个应用只创建一个实例。
             containerRegistry.RegisterSingleton<AxisStatusViewModel>();
 
@@ -132,6 +139,8 @@ namespace ZNQInterface
             await monitoring.StartAsync();
             await processStatusMonitoringService.StartAsync();
             await visionMonitoringService.StartAsync();
+            await Container.Resolve<WorkpieceMonitoringService>().StartAsync();
+            await Container.Resolve<ScannerResultConsumerService>().StartAsync();
         }
         /// <summary>
         /// 退出前停止心跳、停止全部已接入轴并撤销使能，
@@ -141,6 +150,8 @@ namespace ZNQInterface
         {
             try
             {
+                Container.Resolve<ScannerResultConsumerService>().Stop();
+                Container.Resolve<WorkpieceMonitoringService>().Stop();
                 /*
                  * 先停止WPF心跳。
                  *

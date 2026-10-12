@@ -1414,7 +1414,8 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right"/>
                                 <TextBlock Grid.Column="1"
-                                    Text="ZNQ_2026_08_20"
+                                    Text="{Binding WorkpieceStations.TransferDisplayCode}"
+                                       ToolTip="{Binding WorkpieceStations.StatusText}"
                                     FontSize="15"
                                     Foreground="Black"
                                     VerticalAlignment="Center"
@@ -1432,7 +1433,8 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right"/>
                                 <TextBlock Grid.Column="1"
-                                    Text="ZNQ_2026_08_19"
+                                    Text="{Binding WorkpieceStations.AdjustmentDisplayCode}"
+                                       ToolTip="{Binding WorkpieceStations.StatusText}"
                                     FontSize="15"
                                     Foreground="Black"
                                     VerticalAlignment="Center"

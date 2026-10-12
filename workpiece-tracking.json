@@ -1,0 +1,5 @@
+{
+  "ManualEntrySeconds": 10,
+  "ProtocolGraceMilliseconds": 2000,
+  "BarcodeEncoding": "utf-8"
+}
