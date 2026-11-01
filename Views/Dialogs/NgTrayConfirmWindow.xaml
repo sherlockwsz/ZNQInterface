@@ -1,0 +1,30 @@
+<Window x:Class="ZNQInterface.Views.Dialogs.NgTrayConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="560" SizeToContent="Height"
+        WindowStyle="None" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="#F6F8FA"
+        Closing="OnClosing" PreviewKeyDown="OnPreviewKeyDown">
+    <Border BorderBrush="#CBD5E1" BorderThickness="1" Padding="28">
+        <StackPanel>
+            <TextBlock x:Name="HeadingText" FontSize="22" FontWeight="SemiBold"
+                       Foreground="#172B4D" TextWrapping="Wrap" />
+            <TextBlock x:Name="ScenarioText" Margin="0,16,0,0" FontSize="15"
+                       Foreground="#334155" TextWrapping="Wrap" />
+            <Border Margin="0,18,0,0" Padding="16" Background="#FFF4D6">
+                <TextBlock FontSize="15" Foreground="#704D00" TextWrapping="Wrap"
+                           Text="请人工确认：NG 料盘全部 24 个位置已物理清空，且无未处理的在途 NG 工件。点击“确认”会让 PLC 将全部 NG 料位历史重置为 Empty。" />
+            </Border>
+            <TextBlock x:Name="FeedbackText" Margin="0,16,0,0" MinHeight="42"
+                       FontSize="14" Foreground="#B42318" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button x:Name="CancelButton" Content="取消" Width="104" Height="38"
+                        Margin="0,0,12,0" Click="OnCancelClick" />
+                <Button x:Name="ConfirmButton" Content="确认" Width="104" Height="38"
+                        Background="#1D4ED8" Foreground="White" Click="OnConfirmClick" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

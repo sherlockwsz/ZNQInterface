@@ -18,6 +18,9 @@ namespace ZNQInterface.Services.Device
         Task RequestMachineFaultResetAsync(
             CancellationToken cancellationToken = default);
 
+        Task ConfirmNgTrayAsync(
+            CancellationToken cancellationToken = default);
+
         Task<DeviceControlState> ReadStateAsync(
             CancellationToken cancellationToken = default);
     }

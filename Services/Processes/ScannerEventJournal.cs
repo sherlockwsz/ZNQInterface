@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -24,7 +25,7 @@ namespace ZNQInterface.Services.Processes
     public sealed class ScannerEventJournal : IDisposable
     {
         private sealed record Envelope(string Body, string Sha256);
-        private readonly Dictionary<string, ScannerJournalEntry> _entries = new();
+        private readonly ConcurrentDictionary<string, ScannerJournalEntry> _entries = new();
         private readonly string _path;
         private readonly FileStream _consumerLock;
         public ScannerEventJournal(string directory)
@@ -49,6 +50,29 @@ namespace ZNQInterface.Services.Processes
             catch { _consumerLock.Dispose(); throw; }
         }
         public ScannerJournalEntry? Find(ScannerEvent value) => _entries.TryGetValue(value.Key, out var entry) ? entry : null;
+        // Read-only observer; exact PLC-confirmed event IDs, never nearest-time matching.
+        public DateTime? FindProductScanTime(ulong session, uint request, string code,
+            ScannerCodeSource source, uint originalId, uint correctionId)
+        {
+            uint resultId = source == ScannerCodeSource.Manual ? correctionId : originalId;
+            if (session == 0 || request == 0 || resultId == 0
+                || !_entries.TryGetValue($"{session}:{resultId}", out var entry)) return null;
+            var value = entry.Event;
+            if (value.RequestId != request || !value.QRCodeValid || value.QRCode != code
+                || value.CodeSource != source
+                || entry.ReceivedUtc.Kind != DateTimeKind.Utc) return null;
+            if (source == ScannerCodeSource.Manual)
+            {
+                // PLC deliberately retains ScanSkipped on accepted manual corrections.
+                if (value.Result != ScannerResult.ScanSkipped || value.CorrectsResultId != originalId
+                    || !_entries.TryGetValue($"{session}:{originalId}", out var original)
+                    || original.Event.RequestId != request
+                    || original.ManualOutcome != ScannerManualAck.Accepted
+                    || original.SubmittedCode != code) return null;
+            }
+            else if (source != ScannerCodeSource.Tcp || value.Result != ScannerResult.ScanSuccess || value.CorrectsResultId != 0) return null;
+            return entry.ReceivedUtc;
+        }
         public IEnumerable<ScannerJournalEntry> Pending(ulong session) => _entries.Values.Where(e => e.Event.SessionId == session
             && ((e.ManualSeq != 0 && e.ManualOutcome == null) || (e.AckSeq != 0 && e.AckOutcome == null))).ToArray();
         public ScannerJournalEntry Save(ScannerJournalEntry entry)

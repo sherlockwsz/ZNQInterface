@@ -9,6 +9,7 @@
     <!-- Beckhoff 官方 ADS .NET 客户端；项目目标框架为 .NET 8。 -->
     <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="7.0.317" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Resources\PanelStyles.xaml">
@@ -23,6 +24,10 @@
     </None>
     <None Update="vision-monitoring.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="product-data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 </Project>

@@ -51,6 +51,13 @@
 
         public const string MachineFaultCode = "MAIN.udiMachineFaultCode";
 
+        public const string NgConfirmRequest = "GVL_RejectTray.bConfirmNGTrayReady";
+        public const string NgConfirmAccepted = "GVL_RejectTray.bNGConfirmAccepted";
+        public const string NgConfirmAckSeq = "GVL_RejectTray.udiNGConfirmAckSeq";
+        public const string NgTrayReady = "GVL_RejectTray.bNGTrayReady";
+        public const string NgFullWaitReady = "GVL_RejectTray.bNGTrayFullWaitReady";
+        public const string NgConfirmResult = "GVL_RejectTray.eNGConfirmResult";
+
         public const string ResetMachineFault = "MAIN.bResetMachineFault";
     }
 }

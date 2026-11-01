@@ -36,7 +36,11 @@ namespace ZNQInterface.Services.Processes
         private long _readyEpoch = -1;
         private uint _highWater;
         private readonly Dictionary<string, long> _protocolClock = new();
-        private ScannerEventJournal? _journal;
+        private volatile ScannerEventJournal? _journal;
+        // Observer has no submit/ACK/lock ownership and cannot throw into the scanner loop.
+        public DateTime? FindProductScanTime(ulong session, uint request, string code,
+            ScannerCodeSource source, uint originalId, uint correctionId)
+            => _journal?.FindProductScanTime(session, request, code, source, originalId, correctionId);
         public ScannerResultConsumerService(WorkpieceAdsReader reader, WorkpieceTrackingOptions options, WorkpieceStationViewModel vm)
         { _reader = reader; _options = options; _vm = vm; }
         private static void Ui(Action action) => Application.Current?.Dispatcher.BeginInvoke(action);

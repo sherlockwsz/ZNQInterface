@@ -41,5 +41,7 @@
 
         public uint MachineFaultCode { get; init; }
 
+        public bool IsNgFullWaitReady { get; init; }
+
     }
 }

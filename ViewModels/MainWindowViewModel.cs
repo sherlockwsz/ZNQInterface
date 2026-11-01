@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ZNQInterface.Models.Device;
 using ZNQInterface.Services.Device;
+using ZNQInterface.Views.Dialogs;
 namespace ZNQInterface.ViewModels
 {
     /// <summary>
@@ -39,6 +40,8 @@ namespace ZNQInterface.ViewModels
 
         private int _deviceStateCycleRunning;
         private bool _deviceCommandExecuting;
+        private bool _ngFullDialogActive;
+        private bool _ngFullWaitHandled;
 
         private DeviceControlState _machineState;
         private bool _hasMachineSnapshot;
@@ -488,6 +491,14 @@ namespace ZNQInterface.ViewModels
                 }
                 else
                 {
+                    DeviceStatusText = "设备：等待NG清盘确认";
+                    // 每次启动都要求新的人工确认；窗口内ACK成功后才返回true。
+                    if (!ShowNgTrayConfirmDialog(isFullWait: false))
+                    {
+                        DeviceStatusText = "设备：已取消启动";
+                        return;
+                    }
+
                     DeviceStatusText =
                         "设备：正在启动";
 
@@ -636,6 +647,10 @@ namespace ZNQInterface.ViewModels
                         : $"设备：停止异常，轴号{state.AutoStopErrorAxis}，" +
                           $"错误0x{state.AutoStopErrorId:X8}";
             }
+            else if (state.IsNgFullWaitReady)
+            {
+                DeviceStatusText = "设备：等待NG清盘确认";
+            }
             else if (state.IsControlAuto)
             {
                 DeviceStatusText =
@@ -651,7 +666,54 @@ namespace ZNQInterface.ViewModels
                 DeviceStatusText =
                     "设备：等待启动";
             }
+
+            ScheduleNgFullWaitDialog(state);
         }
+        private bool ShowNgTrayConfirmDialog(bool isFullWait)
+        {
+            var window = new NgTrayConfirmWindow(
+                isFullWait, () => _deviceControlService.ConfirmNgTrayAsync());
+            if (Application.Current?.MainWindow is Window owner)
+                window.Owner = owner;
+            return window.ShowDialog() == true;
+        }
+
+        private void ScheduleNgFullWaitDialog(DeviceControlState state)
+        {
+            // 只有实际读到PLC FALSE才解除本轮锁存；取消/关窗不会解除。
+            if (!state.IsNgFullWaitReady)
+            {
+                _ngFullWaitHandled = false;
+                return;
+            }
+            if (_ngFullWaitHandled || _ngFullDialogActive || _deviceCommandExecuting)
+                return;
+
+            _ngFullWaitHandled = true;
+            _ngFullDialogActive = true;
+            // 排队到UI Dispatcher，刷新及Tick调用栈先退出，200 ms轮询继续工作。
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                (Action)(() =>
+                {
+                    try
+                    {
+                        if (!_hasMachineSnapshot || !_adsConnection.IsConnected ||
+                            !_machineState.IsNgFullWaitReady)
+                            return;
+                        ShowNgTrayConfirmDialog(isFullWait: true);
+                        // 满盘分支不发送启动/停止；确认成功后由PLC自行续行。
+                    }
+                    catch (Exception exception)
+                    {
+                        DeviceStatusText = $"NG确认窗口失败：{exception.Message}";
+                    }
+                    finally
+                    {
+                        _ngFullDialogActive = false;
+                    }
+                }));
+        }
+
         /// <summary>
         /// 手动连接或断开ADS。
         ///

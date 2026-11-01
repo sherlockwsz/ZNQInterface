@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -20,6 +20,7 @@ using ZNQInterface.ViewModels.Components.MaterialSlots;
 using ZNQInterface.ViewModels.Components.Warehouse;
 using ZNQInterface.ViewModels.Components.Detection;
 using ZNQInterface.Services.Vision;
+using ZNQInterface.Services.Product;
 
 namespace ZNQInterface
 {
@@ -62,6 +63,11 @@ namespace ZNQInterface
             containerRegistry.RegisterSingleton<WorkpieceAdsReader>();
             containerRegistry.RegisterSingleton<WorkpieceMonitoringService>();
             containerRegistry.RegisterSingleton<ScannerResultConsumerService>();
+            containerRegistry.RegisterInstance(ProductDataOptions.Load(
+                Path.Combine(AppContext.BaseDirectory, "product-data.json")));
+            containerRegistry.RegisterSingleton<ProductCompletionReader>();
+            containerRegistry.RegisterSingleton<ProductExcelStore>();
+            containerRegistry.RegisterSingleton<ProductDataRecordingService>();
             // 14根轴的状态ViewModel，整个应用只创建一个实例。
             containerRegistry.RegisterSingleton<AxisStatusViewModel>();
 
@@ -141,6 +147,7 @@ namespace ZNQInterface
             await visionMonitoringService.StartAsync();
             await Container.Resolve<WorkpieceMonitoringService>().StartAsync();
             await Container.Resolve<ScannerResultConsumerService>().StartAsync();
+            await Container.Resolve<ProductDataRecordingService>().StartAsync();
         }
         /// <summary>
         /// 退出前停止心跳、停止全部已接入轴并撤销使能，
@@ -150,6 +157,7 @@ namespace ZNQInterface
         {
             try
             {
+                Container.Resolve<ProductDataRecordingService>().Stop();
                 Container.Resolve<ScannerResultConsumerService>().Stop();
                 Container.Resolve<WorkpieceMonitoringService>().Stop();
                 /*

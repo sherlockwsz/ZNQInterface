@@ -19,6 +19,19 @@ namespace ZNQInterface.Services.Device
         private static readonly TimeSpan StopAcceptTimeout =
             TimeSpan.FromSeconds(2);
 
+        private static readonly TimeSpan NgConfirmTimeout = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan NgConfirmPollInterval = TimeSpan.FromMilliseconds(100);
+        private readonly SemaphoreSlim _ngConfirmGate = new SemaphoreSlim(1, 1);
+        private static readonly IReadOnlyList<AdsReadRequest> NgConfirmReadRequests =
+            new AdsReadRequest[]
+            {
+                AdsReadRequest.Create<uint>(DeviceControlSymbols.NgConfirmAckSeq),
+                AdsReadRequest.Create<bool>(DeviceControlSymbols.NgConfirmAccepted),
+                AdsReadRequest.Create<bool>(DeviceControlSymbols.NgTrayReady),
+                // 参考PLC包的TMC明确声明E_RejectTrayDiagnostic为INT / 16 bit。
+                AdsReadRequest.Create<short>(DeviceControlSymbols.NgConfirmResult)
+            };
+
         private readonly IAdsConnectionService _ads;
 
         private readonly IReadOnlyList<AdsReadRequest>
@@ -65,7 +78,8 @@ namespace ZNQInterface.Services.Device
                     AdsReadRequest.Create<bool>(DeviceControlSymbols.MachineFaultResetBlocked),
                     AdsReadRequest.Create<short>(DeviceControlSymbols.MachineFaultSource),
                     AdsReadRequest.Create<ushort>(DeviceControlSymbols.MachineFaultAxis),
-                    AdsReadRequest.Create<uint>(DeviceControlSymbols.MachineFaultCode)
+                    AdsReadRequest.Create<uint>(DeviceControlSymbols.MachineFaultCode),
+                    AdsReadRequest.Create<bool>(DeviceControlSymbols.NgFullWaitReady)
                 };
         }
 
@@ -230,7 +244,8 @@ namespace ZNQInterface.Services.Device
                 IsMachineFaultResetBlocked = Convert.ToBoolean(values[16]),
                 MachineFaultSource = (MachineFaultSource)Convert.ToInt16(values[17]),
                 MachineFaultAxis = Convert.ToUInt16(values[18]),
-                MachineFaultCode = Convert.ToUInt32(values[19])
+                MachineFaultCode = Convert.ToUInt32(values[19]),
+                IsNgFullWaitReady = Convert.ToBoolean(values[20])
             };
         }
 
@@ -282,6 +297,67 @@ namespace ZNQInterface.Services.Device
                 }
             }
         }
+
+        /// <summary>只发送一笔人工NG确认，等待本轮反馈；不控制设备启停。</summary>
+        public async Task ConfirmNgTrayAsync(
+            CancellationToken cancellationToken = default)
+        {
+            await _ngConfirmGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                EnsureConnected();
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeout.CancelAfter(NgConfirmTimeout);
+                try
+                {
+                    uint oldAckSeq = await _ads.ReadAsync<uint>(
+                        DeviceControlSymbols.NgConfirmAckSeq, timeout.Token).ConfigureAwait(false);
+                    // 只写一次TRUE。PLC自行消费复位；不自动重发，也不写FALSE。
+                    await _ads.WriteAsync(DeviceControlSymbols.NgConfirmRequest,
+                        true, timeout.Token).ConfigureAwait(false);
+                    while (true)
+                    {
+                        timeout.Token.ThrowIfCancellationRequested();
+                        IReadOnlyList<object> values = await _ads.ReadManyAsync(
+                            NgConfirmReadRequests, timeout.Token).ConfigureAwait(false);
+                        timeout.Token.ThrowIfCancellationRequested();
+                        if (Convert.ToUInt32(values[0]) != oldAckSeq)
+                        {
+                            bool accepted = Convert.ToBoolean(values[1]);
+                            bool ready = Convert.ToBoolean(values[2]);
+                            short result = Convert.ToInt16(values[3]);
+                            if (!accepted)
+                                throw new InvalidOperationException(
+                                    "PLC拒绝NG确认：" + DescribeNgConfirmResult(result));
+                            if (!ready)
+                                throw new InvalidOperationException(
+                                    "PLC已处理NG确认，但NG料盘尚不可用：" + DescribeNgConfirmResult(result));
+                            return;
+                        }
+                        await Task.Delay(NgConfirmPollInterval, timeout.Token).ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                {
+                    throw new TimeoutException("本次PLC NG确认结果未判明/超时，设备不会启动。请检查PLC状态后人工重试。");
+                }
+            }
+            finally
+            {
+                _ngConfirmGate.Release();
+            }
+        }
+
+        private static string DescribeNgConfirmResult(short result) => result switch
+        {
+            0 => "无诊断故障（None=0）",
+            10 => "NG料盘不在位（TrayMissing=10）",
+            50 => "存在未完成的NG事务（TransactionActive=50）",
+            70 => "当前存在不安全的手动操作（UnsafeManualOperation=70）",
+            150 => "NG料盘尚未授权（NotAuthorized=150）",
+            160 => "当前状态不允许确认（ConfirmNotAllowed=160）",
+            _ => $"PLC NG诊断代码{result}"
+        };
 
         private async Task WaitForStopAcceptedAsync(
             CancellationToken cancellationToken)
